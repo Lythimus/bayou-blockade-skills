@@ -1,0 +1,12 @@
+{
+  "name": "bayou",
+  "owner": { "name": "josephcoco" },
+  "description": "Bayou Blockade — a Claude Code plugin for environmental-justice research and permit-application interrogation in Louisiana and at the federal level.",
+  "plugins": [
+    {
+      "name": "bayou",
+      "source": "./",
+      "description": "Bayou Blockade toolkit: permit-application interrogation pipeline plus Louisiana/federal environmental-justice research skills (LDEQ, EPA, USACE, FEMA, PACER, and more)."
+    }
+  ]
+}

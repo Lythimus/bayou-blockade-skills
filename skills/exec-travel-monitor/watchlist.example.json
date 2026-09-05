@@ -1,0 +1,19 @@
+{
+  "_comment": "Placeholder only. Copy this file to ~/.claude/bayou-exec-travel-watchlist.json and fill in a real company/aircraft before using this skill — see README.md and this skill's SKILL.md Step 1.",
+  "companies": [
+    {
+      "name": "Example Midstream Holdings",
+      "parents": ["Example Capital Partners"],
+      "notes": "Sample entry showing the schema. Replace with a real company and its known aircraft.",
+      "aircraft": [
+        {"tail": "N12345", "icao24": "a1b2c3", "type": "Cessna Citation X", "owner": "Example Aviation LLC", "confidence": "medium-repeat-visitor", "notes": "Sample note field — record backfill coverage, base-rate checks, and classification reasoning here as you investigate."}
+      ]
+    }
+  ],
+  "watched_airports": [
+    {"icao": "KBTR", "label": "LA state capital (Baton Rouge) — Governor/legislature/agencies", "weight": 3},
+    {"icao": "KDCA", "label": "Washington DC (federal lobbying)", "weight": 3},
+    {"icao": "KMSY", "label": "New Orleans (project region / main)", "weight": 2}
+  ],
+  "home_bases_ignore": []
+}

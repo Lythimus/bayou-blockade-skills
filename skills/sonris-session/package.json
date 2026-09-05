@@ -1,0 +1,9 @@
+{
+  "name": "sonris-session",
+  "private": true,
+  "description": "Playwright harness for the sonris-session Claude Code skill (local-only, never published).",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

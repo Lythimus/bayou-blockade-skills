@@ -1,0 +1,6 @@
+{
+  "name": "bayou",
+  "description": "Bayou Blockade toolkit: permit-application interrogation pipeline plus Louisiana/federal environmental-justice research skills (LDEQ EDMS, EPA ECHO/CAMPD, PACER/CourtListener, OSHA, PHMSA, USACE, FEMA NFHL, CPRA, EPA TRI/FRS crosswalk/GHGRP/RCRA Biennial Report, forensic wind history, public air monitor lookup (PurpleAir/OpenAQ/AirNow) with Louisiana CAMRA usage guardrails, Federal Register, USGS/NOAA water data, EJScreen, LA comment calendar, LDEQ permit status, LA species/cultural resource review, unmarked burial site documentary screening, historic topo/lidar and newspaper archive research, multi-sheet permit drawing navigation, multi-backend document OCR with cross-reader agreement (Surya/olmOCR/Chandra/MinerU/Azure) and evidence-backed OCR verification/validation (ocr-verify, ocr-validate), Kit.com campaign-email dissemination (draft-only by default), Nextdoor social campaign generation, SONRIS session/operator/well/document lookup and download (Louisiana DNR oil-and-gas, injection-well, and Class VI carbon-sequestration records, CAPTCHA-gated), Louisiana Class VI/CCS program tracker, and more).",
+  "version": "1.8.0",
+  "author": { "name": "josephcoco" }
+}

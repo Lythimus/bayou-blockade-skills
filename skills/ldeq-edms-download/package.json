@@ -1,0 +1,9 @@
+{
+  "name": "ldeq-edms-download",
+  "private": true,
+  "description": "Playwright harness for the ldeq-edms-download Claude Code skill (local-only, never published).",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "ldeq-permit-status",
+  "private": true,
+  "description": "Playwright harness for the ldeq-permit-status Claude Code skill (local-only, never published).",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
