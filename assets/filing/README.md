@@ -1,7 +1,7 @@
 # Bayou Blockade filing style
 
 Shared LaTeX styling for regulatory filings — public comments, complaint letters, analysis
-reports. Used by `bayou:permit-comment` Step 9, and available to any hand-written filing that
+reports. Used by `bayou:public-comment` Step 9, and available to any hand-written filing that
 wants to match.
 
 Three files:
@@ -24,7 +24,7 @@ Write a per-campaign identifier file, `<slug>-id.tex`, beside the markdown:
 \def\filingauthorline{<commenter name(s)> · <town, parish>}
 ```
 
-When `bayou:permit-comment` drives this, `\filingauthorline` is taken from the private profile
+When `bayou:public-comment` drives this, `\filingauthorline` is taken from the private profile
 at `~/.claude/bayou-profile.md` (its Core Identity section), never typed from memory. Keep the
 street address out of it — the mailing address for notice belongs in the signature block, where
 the agency looks for it.

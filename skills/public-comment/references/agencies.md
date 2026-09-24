@@ -81,6 +81,64 @@ conflicts with planned restoration or risk-reduction work.
 
 ---
 
+## FAA (Federal Aviation Administration)
+
+FAA acts in two postures, and each takes a different route.
+
+**Rulemaking** (`postures/rulemaking.md`), e.g. FAA-2026-8614:
+- Submit through the Federal eRulemaking Portal, `regulations.gov`, under the docket number
+  (FAA-YYYY-NNNN). The NPRM also lists mail, hand-delivery, and fax addresses.
+- Put the docket number, notice number, and RIN in the first lines.
+- The portal returns a **comment tracking number**. Keep it as proof of timely filing; the FAA
+  campaign recorded it in its research memo.
+- Comments are posted publicly, including anything personal in them.
+- The NPRM usually closes with numbered questions. Answer them under their own labels.
+
+**Licensing** (`postures/permit.md`): launch/reentry site and vehicle operator licenses under
+14 C.F.R. Parts 420/433/450. Public participation mostly runs through the NEPA document for the
+license (an EA or EIS comment period), not the license itself. The notice states the address.
+Airspace and obstruction matters (Form 7460-1, Notice of Proposed Construction) run through a
+separate aeronautical study process.
+
+---
+
+## LPFA and other Louisiana conduit bond issuers (`postures/financing.md`)
+
+Covers LPFA, parish Industrial Development Boards, LCDA, and ports that issue on behalf of
+private borrowers.
+
+**Submission**
+- A **written comment to the issuer's President/CEO** (the LPFA notice names the officer and
+  gives a phone number), delivered **before** the TEFRA hearing. Ask that it be entered into
+  the hearing record.
+- Speaking at the hearing is optional. The written letter is what persists. Use
+  `bayou:hearing-prep --oral` for a spoken version.
+- There is no portal, docket, or tracking number. Keep proof of delivery.
+
+**Put in the RE line** the bond series exactly as noticed and the hearing date. Once the State
+Bond Commission publishes its agenda, add the **SBC docket number and item**.
+
+**What the issuer produces:** nothing formal. There is no response summary, and IRC § 147(f)
+requires none. Ask for:
+- transmittal of the letter to the SBC;
+- written notice of the board's action;
+- written notice of the notice-of-sale publication date.
+
+**Next venue: the State Bond Commission.**
+- La. R.S. 9:2347(H) requires SBC approval for every public-trust bond issue.
+- The SBC meets monthly and publishes a preliminary agenda with docket numbers ahead of each
+  meeting. Check it; it may carry facts the notice does not, such as a "(Volume Cap)" caption.
+- The SBC is chaired by the State Treasurer and made up of elected officials, so it answers to
+  public pressure in a way the issuer's board does not.
+- The interval between the TEFRA hearing and the SBC vote can be days, as with LPFA/HPLS (three
+  days). Ask the issuer to transmit comments before the vote.
+
+**Terminal clock:** La. R.S. 9:2347(G). The bonds become incontestable 30 days after
+publication of the **notice of sale**, which comes after SBC approval and at least 7 days before
+the sale. See `louisiana-hooks.md`.
+
+---
+
 ## General, any agency
 
 1. **Confirm the deadline from the notice itself.** Never from memory, never from a secondary

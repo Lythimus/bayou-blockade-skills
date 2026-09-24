@@ -155,6 +155,43 @@ caps how many it'll do in one run, replays the captured headers (with a `navigat
 classifies the response rather than trusting it blindly. See its `--help` for the full
 flag set.
 
+## Registered-account login (`sonris_login.js`) — a separate, deeper tier
+
+The anonymous CAPTCHA-passed session above gets past the edge gate but never
+authenticates as anyone. Some SONRIS pages go a step further and redirect even a
+CAPTCHA-passed anonymous session to a login form — e.g. a CUP (Coastal Use Permit)
+application's "View Comments" page (`f?p=129:560`), which turns out to be the
+**interagency review comment log** (CPRA, LDWF, State Land Office, DCE, etc.), not a
+public notice/comment period. That page requires a registered SONRIS account.
+
+If the user has one, credentials go in `~/.claude/bayou-credentials.md` under `SONRIS_USERNAME`
+/ `SONRIS_PASSWORD` (see `bayou-credentials.example.md`). Log in and, optionally, fetch one
+authenticated page in the same browser session:
+
+```bash
+node ~/.claude/plugins/bayou/skills/sonris-session/sonris_login.js \
+  --username "$SONRIS_USERNAME" --password "$SONRIS_PASSWORD" \
+  --then-url 'https://sonlite.dnr.state.la.us/ords/f?p=129:560:SESSION:::0:P560_CUP_NUM:P20260152'
+```
+
+Oracle APEX mints a fresh numeric session/instance ID on login that can't be known in
+advance, so a `--then-url` can't hardcode one — pass the literal token `SESSION` where the
+instance ID goes and the script substitutes the real post-login ID it landed on. Prints
+`{url,finalUrl,status,body}` as JSON on success. Drives a real stealth-hardened Playwright
+browser end to end (fill form, click "Log In", follow the resulting navigation) rather than
+replaying a raw POST, because APEX page submissions carry a per-page CSRF/session-state
+checksum that a static replay can't reconstruct.
+
+Saves the authenticated cookies to `.session/auth_profile.json` — separate from
+`.session/profile.json` (the anonymous capture every other `sonris-*` skill shares), so
+logging in here never overwrites that.
+
+Confirmed working 2026-09-06 against a real CUP application's comments page.
+
+Exit codes: `0` ok, `1` script error, `2` login failed (bad credentials, or the login
+form's markup changed and the `#P101_USERNAME`/`#P101_PASSWORD`/"Log In" selectors no
+longer match — check by hand before assuming credentials are wrong).
+
 ## Exit codes (`sonris_get.js` and `sonris_session.js --check --probe`)
 
 | Code | Meaning | What to do |

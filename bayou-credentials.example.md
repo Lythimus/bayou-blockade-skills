@@ -26,6 +26,20 @@ NRC_ADAMS_KEY: <subscription-key>
 
 ---
 
+## SONRIS (sonlite.dnr.state.la.us) — registered account login
+
+Used by `bayou:sonris-session`'s `sonris_login.js` to log into a registered SONRIS
+account — separate from the anonymous CAPTCHA-passed session every other `sonris-*`
+skill shares (that one never authenticates as anyone). Some SONRIS pages redirect an
+anonymous-but-CAPTCHA-passed session to this login form, e.g. a CUP application's
+"View Comments" / interagency-review-log view at `f?p=129:560`. Register at
+https://sonlite.dnr.state.la.us (free).
+
+SONRIS_USERNAME: <username>
+SONRIS_PASSWORD: <password>
+
+---
+
 ## PACER (Public Access to Court Electronic Records)
 
 Used by `bayou:pacer-case-search` **only as a paid fallback** — free CourtListener/RECAP

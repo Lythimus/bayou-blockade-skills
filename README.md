@@ -19,7 +19,7 @@ scanned image-only PDFs. The `SKILL.md` files record what actually works, includ
 the dead ends.
 
 **This is not legal advice, and no output here is filing-ready on its own.**
-`permit-analysis` and `permit-comment` produce drafts with provenance citations —
+`permit-analysis` and `public-comment` produce drafts with provenance citations —
 every citation still needs to be checked against the source document, and every
 draft against your own judgment, before anything is submitted to a regulator.
 
@@ -38,9 +38,12 @@ Claude.ai has its own, separate Agent Skills feature (Pro/Max/Team/Enterprise �
 not available on the Free plan) using the same `SKILL.md` format, but its hosted
 skill-execution sandbox doesn't give a skill the same shell-plus-network access
 Claude Code's Bash tool does. Because of that, none of the skills in this repo are
-turnkey-portable to Claude.ai as-is — the one exception is `toxic-truth-teller-style`,
-a pure writing-style skill with no tool requirements, which works anywhere Agent
-Skills are supported. If you want data-lookup skills that run natively as MCP
+turnkey-portable to Claude.ai as-is — the exceptions are the two writing-style
+skills, `toxic-truth-teller-style` and `ej-comment-style`, which have no tool
+requirements and work anywhere Agent Skills are supported. (`ej-comment-style`
+cross-references a few other skills in this repo for source-gathering and citation
+checking; those pointers go dead off Claude Code, but the style guidance itself
+does not depend on them.) If you want data-lookup skills that run natively as MCP
 servers instead (Claude.ai, Claude Code, or any MCP client), see the "Overlapping
 MCP servers" note under Skills below.
 
@@ -77,13 +80,15 @@ Some skills need per-machine setup that is **deliberately not in this repo**:
   [bayou-credentials.example.md](bayou-credentials.example.md) there and fill it in.
   Every entry is optional; skills that need a key say so and fail with a clear message
   when it is missing, and most skills need no credentials at all.
-- **Personal profile** for `nextdoor-campaign` and `permit-comment` lives at
+- **Personal profile** for `nextdoor-campaign`, `public-comment`, and `hearing-prep` lives at
   `~/.claude/bayou-profile.md` — same reasoning as credentials, but for personal narrative
   material (health, exposure, ancestral ties, parish reach) instead of API keys. Copy
   [skills/nextdoor-campaign/profile.example.md](skills/nextdoor-campaign/profile.example.md)
-  there and fill it in. `permit-comment` treats it as a **standing gate**: family presence
-  inside a permit's covered parishes is what makes the commenter an "aggrieved person"
-  under La. R.S. 30:2050.21, and therefore what preserves the right to appeal.
+  there and fill it in. `public-comment` uses it to establish standing or interest. For a
+  permit it is a **standing gate**: family presence inside the permit's covered parishes is
+  what makes the commenter an "aggrieved person" under La. R.S. 30:2050.21, and therefore what
+  preserves the right to appeal. For a rulemaking or a bond hearing, it supplies an interest
+  statement instead, and the LDEQ appeal statute is never cited.
 - **Watchlist** for `exec-travel-monitor` lives at
   `~/.claude/bayou-exec-travel-watchlist.json` — same reasoning again, since a real
   watchlist is per-investigation data (real companies, tail numbers, research notes).
@@ -208,11 +213,13 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | Skill | What it does |
 |---|---|
 | `permit-analysis` | The pipeline above |
-| `permit-comment` | Findings report + profile → filed-ready public comment letter (standing, numbered comments, drafted conditions, candor section, optional styled PDF) |
+| `public-comment` | Findings report or research memo + profile → a filed-ready public comment. Covers three postures: a permit or license, a rulemaking, and a public financing approval such as a TEFRA bond hearing. Includes standing/interest, numbered requests, a candor section, and an optional styled PDF. *Renamed from `permit-comment` in 1.9.0: use `/bayou:public-comment`.* |
+| `hearing-prep` | In-person engagements. Three modes: questions grouped by the staffer likely to field them, a 2–3 minute oral version of a filed comment, and a debrief of a meeting transcript against the written record |
 | `document-ocr` | Multi-backend OCR (Surya geometry + olmOCR/Chandra/MinerU readers, optional Azure) for a folder or single scanned PDF, with per-line confidence and cross-reader agreement |
 | `ocr-verify` | Resolve one OCR-contested value with evidence — every backend's opinion, a cross-package tally, a rendered crop when needed |
 | `ocr-validate` | Cheap mechanical pre-pass over an OCRed permit package — flags unit/subtotal/plausibility/date issues, each pointing at a runnable `ocr-verify` command |
 | `toxic-truth-teller-style` | Writing style for fenceline-community campaign material (invoke by name) |
+| `ej-comment-style` | Writing style for the filed administrative comment itself — register, structure, and the argumentative moves from four successful Louisiana permit comments, with verbatim samples (invoke by name) |
 | `kit-dissemination` | Draft (never auto-send) Kit.com email broadcasts — case updates, calls for community testimony |
 | `nextdoor-campaign` | Research + profile → dated Nextdoor post series, one audience archetype per post, paced to a comment/hearing deadline |
 

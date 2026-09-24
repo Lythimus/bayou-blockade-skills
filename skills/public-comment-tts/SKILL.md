@@ -1,6 +1,6 @@
 ---
 name: public-comment-tts
-description: Convert a finished permit-comment Markdown letter into a TTS-clean plain-text file for auditory proofreading (e.g. piping into chatterbox TTS) — disables pandoc's smart-quote injection, expands unicode typographic and scientific-unit characters (em dash, µg/m³, §, etc.) into spoken-safe text via a data-driven substitution table, strips bracket-citation shorthand, and rewrites markdown tables and dash dividers into labeled spoken sentences instead of column-mashed noise. Produces a normalized `<basename>.tts.txt` only — it does not synthesize audio. Use once a bayou:permit-comment draft is finalized and before an audio proofread pass.
+description: Convert a finished public-comment Markdown letter into a TTS-clean plain-text file for auditory proofreading (e.g. piping into chatterbox TTS) — disables pandoc's smart-quote injection, expands unicode typographic and scientific-unit characters (em dash, µg/m³, §, etc.) into spoken-safe text via a data-driven substitution table, strips bracket-citation shorthand, and rewrites markdown tables and dash dividers into labeled spoken sentences instead of column-mashed noise. Produces a normalized `<basename>.tts.txt` only — it does not synthesize audio. Use once a bayou:public-comment draft is finalized and before an audio proofread pass.
 argument-hint: <comment-doc-path.md> [--out <path>] [--keep-brackets] [--keep-tables] [--table <path>]
 allowed-tools: Bash, Read, Grep, Edit
 ---
@@ -28,7 +28,7 @@ This skill produces text only. It never invokes chatterbox or any other TTS engi
 ## Parsing arguments
 
 Positional argument is the path to a finished comment-letter Markdown file (normally the output of
-`bayou:permit-comment`, e.g. `PUBLIC-COMMENT.md`).
+`bayou:public-comment`, e.g. `PUBLIC-COMMENT.md`).
 
 Flags:
 

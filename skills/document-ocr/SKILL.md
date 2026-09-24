@@ -97,6 +97,25 @@ interrupted, re-running the exact same command picks up only the remaining files
 failures (`[OCR] FAIL <stem>: <stage>`) don't stop the batch — one bad PDF doesn't waste hours of
 otherwise-good work.
 
+**Diagnosing a per-file `FAIL` without reading the whole log.** Each reader's log
+(`$WORK/logs/<stem>.<reader>.log` — `mineru`, `olmocr`, `chandra`) is dominated by tqdm-style
+progress-bar spam: hundreds of lines like `OCR-rec Predict: 80%|████ | ...` per stage, none of
+which carry diagnostic value once that stage has moved on. The actual error is always near the
+end, right before the process exits. Read the last ~15-20 lines (`tail -20 <log>`) or grep directly
+for the failure (`grep -B2 -A10 -iE "error|traceback|exception" <log>`) instead of reading the
+whole file — a full read burns far more context for the same information. A per-file `FAIL` also
+doesn't require touching the rest of the batch: that stem's own log is self-contained, and if a
+retry looks warranted (an environment-dependent crash — memory pressure, a network timeout during
+a model download — rather than something specific to that document), point a fresh
+`INPUT_DIR_OR_PDF` at just that one PDF with the same `WORK_DIR`; the resume-skip logic above means
+already-succeeded stems won't be redone.
+
+**Watching the Monitor output efficiently.** The `[OCR] done|FAIL|ALL DONE` stream is one line per
+completed/failed file plus a final summary — there's no need to produce a user-facing reply to
+every intermediate per-file line in a large batch. Reserve an actual response for the batch
+finishing, a failure that needs a decision (skip vs. retry vs. accept degraded), or a pattern
+worth flagging (e.g. multiple stems failing the same way) — not a running commentary on each tick.
+
 **Remote (`holos`) probe failures.** `OCR_BACKEND=remote` (or `auto` falling through to it) fails
 with one of two distinguishable messages: the OCR box is VPN-gated (hostname doesn't resolve — the
 message tells you to connect the VPN, and separately warns that while that VPN is up,

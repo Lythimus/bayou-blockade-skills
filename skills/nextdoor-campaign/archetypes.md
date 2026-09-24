@@ -51,7 +51,7 @@ angle in the underlying material.
 Nextdoor post has no substantive-comment standard to satisfy, and Louisiana has a diocesan
 precedent for this (the Diocese of Baton Rouge on Formosa Plastics in St. James). Two
 constraints specific to this archetype: honor the profile's own-affiliation field the same way
-`bayou:permit-comment` does — "the church I attend with my family" and "my wife's parish" are
+`bayou:public-comment` does — "the church I attend with my family" and "my wife's parish" are
 available voice, "as a Catholic" is not, regardless of which congregation the post names — and
 the post should still route readers to a concrete action (the comment deadline, the hearing),
 not end in exhortation alone.

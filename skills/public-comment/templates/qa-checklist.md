@@ -12,13 +12,23 @@ and why.
 
 - [ ] **Deadline confirmed from the public notice itself**, not from memory or a secondary
       summary. Date, time, and time zone.
-- [ ] **Standing is stated** in its own section: who the commenter is, and a connection to the
-      permit's covered area that a hostile reader would accept. If residence is outside the
-      covered area, the connection that carries standing is explicit.
-- [ ] **Written notice of the final decision is requested**, with a correct mailing address.
+- [ ] **The posture is right, and the letter stays inside it.** The posture was named or
+      inferred and confirmed, and its file was read. Under rulemaking or financing, grep for
+      `2050.21`, `aggrieved`, `permit writer`, `Response Summary`, and `PER`. Each hit is either
+      deliberate (quoting the underlying permit record) or a leak from the permit posture that
+      costs credibility with this reader.
+- [ ] **Standing or interest is stated** in its own section, under the heading and test the
+      posture file names. Where standing is a gate, the connection to the covered area is one a
+      hostile reader would accept, and if residence is outside the covered area, the connection
+      that carries standing is explicit. Where interest is the test, distance is conceded and
+      the interest is tied to what the action actually does.
+- [ ] **Written notice of the final decision is requested**, with a correct mailing address,
+      plus notice of whatever event starts the posture's clock (e.g. the notice of sale under
+      the financing posture).
 - [ ] **Contact details match the profile** — address and email — and match prior filings.
-- [ ] **Every permit identifier from the notice appears in the RE block**: applicant name, AI
-      number, permit number, activity/PER number.
+- [ ] **Every identifier the posture file lists appears in the RE block**, verbatim from the
+      notice. Permit: applicant, AI, permit, activity/PER. Rulemaking: docket, RIN, Fed. Reg.
+      cite. Financing: bond series as noticed, hearing date, SBC docket.
 - [ ] **No fabricated citations.** Every case, statute, regulation, study, and document number
       either traces to a source that was actually read, or is removed.
 - [ ] **No citation points to a pipeline artifact.** Grep the draft for `` `:[0-9]+` `` or
@@ -32,15 +42,20 @@ and why.
       used to extract or verify them from the scanned record. A regulator doesn't need to know
       how the sausage was made, and a sentence describing OCR/rendering/fuzzy-matching mechanics
       reads as insider tooling talk, not as an individual's plain reading of the record.
-- [ ] **Every case characterization checked against `references/louisiana-hooks.md`.** No
-      authority described from memory. Nothing described as a win that was a loss.
+- [ ] **Every authority checked against `references/louisiana-hooks.md` or
+      `references/federal-hooks.md`.** No authority described from memory or copied from a
+      research memo unchecked. Nothing described as a win that was a loss. Every clock cites
+      the statute that actually sets it, and names the event that starts it.
 
 ## Substance
 
-- [ ] **Every criticism ends in a draftable condition.** Scan each numbered comment: could a
-      permit writer paste the request into the permit? If not, rewrite it.
+- [ ] **Every criticism ends in the posture's endpoint.** Scan each numbered comment. Could
+      the decision-maker's drafter implement it as written? That means a permit condition, a
+      rule-text/scope/record edit, or a disclosure required before the vote. If not, rewrite
+      it.
 - [ ] **Comments are numbered**, numbering is continuous, and no number is reused.
-- [ ] **Itemized response is requested** in the relief section.
+- [ ] **Itemized response is requested** in the relief section. Where the posture owes no
+      response, transmittal to the next venue is requested instead.
 - [ ] **Tier 1 findings lead.** The first substantive part is the strongest legal defect, not
       the most emotionally compelling section.
 - [ ] **Every relief item traces to a numbered comment** above it, and every Tier 1 comment
@@ -57,11 +72,13 @@ and why.
 
 ## Voice
 
-- [ ] **Reads as a concerned resident, not an opponent of industry.** Would a permit writer
-      classify this as substantive or as emotional opposition?
+- [ ] **Reads as a concerned resident, not an opponent of industry.** Would this reader (the
+      permit writer, rule staff, or an underwriter-minded board) classify it as substantive or
+      as emotional opposition?
 - [ ] **None of the phrasings listed under "avoid" in the profile appear**, in any variation.
-- [ ] **Health content is mechanism, not just status**, and is confined to its own section
-      rather than diffused through the document.
+- [ ] **Health content follows the posture file.** Where a section applies, it is mechanism,
+      not just status, and is confined to that section. Under financing, health appears only
+      as financed-asset or reputational risk.
 - [ ] **Personal details are consistent with prior filings.** Cross-check names, conditions,
       distances, and relationships against the profile — inconsistency across public filings is
       free ammunition for opposing counsel.

@@ -1,78 +1,126 @@
 ---
-name: permit-comment
-description: Turn a completed permit findings report plus the private Bayou Blockade profile into a filed-ready public comment letter for a regulator (LDEQ, USACE, LADENR/OCM, LDOTD, FAA). Produces a standing statement, numbered comments that each end in a draftable permit condition, an enumerated relief request, and a candor section for unresolved items — then optionally renders a styled PDF. Use after /bayou:permit-analysis when it is time to write the actual comment.
-argument-hint: <findings-doc-path> [more doc paths...] [--revise <existing-draft>] [--deadline <date>] [--agency <ldeq|usace|ladenr|other>] [--slug <name>] [--render] [--no-profile]
+name: public-comment
+description: Turn research findings plus the private Bayou Blockade profile into a filed-ready public comment for any decision-maker — a permit or license (LDEQ, USACE, LADENR/OCM, LDOTD, FAA), a rulemaking (federal NPRM, Louisiana Register), or a public financing approval (LPFA/TEFRA bond hearing, State Bond Commission). Selects a posture that sets standing, what each numbered request ends in, the leverage tiers, and the terminal clock; produces a standing/interest statement, numbered requests, an enumerated relief list, and a candor section — then optionally renders a styled PDF. Use after /bayou:permit-analysis, or after any research memo, when it is time to write the actual comment.
+argument-hint: <findings-or-memo-path> [more paths...] [--posture <permit|rulemaking|financing>] [--agency <ldeq|usace|ladenr|faa|lpfa|other>] [--revise <existing-draft>] [--deadline <date>] [--slug <name>] [--render] [--no-profile]
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Skill, WebSearch, WebFetch
 ---
 
-# bayou:permit-comment — findings to filed comment
+# bayou:public-comment — findings to filed comment
 
 `bayou:permit-analysis` ends at `verification/FINDINGS-FOR-REPORT.md`: an evidentiary
-backbone, one bullet per finding, written for whoever drafts the comment. This skill is that
-drafter. It converts findings into a document a regulator must respond to.
+backbone, one bullet per finding, written for whoever drafts the comment. Not every fight runs
+through that pipeline. A rulemaking or a bond hearing usually starts from a research memo and
+the noticed document itself. This skill is the drafter for all of them. It converts findings
+into a document the decision-maker has to deal with.
+
+**The craft is shared; the posture is not.** Citation discipline, voice, the candor section,
+revise mode, QA and rendering are the same for every comment. What changes with the kind of
+decision — who the real reader is, whether standing is a gate, what each numbered request ends
+in, how findings rank, what response is owed, and which clock ends the fight — lives in one
+posture file per decision type.
 
 Bundled in this skill's directory:
 
-- `references/leverage.md` — **what actually changes a permit.** The tier system that decides
-  ordering and emphasis. Read it before drafting, not after.
-- `references/louisiana-hooks.md` — Louisiana legal authorities with current status and the
-  trap attached to each. Contains at least one case that reads as helpful and is not.
-- `references/agencies.md` — per-agency submission mechanics, deadlines, appeal windows.
+- `postures/README.md` — what a posture is and the table of them. Then exactly one of:
+  - `postures/permit.md` — permit or license decisions (LDEQ, USACE, OCM, Class VI, FAA
+    license).
+  - `postures/rulemaking.md` — rules of general applicability (APA NPRM, La. Register).
+  - `postures/financing.md` — public financing approvals (TEFRA hearing, conduit issuer, State
+    Bond Commission).
+- `references/leverage.md` — **what actually changes a decision**: the principle, the shared
+  Tier 4 cut list, and the structural multipliers. The posture file carries Tiers 1–3.
+- `references/louisiana-hooks.md` — Louisiana authorities with current status and the trap
+  attached to each. Contains at least one case that reads as helpful and is not.
+- `references/federal-hooks.md` — federal authorities outside a state permit (APA, enabling
+  statutes with conditions, tax-exempt bond law), same format.
+- `references/agencies.md` — per-agency submission mechanics, deadlines, what the agency
+  produces in response.
 - `templates/comment.md` — the letter skeleton.
 - `templates/qa-checklist.md` — the pre-filing pass.
 
-Real comments in this style, all filed: Waterford 5 & 6 (Entergy, Part 70/PSD/Acid Rain),
-River Birch Avondale (solid waste major mod), Air Products Clean Ammonia / LCEC (Part 70 +
-PSD), ExxonMobil Pipeline statewide flaring (minor source). Waterford supplies the structure;
-River Birch supplies the opening move; Air Products supplies the health-mechanism section and
-also the three phrasings this skill refuses to reproduce.
+Real comments in this style, all filed (paths under `~/Documents/personal/petro/`): Waterford 5
+& 6 (Entergy, Part 70/PSD/Acid Rain), River Birch Avondale (solid waste major mod), Air
+Products Clean Ammonia / LCEC (Part 70 + PSD), ExxonMobil Pipeline statewide flaring (minor
+source), Hyundai-POSCO (LDEQ Part 70/PSD), FAA-2026-8614 (rulemaking), and the LPFA TEFRA
+hearing for Hyundai-POSCO (financing). Waterford supplies the structure; River Birch supplies
+the opening move; Air Products supplies the health-mechanism section and also the three
+phrasings this skill refuses to reproduce; FAA shows interest-without-standing; LPFA shows the
+translation into underwriter terms. Each posture file names its own worked example.
 
 ## Parsing arguments
 
-Positional arguments are paths to findings documents — normally
-`verification/FINDINGS-FOR-REPORT.md`, optionally plus `RESEARCH-TODO.md` (which feeds the
-candor section) and any section files worth reading in full. If nothing is passed, look for
-`verification/FINDINGS-FOR-REPORT.md` under the working directory and ask before proceeding.
+Positional arguments are paths to the evidence. Any of these is acceptable:
+- **A findings report.** Normally `verification/FINDINGS-FOR-REPORT.md`, optionally with
+  `RESEARCH-TODO.md` (which feeds the candor section) and any section files worth reading in
+  full.
+- **A research memo.** For example, `context-and-precedent.md` from the FAA campaign, or a
+  verification report like `LPFA-TEFRA-COMMENT-VERIFICATION-….md`.
+- **The noticed document itself.** For example, the NPRM, or the bond hearing notice.
+
+If nothing is passed, look for `verification/FINDINGS-FOR-REPORT.md`, then for any `*.md` memo
+next to the notice, and ask before proceeding.
 
 Flags:
+
+- `--posture <permit|rulemaking|financing>` — the kind of decision. **If absent, infer it from
+  the notice:**
+  - a docket number, RIN, "proposed rule," or a La. Register notice of intent → `rulemaking`;
+  - TEFRA, "public hearing" on bonds, a conduit issuer, or a State Bond Commission docket →
+    `financing`;
+  - otherwise → `permit`.
+
+  State the inference to the user in one line. **Ask if it is ambiguous.** A permit and a
+  rulemaking by the same agency look alike at a glance, and they are argued differently.
 
 - `--revise <path>` — an existing comment draft to improve rather than replace. Switches the
   skill into revise mode (Step 5R below). **This is the common case once a draft exists** —
   drafting from findings alone discards synthesis work the findings file does not contain.
 - `--deadline <date>` — the comment deadline. If absent, look for it in the findings doc or
   the project `CLAUDE.md`; if still absent, **stop and ask.** Never guess a deadline.
-- `--agency <ldeq|usace|ladenr|other>` — defaults to `ldeq`. Selects the block in
-  `references/agencies.md`.
+- `--agency <ldeq|usace|ladenr|faa|lpfa|other>` — who receives the comment. It selects only the
+  submission-mechanics block in `references/agencies.md`. Defaults to `ldeq` under the permit
+  posture. Under any other posture there is no default: take it from the notice.
 - `--slug <name>` — output basename. Defaults to `PUBLIC-COMMENT`.
 - `--render` — after the markdown is final, run Step 9 to produce a styled PDF.
-- `--no-profile` — draft without the private profile. **This forfeits the standing section**;
-  only honor it if the user confirms they are filing anonymously or on someone else's behalf.
+- `--no-profile` — draft without the private profile. **This forfeits the standing/interest
+  section.** Only honor it if the user confirms they are filing anonymously or on someone
+  else's behalf.
 
 ## Step 1 — Confirm you have what you need
 
-Before drafting: the findings doc(s), a confirmed deadline, a named agency, and a readable
-profile. If any is missing, stop and ask. A wrong deadline or an invented personal detail is
-worse than a delay.
+Before drafting, you need all of these:
+- the evidence;
+- a confirmed deadline, or hearing date;
+- a posture;
+- a named agency or issuer;
+- a readable profile.
 
-Read the findings document in full. Read `RESEARCH-TODO.md` if present. Do not start writing
-from a partial read — this skill's whole value is cross-checking findings against each other,
-and that needs the corpus in view at once.
+If any is missing, stop and ask. A wrong deadline or an invented personal detail is worse than
+a delay.
+
+**Read the posture file now, in full.** Every later step defers to it on standing, ask
+endpoints, tiers, identifiers, and the clock.
+
+Read the evidence in full. Read `RESEARCH-TODO.md` if present. Do not start writing from a
+partial read. This skill's whole value is cross-checking findings against each other, and that
+needs the whole corpus in view at once.
 
 **The inputs have distinct roles and are never merged.**
 
 | Input | Role | Owner |
 |---|---|---|
-| `FINDINGS-FOR-REPORT.md` | Evidentiary backbone — what is true, with flags and citations | `bayou:permit-analysis` |
-| `RESEARCH-TODO.md` | Unresolved items — feeds the candor section | `bayou:permit-analysis` |
-| `--revise <draft>` | Prose synthesis — how it was argued | this skill |
+| `FINDINGS-FOR-REPORT.md` or a research memo | Evidentiary backbone: what is true, with citations | `bayou:permit-analysis`, or whoever wrote the memo |
+| `RESEARCH-TODO.md`, or the memo's own open-items / caveats section | Unresolved items. Feeds the candor section | `bayou:permit-analysis`, or the memo's author |
+| The noticed document | The record the comment cites by its own printed page | the agency |
+| `--revise <draft>` | Prose synthesis: how it was argued | this skill |
 
-Never write prose into the findings file or the TODO file, and never fold them into the
-letter wholesale. The `verification/` set has its own role-ownership and flag conventions
+Never write prose into the findings file, the memo, or the TODO file, and never fold them into
+the letter wholesale. The `verification/` set has its own role-ownership and flag conventions
 (see the campaign's `CLAUDE.md`); merging a draft into it breaks the pipeline that regenerates
 it. Findings supply the evidence; the draft supplies the architecture; the letter is the third
 artifact, not a merge of the first two.
 
-## Step 2 — Read the private profile, and treat it as a standing gate
+## Step 2 — Read the private profile, and establish standing or interest
 
 Read `~/.claude/bayou-profile.md` with `Read`. If it does not exist, **stop** and tell the
 user to fill in `../nextdoor-campaign/profile.example.md` and save it there. Do not read
@@ -81,28 +129,37 @@ prior filed comment — even if you know one exists. The fixed path is the point
 
 Then do the thing this skill exists for:
 
-**Cross-check the permit's covered parishes (or the facility's location) against the profile's
-parish-reach table.** That comparison produces the standing statement. It is not optional and
-it is not a formality:
+**Cross-check what the action reaches against the profile's parish-reach table.** For a
+permit, that is the covered parishes or the facility's location. For a rule, it is the
+provisions it changes and where they apply. For a financing, it is the host parish and the
+state fisc. That comparison produces the commenter section. **The posture file's "Standing /
+interest" section governs what the comparison must show and what the section is called.**
 
-- Under La. R.S. 30:2050.21 only an **aggrieved person** may appeal a final permit action, to
-  the 19th JDC, within 30 days of notice.
-- A comment with no stated interest can be answered without ever reaching the merits, and
-  leaves nothing to appeal on.
-- If the profile shows **no** connection to the covered area, say so plainly to the user and
-  ask how they want to proceed. Do not invent proximity, and do not quietly file without
-  standing.
+- **Where the posture makes standing a gate** (permit decisions carrying an aggrieved-person
+  appeal, such as La. R.S. 30:2050.21 for LDEQ), a comment with no stated interest can be
+  answered without reaching the merits, and it leaves nothing to appeal. If the profile shows
+  **no** connection to the covered area, say so plainly to the user and ask how they want to
+  proceed. Do not invent proximity, and do not quietly file without standing.
+- **Where the posture makes interest the test, not a gate** (rulemaking, financing), do not
+  stop for lack of proximity. Concede distance plainly, then tie the interest to what the
+  action actually does. The FAA letter is the model: "I don't live in Vermilion Parish…" and
+  then the coastal-zone and general-conformity provisions that reach the commenter's own
+  parish.
+- **Never import one posture's standing statute into another.** An LDEQ appeal statute cited to
+  a bond board or in a rulemaking is a visible error that costs the whole letter.
 
-Pull only what the permit's actual pollutants and impacts bear on. A flare permit emitting
-carcinogens calls for the cancer histories; a discharge permit does not. Never echo the whole
+Pull only what the action's actual pollutants and impacts bear on. A flare permit emitting
+carcinogens calls for the cancer histories; a discharge permit does not. A bond board calls for
+the taxpayer and family-in-parish facts, and none of the medical history. Never echo the whole
 profile into the letter.
 
 **If the profile carries a `Faith & Congregation` section** and the named congregation or its
-cemetery lies within the permit's affected area, treat **recurring physical presence** there as
+cemetery lies within the action's affected area, treat **recurring physical presence** there as
 a proximity and exposure fact for the standing statement, on the same footing as residence and
-family health history — "I am present at [congregation], N miles from the proposed site and
-inside the modeled impact area, most weeks" is a concrete, particularized aggrieved-person
-allegation under La. R.S. 30:2050.21; an affiliation alone is not. Use the profile's own "what
+family health history. "I am present at [congregation], N miles from the proposed site and
+inside the modeled impact area, most weeks" is a concrete, particularized interest; under the
+permit posture it is an aggrieved-person allegation under La. R.S. 30:2050.21. An affiliation
+alone is neither. Use the profile's own "what
 you're comfortable being called publicly" field for the wording, verbatim in substance.
 
 **Hard constraint on voice: never assert the commenter's religious affiliation beyond what the
@@ -114,47 +171,63 @@ because faith language drifts toward profession of belief more easily than most.
 
 ## Step 3 — Rank the findings by leverage
 
-Read `references/leverage.md` and sort every finding into its tier. This governs the letter's
-architecture:
+Read `references/leverage.md` for the principle and the shared Tier 4 list. Then sort every
+finding using **the posture file's tier tables**. This governs the letter's architecture:
 
-- **Tier 1 findings lead.** They are what actually changes a permit.
-- Tier 2 findings build the record and preserve issues.
-- Tier 3 findings move discretion — the hearing, the scrutiny level.
-- **Tier 4 material is cut**, even when true, because it costs more than it earns.
+- **Tier 1 findings lead.** They create legal exposure for the decision-maker itself: a defect in
+  a permit, a rule's statutory predicate that is not met, a classification Bond Counsel cannot
+  opine on.
+- Tier 2 findings build the record and preserve issues for the next venue.
+- Tier 3 findings move discretion: the hearing, deferral, the scrutiny level.
+- **Tier 4 material is cut**, even when true, because it costs more than it earns. Some posture
+  files add to the shared list.
+
+Under the financing posture, a finding that cannot be translated into risk to the financed
+asset, or to the tax exemption, is Tier 4 for that letter, however strong it is in the permit
+fight.
 
 Report the ranking to the user before drafting if there are more than ~8 findings, so they can
 override. Their judgment on what matters locally beats the tier table.
 
-## Step 4 — Check every legal authority against `references/louisiana-hooks.md`
+## Step 4 — Check every legal authority against the hooks files
 
-Any statute, regulation, or case about to be cited gets checked there first. That file records
-current status and the specific trap attached to each authority, because at least one
-Louisiana case in this area reads as favorable and is not — it reversed in the applicant's
-favor, and citing it as a win has already happened once in a filed comment.
+Check any statute, regulation, or case against `references/louisiana-hooks.md` or
+`references/federal-hooks.md` before citing it. Those files record current status and the
+specific trap attached to each authority. At least one Louisiana case in this area reads as
+favorable and is not: it reversed in the applicant's favor, and citing it as a win has already
+happened once in a filed comment. At least one bond-law clock has already been stated with the
+wrong statute and the wrong trigger in a draft.
 
-If an authority is not in the reference file, verify it live (`bayou:la-rs-search`,
-`bayou:lac33-search`, or WebSearch) before citing, then add it to the reference file with its
-status. **Never characterize a case from memory.**
+If an authority is not in either file, verify it live before citing it. Use
+`bayou:la-rs-search` or `bayou:lac33-search` for Louisiana, and Cornell LII, govinfo, eCFR, or
+WebSearch for federal law. Then add it to the right file with its status and date. **Never
+characterize a case or statute from memory, and never copy one from a research memo or AI
+research report without checking the primary text.**
 
 ## Step 5 — Build the skeleton
 
 Follow `templates/comment.md`. The order is deliberate:
 
-1. **Letterhead** — date, RE line, applicant, every permit/AI/activity number, permit type.
-2. **Statement of comment and relief requested** — what you want, in the first 150 words.
-   Regulators triage by this paragraph.
-3. **Commenter and standing** — who you are, who is affected, where they are relative to this
-   permit, and the request for written notice of the final decision. Where the profile carries
-   a `Faith & Congregation` section that reaches the permit's affected area, this is where
-   recurring physical presence goes in (Step 2). This is also the only place a single sentence
-   of moral framing may appear (see the capped allowance below) — never in a numbered comment.
-4. **Summary of the argument** — the two or three facts that compound into the central
-   objection.
-5. **Numbered substantive parts** — Tier 1 first. Each part ends in a numbered **Comment N**
-   stating the specific condition or action requested.
-6. **Relief requested** — enumerated, with the authority invoked in the lead sentence.
-7. **Limits of the present record** — the candor section (Step 7).
-8. **Signature** — name, address, email from the profile.
+1. **Letterhead.** Date, RE line, and every identifier the posture file lists: AI, permit,
+   and activity numbers for a permit; docket, RIN, and Fed. Reg. cite for a rule; bond series,
+   hearing date, and SBC docket for a financing.
+2. **Statement of comment and relief requested.** What you want, in the first 150 words.
+   Decision-makers triage by this paragraph. Under the financing posture this becomes a
+   numbered "Requested relief" block at the top, each item pointing to its section.
+3. **Commenter and standing / interest.** Use the heading the posture file names. Cover who you
+   are, who is affected, where they are relative to what the action reaches, and the request
+   for written notice of the decision. Where the profile carries a `Faith & Congregation`
+   section that reaches the affected area, recurring physical presence goes in here (Step 2).
+   This is also the only place a single sentence of moral framing may appear (see the capped
+   allowance below), never in a numbered comment.
+4. **Summary of the argument.** The two or three facts that add up to the central objection.
+5. **Numbered substantive parts.** Tier 1 first. Each part ends in a numbered **Comment N**
+   stating what is requested, in the form the posture file's "ends in" section requires.
+6. **Relief requested.** Enumerated, with the posture's authority line in the lead sentence.
+   Under the financing posture the enumerated list already sits at item 2, so this becomes the
+   closing: transmittal to the next venue, the clock, and the request for notice.
+7. **Limits of the present record.** The candor section (Step 7).
+8. **Signature.** Name, address, and email from the profile.
 
 **Moral framing is capped at one sentence, and only here.** When the profile names a
 congregation the user is willing to have named, a single sentence drawing on *Laudato Si'* or
@@ -191,13 +264,20 @@ Read the existing draft **in full, before** doing anything else, then:
    - findings not represented in the draft — candidates to add, ranked by tier;
    - claims in the draft not supported by the findings — verify or cut. A claim that survived
      an earlier pass is not thereby verified.
-3. **Apply the structural additions** the draft is likely missing, since these are what a
-   from-scratch skeleton supplies and an organically grown draft usually lacks: the standing
-   section, the health-mechanism section, the candor section, the authority line in the relief
-   list, and the explicit request for itemized response.
-4. **Run every authority through `references/louisiana-hooks.md`** (Step 4). Revise mode is
-   where miscited case law gets caught, because the draft was written before the reference
-   file existed.
+3. **Apply the structural additions** the draft is likely missing. A from-scratch skeleton
+   supplies these and an organically grown draft usually lacks them. **Take them from the
+   posture file, not by habit**:
+   - the standing or interest section;
+   - the health-mechanism section, only where the posture calls for one;
+   - the candor section;
+   - the authority line in the relief list;
+   - the explicit request for an itemized response, or, where no response is owed, for
+     transmittal to the next venue.
+4. **Run every authority through the hooks files** (Step 4). Revise mode is where miscited case
+   law and wrong clocks get caught, because the draft was written before the reference file
+   existed. **Also grep for authorities imported from the wrong posture**, such as
+   `2050.21`, "aggrieved," "permit writer," or "Response Summary" in a rulemaking or financing
+   letter.
 5. **Re-order only on a material tier violation.** If a Tier 1 finding is buried behind Tier 3
    material, move it and say so. Otherwise leave the order alone — reshuffling a working
    argument to match a table is how a good draft gets worse.
@@ -232,13 +312,22 @@ do about it.**
 
 Rules that are not negotiable:
 
-- **Every criticism terminates in a draftable permit condition.** "Add an exit-velocity
-  condition consistent with 40 C.F.R. § 60.18(c)(4)" is actionable. "This permit is
-  inadequate" is not. A comment a permit writer can implement is a comment that gets
-  implemented.
+- **Every criticism terminates in something the decision-maker can do, in the form the
+  posture file's "ends in" section names.** Examples of what counts:
+  - **Permit:** a draftable permit condition. "Add an exit-velocity condition consistent with
+    40 C.F.R. § 60.18(c)(4)."
+  - **Rulemaking:** a rule-text or scope edit. "Delete 'including, but not limited to' from the
+    description of the class," or "limit § 400.3(a) to federal launch sites."
+  - **Financing:** a record disclosure or Bond Counsel statement before the vote. "Require the
+    Company to disclose the percentage of Melt Shop throughput that will be scrap rather than
+    DRI from virgin ore."
+
+  What does not count: "this permit is inadequate," "this rule is bad policy," "this project
+  is not in the public interest." A request the decision-maker's own drafter can implement is a
+  request that gets implemented.
 - **A numbered comment may never rest on a religious or moral premise.** Theology cannot
-  generate a draftable condition, so it cannot satisfy the rule above. Where a congregation,
-  cemetery, or burial ground is the subject, make the argument as church-as-receptor,
+  generate a draftable condition, rule edit, or disclosure, so it cannot satisfy the rule
+  above. Where a congregation, cemetery, or burial ground is the subject, make the argument as church-as-receptor,
   NHPA §106 consulting-party status, LDEQ's church buffer zone, or the Unmarked Human Burial
   Sites Preservation Act instead — each of those *can* end in a condition. The one sentence of
   moral framing this skill permits belongs only in the standing section or the closing
@@ -274,8 +363,10 @@ Rules that are not negotiable:
   and will provide them to LDEQ on request" — never the technique that produced it. If in doubt
   whether a sentence crosses this line, ask: would a person who read paper copies at a library
   have said this? If not, cut it.
-- **Number the comments.** LDEQ produces a Public Comments Response Summary; numbered comments
-  force itemized response and make a skipped one visible.
+- **Number the comments.** Where the decision-maker owes a response (LDEQ's Public Comments
+  Response Summary, a final rule's preamble), numbered comments force an itemized response and
+  make a skipped one visible. Where it owes none (a TEFRA hearing), numbering still lets the
+  next venue see which questions went unanswered.
 - **Concede what cuts against you, early and explicitly.** A conceded point costs one sentence
   and buys the reader's trust for the rest. An unconceded weakness gets found and discredits
   everything near it.
@@ -314,7 +405,13 @@ than leaving the clinical version in place.
 
 ### The health-mechanism section
 
-Where the permit's pollutants bear on the household, include one bounded section that states
+**Whether this section exists at all is the posture file's call.** Permit posture: yes, where
+the pollutants bear on the household. Rulemaking: only when the rule itself governs exposure;
+otherwise health is the reason the commenter tracks a provision, stated in the interest
+section. Financing: never as a section; health enters only through its translation into
+financed-asset or reputational risk.
+
+Where the section applies and the pollutants bear on the household, include one bounded section that states
 **what the pollutant does inside a body**, then names who is standing in front of it. Mechanism
 is what converts a personal fact into a technical comment the agency must answer; status alone
 reads as sympathy and gets a sympathetic non-answer.
@@ -333,8 +430,10 @@ Title it "Limits of the present record" or similar. List what could not be resol
 public sources, stated as open questions rather than as facts, each framed as something the
 agency is better positioned to answer than the public.
 
-Source it from `RESEARCH-TODO.md` — items still `🟡 PARTIAL`, `⛔ BLOCKED`, or `⬜ OPEN`, plus
-anything the findings doc flags as unverified. Include the honest negatives too: research that
+Source it from `RESEARCH-TODO.md`: items still `🟡 PARTIAL`, `⛔ BLOCKED`, or `⬜ OPEN`, plus
+anything the findings doc flags as unverified. Where the evidence is a research memo, use its
+open-items, caveats, or "could not verify" passages instead. A `bayou:hearing-prep --debrief`
+file's divergences and unanswered questions are also candidates. Include the honest negatives too: research that
 established a theory was *unavailable* belongs here, because it stops a later reader from
 re-litigating it.
 
@@ -364,11 +463,16 @@ one.
 
 ```latex
 \def\filingkind{<filing type — e.g. Public Comment and Request for Public Hearing>}
-\def\filingid{<AI / permit / activity numbers, as printed in the notice>}
+\def\filingid{<the posture file's identifier set, as printed in the notice>}
 \def\filingagency{<full agency name>}
 \def\filingshort{<short campaign label for the running head>}
 \def\filingauthorline{<commenter name(s)> · <town, parish>}
 ```
+
+Examples of `\filingid` by posture, all taken verbatim from the notice:
+- **Permit:** `AI 12345 · Permit 2560-00123-V0 · PER20260001`
+- **Rulemaking:** `Docket FAA-2026-8614 · RIN 2120-AM51`
+- **Financing:** `LPFA $900,000,000 Exempt Facility Revenue Bonds (… Project) · SBC S26-027`
 
 `\filingid` prints in the footer of **every** page. That is deliberate: agencies scan filings
 into document-management systems where pages get separated from their cover, and an unlabelled
@@ -382,8 +486,10 @@ filing is joint, list both; if it names a campaign, **do not** put the campaign 
 
 That last point is the profile's own instruction, not a style preference: it records that
 "Bayou Blockade" is an informal campaign name and not a nonprofit or formal entity, and that
-filings must not be signed as though it were an organization. Standing under La. R.S.
-30:2050.21 runs to an aggrieved *person*, so the letterhead names people. Keep the street
+filings must not be signed as though it were an organization. Standing and interest run to a
+*person*, whether as an aggrieved person under a permit-appeal statute, an interested person
+under 5 U.S.C. 553(c), or a person in interest under La. R.S. 9:2347(H). So the letterhead names
+people. Keep the street
 address out of `\filingauthorline` — the mailing address for notice belongs in the signature
 block (Step 5, item 8), where the agency looks for it.
 
@@ -406,7 +512,8 @@ carries.
 Three fenced divs are available and map to styled callouts (`assets/filing/README.md` has the
 full vocabulary):
 
-- `::: comment` — the numbered requested condition. Use it for every **Comment N**.
+- `::: comment` — the numbered request (condition, rule edit, or disclosure). Use it for every
+  **Comment N**.
 - `::: recordquote` — verbatim material from the agency's record.
 - `::: alert` — a boxed point that must not be skimmed past.
 
@@ -421,9 +528,20 @@ introducing a third.
 
 ## Step 10 — Report
 
-In your reply: the output path, the standing basis you used, the Tier 1 findings that lead the
-letter, anything from the findings doc you dropped and why, any authority you had to verify
-live, and the QA results. Then state the deadline and the submission address from
-`references/agencies.md` — the last thing the user needs is the mechanics of actually filing.
+In your reply, give:
+- the output path;
+- **the posture used**, and whether it was inferred;
+- the standing or interest basis you used;
+- the Tier 1 findings that lead the letter;
+- anything from the evidence you dropped, and why;
+- any authority you had to verify live;
+- the QA results.
+
+Then state the deadline and the submission address from `references/agencies.md`. The last
+thing the user needs is the mechanics of actually filing. Finish with the posture's terminal
+clock and the event that starts it, so the user knows what to watch for after filing.
+
+If the user will also speak at a hearing, offer `bayou:hearing-prep --oral` on the finished
+letter.
 
 Do not submit anything. This skill drafts; filing is the user's action, always.

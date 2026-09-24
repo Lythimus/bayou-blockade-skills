@@ -23,7 +23,7 @@ haversine math inline.
 ## Step 0 — check the local case file before doing anything else
 
 **Do this before any external research call. It is the single highest-value step in this entire
-skill.** If there is an existing project directory, permit-comment archive, or prior research
+skill.** If there is an existing project directory, public-comment archive, or prior research
 (a `regulatory/`, `air permit/comments/`, or similar folder), grep it first:
 
 ```bash

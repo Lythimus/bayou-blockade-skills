@@ -14,9 +14,22 @@ date: "<Date the comment is filed>"
      every line of this block except the last, including if you add or reorder
      lines. Same reasoning applies to the signature block at the end. -->
 
-**RE: Public comment and request for a public hearing**\
+<!-- The identifier lines vary by posture: use the set named in the posture
+     file's "Identifiers" section, and delete the other two. Examples:
+
+     permit:      **AI Number <n> · Permit Number <n> · Activity Number <PER…>**\
+                  <Permit type as stated in the notice>
+     rulemaking:  **Docket No. <…> · Notice No. <…> · RIN <…>**\
+                  **Rulemaking:** *<Rule title>*, <vol> Fed. Reg. <page> (<date>)\
+                  **Comments due:** <date>
+     financing:   use a dated letter addressed to the issuer's President/CEO
+                  by name instead of this block (see postures/financing.md);
+                  the RE line names the bond series exactly as noticed, the
+                  hearing date, and the SBC docket once published. -->
+
+**RE: Public comment <and request for a public hearing, where the posture allows one>**\
 **Date:** <Date the comment is filed>\
-**Applicant:** <Full legal name of applicant>\
+**Applicant / Agency:** <Full legal name of applicant, or the rulemaking agency>\
 **AI Number <n> · Permit Number <n> · Activity Number <PER…>**\
 <Permit type as stated in the notice>
 
@@ -24,15 +37,21 @@ date: "<Date the comment is filed>"
 
 ## I. Statement of comment and relief requested
 
-<Two or three sentences: what the permit authorizes, and what you are asking for. Regulators
-triage by this paragraph — it must survive being read alone.>
+<Two or three sentences: what the action authorizes, and what you are asking for.
+Decision-makers triage by this paragraph, so it must survive being read alone. Under the
+financing posture, replace this section with a numbered "Requested relief" block, each item
+pointing to the section that argues it.>
 
-I oppose issuance of <permit> as drafted. I ask that <agency> **<primary relief>**; in the
-alternative, **<secondary relief>**; and in any event, **<conditions relief>**. **I request
-that <agency> hold a public hearing on this permit, and I request written notification of the
-final permit decision at the address below.**
+I oppose <issuance of the permit / finalizing the rule> as drafted. I ask that <agency>
+**<primary relief>**; in the alternative, **<secondary relief>**; and in any event,
+**<conditions / rule-text / disclosure relief>**. **I request <a public hearing, where
+available> and written notification of the final decision at the address below.**
 
-## II. Commenter and standing
+## II. Commenter and standing <"and interest" under rulemaking; "Who I am" under financing>
+
+<Use the heading and test in the posture file. Where standing is a gate (permit), what follows
+applies in full. Where interest is the test, concede distance first, then tie the interest to
+what the action actually does. Never cite another posture's standing statute.>
 
 <Who you are. Where you live. Where affected family members live **relative to this permit's
 covered area** — name the parish and tie it to the permit's own footprint. What you can
@@ -61,7 +80,7 @@ outside source is named.
 
 ## IV–<n>. Substantive parts — Tier 1 findings first
 
-<One part per substantive objection, ordered by the tier system in `references/leverage.md`.
+<One part per substantive objection, ordered by the posture file's tier tables.
 Each part follows: **what the record says → why it fails → what to do about it.**
 
 Within a part:
@@ -78,15 +97,19 @@ Within a part:
 Each part ends with:>
 
 ::: comment
-**Comment <N>.** <The specific condition or action requested. Draftable — something a permit
-writer could paste into the permit.>
+**Comment <N>.** <The specific request, in the form the posture file's "ends in" section
+names: a permit condition a permit writer could paste into the permit; a rule-text, scope, or
+record edit; or a disclosure or Bond Counsel statement required before the vote.>
 :::
 
 ---
 
 ## <n>. Health effects of the pollutants this permit authorizes
 
-<One bounded section, only where the permit's pollutants bear on the household.
+<Permit posture, or a rule that itself governs exposure. Delete this section under the
+financing posture; see the posture file.
+
+One bounded section, only where the permit's pollutants bear on the household.
 
 State what the named pollutants do inside a body — carcinogen classification, target organ,
 established mechanism — then name who is standing in front of them and where they are relative
@@ -104,9 +127,14 @@ short-averaging-period limit, a health risk assessment.>
 
 ## <n>. Requested action
 
+<The list below is the permit-posture order. For rulemaking or financing, use the relief
+order and authority line in the posture file. For financing, the enumerated requests already
+opened the letter, so this section becomes the closing: transmittal to the next venue, the
+clock, and the request for notice.>
+
 Under the authority of <the Louisiana Environmental Quality Act / the federal Clean Air Act /
-Louisiana's public trust doctrine, La. Const. art. IX § 1 / other>, I respectfully request that
-<agency>:
+Louisiana's public trust doctrine, La. Const. art. IX § 1 / 5 U.S.C. 553(c) / other>, I
+respectfully request that <agency>:
 
 1. **Hold a public hearing** on this proposed permit, in the affected <parishes/communities>.
    <State the showing: population, area, duration — not just the request.>
@@ -123,12 +151,13 @@ Louisiana's public trust doctrine, La. Const. art. IX § 1 / other>, I respectfu
 
 ## <n>. Limits of the present record
 
-In candor to <the hearing officer / the permit writer>, several matters could not be resolved
+In candor to <the hearing officer / the permit writer / the docket / the Board>, several matters could not be resolved
 from publicly accessible records, and I do not assert them as established facts. Each is
 identified because it is a question <agency> is better positioned than the public to answer,
 and should answer before acting.
 
-<One paragraph or list. Draw from `RESEARCH-TODO.md` — items still partial, blocked, or open.
+<One paragraph or list. Draw from `RESEARCH-TODO.md` (items still partial, blocked, or open),
+or from the research memo's open items.
 Include honest negatives: research that established a theory was unavailable belongs here.
 
 Close:> None of these unknowns weakens the verified record above; each is a further reason the
