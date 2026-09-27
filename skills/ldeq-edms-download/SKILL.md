@@ -98,10 +98,17 @@ manual CAPTCHA solves — the run will need, and suggest narrowing the search fi
    Google escalates to an image challenge.
 2. Navigates to `/quick-search`, fills the AI number, searches.
 3. Reads the results grid (`tr.k-master-row`); document IDs are each row's second cell.
-4. For `--doc`, pages through results (up to 20 pages) hunting for the requested IDs; for `--all`,
-   takes the first page as-is.
-5. Selects the target rows' checkboxes and clicks the grid's download button, which opens a
-   **popup window** at `/doc/download?docid=...`.
+4. For `--doc`, pages through results (up to 20 pages) hunting for the requested IDs, recording
+   the grid page each was found on; for `--all`, takes the first page as-is.
+5. Groups the targets into batches by grid page (row checkboxes are selected by position, and a
+   position only means something on its own page), so IDs spread over several pages cost one
+   CAPTCHA per page. For each batch it re-runs the search, walks to that page, and checks that the
+   rows at the chosen positions carry the requested IDs, logging `grid page N: selecting <IDs>`.
+   A mismatch aborts the run rather than downloading whatever sits at those positions. It then
+   selects the checkboxes and clicks the grid's download button, which opens a **popup window** at
+   `/doc/download?docid=...`.
+   Even so, check each saved file against its EDMS index row (ID, description, page count)
+   before filing it.
 6. Waits for the user to solve the popup's "I'm not a robot" checkbox. After that, EDMS does
    **not** fire a browser download event on its own — it takes an unpredictable amount of time
    (minutes, for large batches) to assemble the requested documents into a zip server-side, then
@@ -126,6 +133,28 @@ If the user's underlying goal is to read/analyze the contents (e.g. confirm a nu
 permit), the actual next step is: `/bayou:document-ocr` on the downloaded folder, then
 `/bayou:permit-analysis` on the OCR output.
 
+## Filing downloads into a project
+
+A case file that gathers records over months accumulates documents that are only loosely related
+to its question: other units at the same facility, later events at the same unit, several copies
+of one report from different sources. An agent that searches the folder later cannot tell these
+apart by file name, and will cite a same-facility, same-unit, wrong-event document as if it were
+on point. Two habits at filing time prevent that:
+
+1. **Identify each file from its contents before naming it.** Match the document ID, description
+   and page count against the EDMS index row, then read the first page (the incident number,
+   unit, emission point and dates). Name the file by the document ID and what it actually is.
+   Never name it after the report you expected to receive. If a file already on disk turns out to be
+   misnamed and other notes cite its path, leave it in place and record the correction in the
+   index rather than renaming it.
+2. **Record it in the project's source index, if the project keeps one** (e.g. a `SOURCES.csv`
+   manifest with a row per file). Tag each file's relevance to the project's question: the event
+   itself, comparable events, governing background, or unrelated. Tag it from the contents, not the
+   title. Note the traps a later reader would hit: an event dated after the one under study, a
+   text-only reconstruction with no page images, or a copy from another source whose page numbers
+   differ. If the project has no index and is going to hold more than a handful of records,
+   suggest starting one.
+
 ## Troubleshooting
 
 - **"Download button not found"** — the EDMS UI changed. Re-pin selectors by loading
@@ -136,6 +165,9 @@ permit), the actual next step is: `/bayou:document-ocr` on the downloaded folder
   never solved, or (more likely for a large batch) EDMS is still assembling the zip server-side;
   re-run with a larger `--timeout` (the default is already 3600s for this reason), or check that
   the Chrome window wasn't accidentally closed/backgrounded during the wait.
+- **`row/ID mismatch on grid page N`** — the results order changed between locating and
+  selecting (e.g. a new document was indexed mid-run). Re-run; nothing was downloaded for that
+  batch.
 - **Some `--doc` IDs not found** — the script scans up to 20 result pages (2,000 documents); IDs
   beyond that, or IDs that don't actually belong to the given AI, will be reported as not found.
 - **`#download-link` selector stops matching** — the EDMS UI changed the post-processing markup.

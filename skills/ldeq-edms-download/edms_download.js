@@ -107,13 +107,13 @@ async function goToNextPage(page) {
 /** Find grid row indices (on whichever page they end up on) matching requested docIds. */
 async function locateRowsForDocIds(page, docIds) {
   const remaining = new Set(docIds.map(String));
-  const found = []; // { docId, index } — index is only valid for the page it was found on
+  const found = []; // { docId, index, pageNum } — index is only valid on grid page pageNum
   let pageNum = 1;
   while (remaining.size > 0 && pageNum <= MAX_PAGES_TO_SCAN) {
     const rows = await readGridRows(page);
     for (const row of rows) {
       if (row.docId && remaining.has(row.docId)) {
-        found.push({ docId: row.docId, index: row.index });
+        found.push({ docId: row.docId, index: row.index, pageNum });
         remaining.delete(row.docId);
       }
     }
@@ -125,7 +125,7 @@ async function locateRowsForDocIds(page, docIds) {
   if (remaining.size > 0) {
     console.error(`warning: could not find these document IDs in the search results: ${[...remaining].join(', ')}`);
   }
-  return found; // NOTE: caller must select+download these while still on the page they were found on
+  return found; // caller must navigate back to each row's pageNum before selecting by index
 }
 
 function chunk(arr, size) {
@@ -197,7 +197,8 @@ async function runDownloadBatch(context, page, outDir, batchLabel, timeoutSecond
   }
 
   console.log(`[${batchLabel}] file ready, fetching ${href}`);
-  const resp = await context.request.get(href);
+  // Multi-hundred-page zips routinely exceed Playwright's default 30s request timeout.
+  const resp = await context.request.get(href, { timeout: 900000 });
   if (!resp.ok()) {
     throw new Error(`[${batchLabel}] fetching ${href} returned HTTP ${resp.status()}`);
   }
@@ -231,24 +232,44 @@ async function main() {
     console.log(`Searching AI ${args.ai}...`);
     await searchByAi(page, args.ai);
 
-    let batches; // array of { indices: number[] } to run, one page-position at a time
+    // Row indices are positions within one grid page, so each batch holds rows from a single page.
+    let batches; // { pageNum, indices: number[], docIds: string[] }[]
     if (args.doc.length > 0) {
       const located = await locateRowsForDocIds(page, args.doc);
       if (located.length === 0) throw new Error('None of the requested --doc IDs were found in the search results.');
-      batches = chunk(located, BATCH_SIZE).map((group) => group.map((g) => g.index));
+      const byPage = new Map();
+      for (const g of located) byPage.set(g.pageNum, [...(byPage.get(g.pageNum) || []), g]);
+      batches = [];
+      for (const [pageNum, group] of [...byPage.entries()].sort((a, b) => a[0] - b[0])) {
+        for (const c of chunk(group, BATCH_SIZE)) {
+          batches.push({ pageNum, indices: c.map((g) => g.index), docIds: c.map((g) => g.docId) });
+        }
+      }
     } else {
       // --all: current (first) results page only, batched by 20.
       const rows = await readGridRows(page);
       if (rows.length === 0) throw new Error('No search results found for this AI number.');
       console.log(`Found ${rows.length} document(s) on the results page. Downloading in batches of ${BATCH_SIZE}.`);
-      batches = chunk(rows.map((r) => r.index), BATCH_SIZE);
+      batches = chunk(rows, BATCH_SIZE).map((c) => ({ pageNum: 1, indices: c.map((r) => r.index), docIds: c.map((r) => r.docId) }));
     }
 
     for (let i = 0; i < batches.length; i++) {
       const label = `batch ${i + 1}/${batches.length}`;
-      // Selections reset per navigation; if we paginated while locating --doc
-      // rows, we're already sitting on the correct page for those indices.
-      await selectRowsByIndex(page, batches[i]);
+      // Locating --doc rows may have paginated past this batch's page, and the popup from the
+      // previous batch may have disturbed the grid, so re-search and walk to the batch's page.
+      // Then confirm the rows at those indices are the requested IDs before selecting: selecting
+      // by index on the wrong page silently downloads unrelated documents.
+      await searchByAi(page, args.ai);
+      for (let p = 1; p < batches[i].pageNum; p++) {
+        if (!(await goToNextPage(page))) throw new Error(`could not reach grid page ${batches[i].pageNum}`);
+      }
+      const onPage = (await readGridRows(page)).filter((r) => batches[i].indices.includes(r.index)).map((r) => r.docId);
+      const want = batches[i].docIds.slice().sort();
+      if (JSON.stringify(onPage.slice().sort()) !== JSON.stringify(want)) {
+        throw new Error(`[${label}] row/ID mismatch on grid page ${batches[i].pageNum}: wanted ${want.join(', ')}, grid has ${onPage.join(', ')}. Results order may have changed; re-run.`);
+      }
+      console.log(`[${label}] grid page ${batches[i].pageNum}: selecting ${onPage.join(', ')}`);
+      await selectRowsByIndex(page, batches[i].indices);
       const dest = await runDownloadBatch(context, page, args.out, label, args.timeout);
       saved.push(dest);
     }
