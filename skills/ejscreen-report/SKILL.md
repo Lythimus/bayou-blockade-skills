@@ -1,6 +1,6 @@
 ---
 name: ejscreen-report
-description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset
+description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset, and corroborate a facility's demographics against EPA ECHO's official ACS profile
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -85,10 +85,67 @@ for f in fields:
 
 State plainly that this is an **approximation** of EPA's exact buffer methodology (EPA's original tool clips block-group polygons to the exact circle and area-weights sub-polygon population; this pulls whole intersecting block groups and population-weights them) — close enough for a fenceline-community argument, not exact enough to cite as an official EJScreen Standard Report figure.
 
+Also list the **per-block-group values**, not just the weighted average. A whole-block-group buffer can mix a small, heavily burdened fenceline pocket with larger low-burden neighborhoods, and the average hides the pocket (see the worked example in Step 3).
+
+## Step 3: Official-record corroboration via EPA ECHO
+
+EJScreen's mirror is genuine EPA data, but it isn't hosted by EPA, and an agency or applicant can use that to dismiss it. For the **demographic** half of the report there is still an official, EPA-hosted source. ECHO's Detailed Facility Report (DFR) carries an ACS demographic profile for a 1-mile radius around each regulated facility. Use EJScreen to find areas of concern, then cite ECHO as the official record for the demographic facts.
+
+Use this step whenever the report centers on a regulated facility. Get its FRS RegistryID from `bayou:epa-echo-search` or `bayou:epa-frs-crosswalk`.
+
+```bash
+REGISTRY_ID=110071940897   # Shell Norco refinery
+
+curl -s "https://echodata.epa.gov/echo/dfr_rest_services.get_dfr?output=JSON&p_id=${REGISTRY_ID}" 2>/dev/null | python3 -c "
+import sys, json
+r = json.load(sys.stdin).get('Results', {})
+if r.get('Error'):
+    sys.exit(f'ECHO error: {r[\"Error\"]}')
+# Newest vintage first; ECHO keeps the prior year alongside it.
+for block in ('ACS2024Demographics', 'ACS2023Demographics'):
+    d = r.get(block)
+    if d:
+        print(block)
+        for k in ('Radius','CenterLatitude','CenterLongitude','ACSPopulation','PercentPeopleOfColor',
+                  'PercentBelowLowIncomeLevel','PercentBelowPovertyLevel','AfricanAmerican','HispanicOrigin',
+                  'Minors','Seniors','Less9thGrade','Grades9to12','IncomeLess15k'):
+            print(f'  {k}: {d.get(k)}')
+        break
+else:
+    print('No ACS demographics block in DFR')
+"
+```
+
+What ECHO gives you, and what it doesn't (verified live 2026-10-07):
+- **The radius is fixed at 1 mile.** `p_radius`, `p_dist`, and `radius` are silently ignored. For 3- or 5-mile radii, EJScreen is the only source.
+- **It is anchored to the facility.** It centers on ECHO's own facility coordinate (`CenterLatitude`/`CenterLongitude`, usually the entrance point), not on an arbitrary lat/lon. For a proposed site that has no RegistryID yet, EJScreen is the only source.
+- **It has raw counts and percents only.** It has no national percentiles, no EJ indexes, and no pollution or proximity indicators. The ≥80th-percentile screening threshold and every environmental indicator still come from EJScreen.
+- The demographic fields in ECHO's facility *search* (`FacPercentMinority`, `PercentPeopleOfColor`, `PercentBelowLowincome3mile`, `AcsPopulationDensity`) are still listed in the metadata but come back null. Use the DFR.
+
+Field correspondence (EJScreen raw `*PCT` fields are **fractions 0–1**; ECHO's are formatted strings like `"16%"`):
+
+| ECHO DFR | EJScreen |
+|---|---|
+| `ACSPopulation` | `ACSTOTPOP` (summed across block groups) |
+| `PercentPeopleOfColor` | `PEOPCOLORPCT` |
+| `PercentBelowLowIncomeLevel` | `LOWINCPCT` |
+
+**Expect the two sources to disagree, and report both side by side without reconciling them.** They use different ACS vintages (EJScreen v2.32 uses the 2018–2022 ACS 5-year; ECHO labels its block by a later release year). They also use different geometry: ECHO clips an exact circle, while Step 2 takes whole intersecting block groups. And they can use different center points.
+
+Worked example: Shell Norco, at ECHO's center point 29.99435, −90.40726, checked 2026-10-07.
+
+| | ECHO DFR (1-mi circle) | EJScreen Step 2 (6 whole block groups) |
+|---|---|---|
+| Population | 1,391 | 7,294 |
+| People of color | 16% | 28% (weighted) |
+| Low-income | 39% | 26% (weighted) |
+
+One of those block groups, 220890627001, is 67% people of color and at the 83rd national demographic percentile. ECHO's circle captures little of it, and EJScreen's weighted average dilutes it to 39th. Neither number is wrong. Each answers a different question, which is why the per-block-group listing from Step 2 matters.
+
 ## Field reference
 
 Raw indicators (facility/area's actual values):
-- **Demographic**: `PEOPCOLORPCT` (people of color %), `LOWINCPCT` (low-income %), `LESSHSPCT` (less than HS education %), `LINGISPCT` (linguistic isolation %), `UNEMPPCT`, `UNDER5PCT`, `OVER64PCT`, `DEMOGIDX_2` (average of people-of-color% + low-income%, EPA's core demographic index)
+- **Demographic**: `PEOPCOLORPCT` (people of color %), `LOWINCPCT` (low-income %), `LESSHSPCT` (less than HS education %), `LINGISOPCT` (linguistic isolation %), `UNEMPPCT`, `UNDER5PCT`, `OVER64PCT`, `DEMOGIDX_2` (average of people-of-color% + low-income%, EPA's core demographic index)
 - **Environmental**: `PM25` (µg/m³), `OZONE` (ppb), `DSLPM` (diesel PM, µg/m³), `PTRAF` (traffic proximity/volume score), `PNPL` (Superfund/NPL proximity score), `PRMP` (RMP facility proximity score), `PTSDF` (hazardous waste TSDF proximity score), `UST` (underground storage tank count/density), `PWDIS` (wastewater discharge indicator), `NO2` (ppb)
 
 National percentile fields — prefix `P_` on any of the above (e.g. `P_PM25`) — are the number that actually matters for an environmental-justice argument: "this block group is at the Nth percentile nationally," 0–100. `P_DEMOGIDX_2` above 80 is EPA's own rule-of-thumb screening threshold for an EJ area of potential concern.
@@ -103,14 +160,17 @@ Other prefixes present on the service, not requested by default above: `D2_`/`D5
 
 1. **Source disclosure, first line, unavoidable**: "Data from EPA's EJScreen v2.32 dataset (2023 ACS/pollution vintage), served via a community-hosted ArcGIS mirror of EPA's Public Environmental Data Portal — EPA's own `ejscreen.epa.gov` and `screeningtool.geoplatform.gov` are no longer live as of this writing. Retrieved [date]."
 2. **Location**: point coordinates, block group ID(s), county/state, and (for a radius report) the radius used and number of block groups included.
-3. **Table**: Indicator | Raw Value | National Percentile — demographic indicators first, then environmental/proximity indicators.
+3. **Table**: Indicator | Raw Value | National Percentile — demographic indicators first, then environmental/proximity indicators. If Step 3 ran, add an **"ECHO official (ACS, 1 mi)"** column, filled for the demographic rows only.
 4. **Flag any percentile ≥ 80** explicitly in prose — that's EPA's own screening threshold for elevated EJ concern.
 5. State population covered (`ACSTOTPOP` sum for a radius report).
 6. If a radius report: disclose the population-weighting approximation caveat from Step 2.
-7. Cross-link: `bayou:epa-echo-search` for compliance history of specific facilities identified nearby, `bayou:epa-tri-search` for their actual reported releases (the `PNPL`/`PTSDF`/`PTRAF` proximity scores are generic distance-based scores, not facility-specific release data).
+7. **Splitting citations for a filed comment.** Cite demographic facts (population, people of color, low-income) to ECHO first, because ECHO is the EPA-hosted record. Cite percentile rankings, the ≥80th-percentile threshold, and environmental indicators to EJScreen, since ECHO has no equivalent. Both sources are cited openly. Never word an ECHO figure as though it confirms an EJScreen percentile.
+8. Cross-link: `bayou:epa-echo-search` for compliance history of specific facilities identified nearby, as well as the DFR demographics in Step 3. Use `bayou:epa-tri-search` for their actual reported releases (the `PNPL`/`PTSDF`/`PTRAF` proximity scores are generic distance-based scores, not facility-specific release data).
 
 ### Citation format
 
 > **EJScreen v2.32 (2023 vintage) via ArcGIS mirror of EPA Public Environmental Data Portal**, block group [ID], [County], LA, source: [services2.arcgis.com FeatureServer](https://services2.arcgis.com/w4yiQqB14ZaAGzJq/arcgis/rest/services/EJScreen_US_Percentiles_Block_Group_gdb_V_2.32_(Parent)_view/FeatureServer/0) (retrieved 2026-07-21) — not EPA's official `ejscreen.epa.gov` (offline). PM2.5: [X] µg/m³ ([Y]th percentile nationally). Demographic Index: [Z]th percentile.
+
+> **EPA ECHO Detailed Facility Report**, [Facility Name] (FRS [RegistryID]), ACS demographic profile, 1-mile radius, [ACS block label, e.g. ACS2024], source: [echo.epa.gov](https://echo.epa.gov/detailed-facility-report?fid=[RegistryID]) (retrieved [date]). Population [N]; people of color [X]%; below low-income level [Y]%.
 
 $ARGUMENTS

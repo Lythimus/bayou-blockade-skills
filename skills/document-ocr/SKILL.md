@@ -86,9 +86,47 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/ocr-pipeline.sh <INPUT_DIR_OR_PDF
 - `OUTPUT_TXT_DIR` — where the final `.txt` files land, one per input PDF (same stem).
 - `WORK_DIR` (optional, default `./.ocr-work`) — everything under "What this produces" above.
 
+Run the script directly under `run_in_background: true`. **Don't wrap it in `nohup … &`
+inside that call.** The Bash call then returns as soon as the wrapper backgrounds itself, and the
+pipeline was observed dying after its first file.
+
 Attach a `Monitor` to the background job's output, watching for `[OCR] done|FAIL|ALL DONE` and
 `Traceback|Error` — each is one stdout line, so Monitor surfaces progress and crashes without
 polling.
+
+**Stopping a run.** `ocr-pipeline.sh` `exec`s into `lib/backend-local.sh` (or `lib/backend-remote.sh`), so
+after startup the running process has the backend's name, not `ocr-pipeline.sh`. Send
+TERM to whichever is running:
+
+```bash
+pkill -TERM -f 'document-ocr/(ocr-pipeline|lib/backend-(local|remote))\.sh'
+```
+
+Both scripts trap TERM, INT and HUP and kill their own `conda run` → surya/mineru children
+before exiting. They print `[OCR] stopped by signal` to stderr. Afterwards, confirm nothing
+is left (`pgrep -fl 'surya_ocr|mineru'`). Never use `kill -9` on the batch script: the
+trap can't run, and its children are reparented to PID 1 and keep OCRing (and slowing the
+machine) until they finish. A remote-tier job on `holos` is detached on purpose so that it
+can resume, so stopping the local script doesn't stop it.
+
+**Fallback cost.** With `OCR_BACKEND=auto`, an unreachable `holos` costs only one stderr line
+(`remote box not available -- falling back to OCR_BACKEND=local`). The run then switches to
+laptop speed. On Apple Silicon, Surya + MinerU took **several minutes per 4-page PDF**, so a
+batch of 18 short PDFs takes over an hour. Before you launch a batch with `auto` while the box
+might be down, say what the fallback will cost, or pick a tier explicitly.
+
+**Quick path for clean typed tables: tesseract.** Some lookups don't need per-line evidence,
+such as finding one applicant or permit number in an image-only status report. For those,
+`tesseract` is fine, and it takes seconds per page:
+
+```bash
+pdftoppm -r 170 -png in.pdf page && for p in page-*.png; do tesseract "$p" "${p%.png}" --psm 6; done
+```
+
+On the two OCM coastal-use status reports where it was compared with Surya, it found the same
+entries. `--psm 6` keeps each table row on one line. Surya's output puts every table cell on
+its own line, which makes it hard to `rg` a row. This path produces no `canonical.json`, so its
+output is not an input to `permit-analysis` citations.
 
 **Resumable by design**: local skips a stem when `.txt` is non-empty *and* `canonical/<stem>.json`
 parses (not just `.txt` existing — a half-finished merge must not look done). If a run is

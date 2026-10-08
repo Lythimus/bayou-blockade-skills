@@ -199,7 +199,7 @@ async function main() {
       console.log(JSON.stringify(fetched));
     }
   } finally {
-    await context.close().catch(() => {});
+    await stealth.closeContext(context);
   }
 }
 

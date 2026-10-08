@@ -220,73 +220,138 @@ function requestViaCurlBinary(binPath, url, headerList) {
   return { status, finalUrl: effectiveUrl, headers, body, transport: binPath };
 }
 
-async function requestViaBrowser(url, profile, { as = 'navigate', referer, timeoutMs = 45000 } = {}) {
-  const { chromium } = require('playwright');
-  const stealth = require('./stealth');
-  const profileDir = path.join(__dirname, '..', '.pw-profile');
-  fs.mkdirSync(profileDir, { recursive: true });
+/** Thrown when the visible browser window goes away mid-run (crash or user closed it). */
+class BrowserGoneError extends Error {}
 
-  const context = await stealth.launchStealthContext(chromium, profileDir, { acceptDownloads: true });
-  try {
-    const cookies = Object.entries(profile.cookies || {}).map(([name, value]) => ({
-      name,
-      value,
-      domain: 'sonlite.dnr.state.la.us',
-      path: '/',
-    }));
-    if (cookies.length) await context.addCookies(cookies);
+/**
+ * One visible browser window for a whole sonris_get.js run. A Chrome
+ * start/stop per URL is machine-like to the site, and every launch is
+ * another chance of a crash dialog on the user's screen.
+ *
+ * Documents (dDocname URLs) are fetched from inside a page already on the
+ * SONRIS origin rather than navigated to: navigating to a PDF goes through
+ * Chrome's download path, which crashes installed Chrome 154 (see
+ * stealth.ensurePdfDownloadPref). The fetch carries the session cookies and
+ * a same-origin Referer, but its Sec-Fetch shape is cors/empty, not the
+ * navigate/document of a clicked link.
+ */
+class BrowserSession {
+  constructor(profile) {
+    this.profile = profile;
+    this.context = null;
+    this.page = null;
+    this.gone = false;
+    this.closing = false;
+  }
 
-    const page = context.pages()[0] || (await context.newPage());
-    if (referer) await page.setExtraHTTPHeaders({ referer });
+  async open() {
+    if (this.context) return;
+    const { chromium } = require('playwright');
+    const stealth = require('./stealth');
+    const profileDir = path.join(__dirname, '..', '.pw-profile');
+    fs.mkdirSync(profileDir, { recursive: true });
 
-    if (as === 'ajax') {
-      const result = await page.evaluate(async (fetchUrl) => {
-        const res = await fetch(fetchUrl, { credentials: 'include' });
-        const buf = await res.arrayBuffer();
-        let binary = '';
-        const bytes = new Uint8Array(buf);
-        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    // A failed launch ends the run: retrying it per URL is a new Chrome (and
+    // potentially a new crash dialog) for every remaining URL.
+    try {
+      this.context = await stealth.launchStealthContext(chromium, profileDir);
+      this.context.on('close', () => {
+        if (!this.closing) this.gone = true;
+      });
+      const cookies = Object.entries(this.profile.cookies || {}).map(([name, value]) => ({
+        name,
+        value,
+        domain: 'sonlite.dnr.state.la.us',
+        path: '/',
+      }));
+      if (cookies.length) await this.context.addCookies(cookies);
+      this.page = this.context.pages()[0] || (await this.context.newPage());
+    } catch (e) {
+      this.gone = true;
+      if (this.context) await this.close();
+      throw new BrowserGoneError(`the browser window failed to start (${e.message})`);
+    }
+  }
+
+  async close() {
+    if (!this.context || this.closing) return;
+    this.closing = true;
+    await require('./stealth').closeContext(this.context);
+  }
+
+  assertAlive() {
+    if (this.gone || !this.page || this.page.isClosed()) {
+      throw new BrowserGoneError('the browser window closed or crashed mid-run');
+    }
+  }
+
+  /**
+   * Puts the page on the target's origin (once per run) so an in-page
+   * fetch is same-origin. Prefers the captured Referer — the page the user
+   * was actually on — over a bare origin root.
+   */
+  async ensureOrigin(url, referer, timeoutMs) {
+    const target = new URL(url).origin;
+    let current = null;
+    try {
+      current = new URL(this.page.url()).origin;
+    } catch (e) {
+      // about:blank
+    }
+    if (current === target) return;
+    let landing = `${target}/`;
+    const candidate = referer || this.profile.headers?.referer;
+    try {
+      if (candidate && new URL(candidate).origin === target) landing = candidate;
+    } catch (e) {
+      // malformed captured referer — use the origin root
+    }
+    await this.page.goto(landing, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    // The landing load is a SONRIS hit of its own; don't follow it with the
+    // document request in the same instant.
+    await new Promise((r) => setTimeout(r, 2000 + Math.random() * 2000));
+  }
+
+  async request(url, { as = 'navigate', referer, timeoutMs = 45000 } = {}) {
+    await this.open();
+    this.assertAlive();
+
+    const isDocument = Boolean(new URL(url).searchParams.get('dDocname'));
+    try {
+      if (isDocument || as === 'ajax') {
+        await this.ensureOrigin(url, referer, timeoutMs);
+        const result = await this.page.evaluate(
+          async ({ fetchUrl, ref }) => {
+            const init = { credentials: 'include' };
+            if (ref) init.referrer = ref;
+            const res = await fetch(fetchUrl, init);
+            const bytes = new Uint8Array(await res.arrayBuffer());
+            let binary = '';
+            for (let i = 0; i < bytes.length; i += 0x8000) {
+              binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+            }
+            return {
+              status: res.status,
+              url: res.url,
+              headers: Object.fromEntries(res.headers.entries()),
+              bodyBase64: btoa(binary),
+            };
+          },
+          { fetchUrl: url, ref: referer || null }
+        );
         return {
-          status: res.status,
-          url: res.url,
-          headers: Object.fromEntries(res.headers.entries()),
-          bodyBase64: btoa(binary),
+          status: result.status,
+          finalUrl: result.url,
+          headers: result.headers,
+          body: Buffer.from(result.bodyBase64, 'base64'),
+          transport: 'browser',
         };
-      }, url);
-      return {
-        status: result.status,
-        finalUrl: result.url,
-        headers: result.headers,
-        body: Buffer.from(result.bodyBase64, 'base64'),
-        transport: 'browser',
-      };
-    }
-
-    // A download aborts the navigation before page.goto() sees a response,
-    // so headers have to be captured separately via the response event —
-    // otherwise filenameFor() has no content-type/content-disposition to
-    // work with and downloaded files lose their extension.
-    let downloadHeaders = {};
-    const onResponse = (resp) => {
-      try {
-        if (resp.url() === url) downloadHeaders = resp.headers();
-      } catch (e) {
-        // ignore
       }
-    };
-    page.on('response', onResponse);
 
-    const downloadPromise = page.waitForEvent('download', { timeout: timeoutMs }).catch(() => null);
-    const navPromise = page.goto(url, { waitUntil: 'commit', timeout: timeoutMs }).catch(() => null);
-    const [response, download] = await Promise.all([navPromise, downloadPromise]);
-    page.off('response', onResponse);
-
-    if (download) {
-      const savedPath = await download.path();
-      const body = savedPath ? fs.readFileSync(savedPath) : Buffer.alloc(0);
-      return { status: 200, finalUrl: download.url(), headers: downloadHeaders, body, transport: 'browser' };
-    }
-    if (response) {
+      const gotoOpts = { waitUntil: 'domcontentloaded', timeout: timeoutMs };
+      if (referer) gotoOpts.referer = referer;
+      const response = await this.page.goto(url, gotoOpts);
+      if (!response) throw new Error('browser transport got no response before timeout');
       const body = await response.body().catch(() => Buffer.alloc(0));
       return {
         status: response.status(),
@@ -295,15 +360,22 @@ async function requestViaBrowser(url, profile, { as = 'navigate', referer, timeo
         body,
         transport: 'browser',
       };
+    } catch (e) {
+      if (this.gone || !this.page || this.page.isClosed()) throw new BrowserGoneError(`the browser window closed or crashed mid-run (${e.message})`);
+      // A redirect off the SONRIS origin makes the in-page fetch fail CORS
+      // with a bare "Failed to fetch"; say so instead of leaving it opaque.
+      if (/Failed to fetch/i.test(e.message)) {
+        throw new Error(`in-page fetch failed (${e.message}) — the document may redirect to another host; check it once by hand in the browser`);
+      }
+      throw e;
     }
-    throw new Error('browser transport got neither a response nor a download before timeout');
-  } finally {
-    await context.close().catch(() => {});
   }
 }
 
 /**
- * Unified request entry point. opts: { transport, as, referer, dryRun }
+ * Unified request entry point. opts: { transport, as, referer, dryRun,
+ * browserSession }. Pass a BrowserSession to reuse one window across a run;
+ * without one, the browser transport opens and closes a window per call.
  * Returns { status, finalUrl, headers, body, transport } — or, for
  * dryRun, { dryRun: true, transport, headerList (redacted) }.
  */
@@ -321,7 +393,13 @@ async function request(url, profile, opts = {}) {
     return requestViaCurlBinary(bin, url, headerList);
   }
   if (transport === 'browser') {
-    return requestViaBrowser(url, profile, opts);
+    if (opts.browserSession) return opts.browserSession.request(url, opts);
+    const session = new BrowserSession(profile);
+    try {
+      return await session.request(url, opts);
+    } finally {
+      await session.close();
+    }
   }
   if (transport === 'curl') {
     const bin = detectSystemCurl();
@@ -392,6 +470,8 @@ module.exports = {
   redactCookieValue,
   request,
   classifyResponse,
+  BrowserSession,
+  BrowserGoneError,
   NAVIGATE_PRESET,
   AJAX_PRESET,
 };

@@ -26,6 +26,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOC_OCR_DIR="$(dirname "$SCRIPT_DIR")"
 RENDERTXT="${RENDERTXT:-$DOC_OCR_DIR/render-txt.py}"
 MERGE="$DOC_OCR_DIR/merge-canonical.py"
+# shellcheck source=proc.sh
+. "$SCRIPT_DIR/proc.sh"
 
 IN="${1:?Usage: backend-local.sh <IN_DIR_OR_PDF> <OUT_TXT> <WORK>}"
 OUT_TXT="${2:?Usage: backend-local.sh <IN_DIR_OR_PDF> <OUT_TXT> <WORK>}"
@@ -123,11 +125,11 @@ while IFS= read -r -d '' pdf; do
 
   if [ ! -s "$results_json" ]; then
     surya_log="$WORK/logs/$stem.surya.log"
-    if ! PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
+    if ! run_child env PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
         "${SURYA_RUN[@]+"${SURYA_RUN[@]}"}" surya_ocr "$pdf" --results_dir "$WORK/results" \
         >"$surya_log" 2>&1; then
       if grep -qE 'CERTIFICATE_VERIFY_FAILED|self-signed certificate|huggingface\.co' "$surya_log" \
-          && PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
+          && run_child env PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
              HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
              "${SURYA_RUN[@]+"${SURYA_RUN[@]}"}" surya_ocr "$pdf" --results_dir "$WORK/results" \
              >>"$surya_log" 2>&1; then
@@ -147,7 +149,7 @@ while IFS= read -r -d '' pdf; do
 
   mineru_out="$WORK/mineru/$stem"
   mineru_log="$WORK/logs/$stem.mineru.log"
-  if ! "${MINERU_RUN[@]+"${MINERU_RUN[@]}"}" mineru -p "$pdf" -o "$mineru_out" \
+  if ! run_child "${MINERU_RUN[@]+"${MINERU_RUN[@]}"}" mineru -p "$pdf" -o "$mineru_out" \
       -b "$MINERU_BACKEND" >"$mineru_log" 2>&1; then
     echo "[OCR] FAIL $stem: mineru (reader) -- continuing with Surya geometry only, see $mineru_log" >&2
   fi
@@ -158,13 +160,13 @@ while IFS= read -r -d '' pdf; do
     reader_args=(--reader "mineru=$mineru_json")
   fi
 
-  if ! python3 "$MERGE" "$results_json" "$canonical_json" --stem "$stem" --backend local \
-      "${reader_args[@]}"; then
+  if ! run_child python3 "$MERGE" "$results_json" "$canonical_json" --stem "$stem" --backend local \
+      ${reader_args[@]+"${reader_args[@]}"}; then
     echo "[OCR] FAIL $stem: merge-canonical"
     continue
   fi
 
-  if ! python3 "$RENDERTXT" "$results_json" "$out_file" "$canonical_json" >/dev/null 2>&1; then
+  if ! run_child python3 "$RENDERTXT" "$results_json" "$out_file" "$canonical_json" >/dev/null 2>&1; then
     echo "[OCR] FAIL $stem: render-txt"
     continue
   fi

@@ -181,12 +181,13 @@ function launchOptions(profileDir, opts = {}) {
   };
 }
 
-// Chrome's built-in PDF viewer renders inline PDFs as a synthesized wrapper
-// document rather than exposing the raw bytes through the normal response
-// body — a real quirk that corrupts document downloads (a valid PDF becomes
-// a ~500-byte HTML shell). Forcing "always open PDF externally" makes every
-// PDF response trigger a real download event instead, which the browser
-// transport already knows how to capture correctly.
+// Documents are fetched from inside the page (lib/transports.js), never
+// navigated to, so Chrome's PDF handling is not on the request path. The
+// pref is set explicitly *off* because an existing profile may carry `true`:
+// with it on, a PDF navigation becomes a download, and Playwright-managed
+// downloads crash installed Chrome 154 on macOS (EXC_BAD_ACCESS ~3 s after
+// launch) — a "Google Chrome quit unexpectedly" dialog for the user each time.
+// Must only run before launch; Chrome rewrites Preferences while running.
 function ensurePdfDownloadPref(profileDir) {
   const defaultDir = path.join(profileDir, 'Default');
   fs.mkdirSync(defaultDir, { recursive: true });
@@ -198,7 +199,7 @@ function ensurePdfDownloadPref(profileDir) {
     // no existing prefs file, or unreadable — start fresh
   }
   prefs.plugins = prefs.plugins || {};
-  prefs.plugins.always_open_pdf_externally = true;
+  prefs.plugins.always_open_pdf_externally = false;
   fs.writeFileSync(prefsPath, JSON.stringify(prefs));
 }
 
@@ -209,6 +210,28 @@ async function launchStealthContext(chromium, profileDir, opts = {}) {
   return context;
 }
 
+/**
+ * Quits the browser the way Cmd-Q would. context.close() on a persistent
+ * context with installed Chrome hangs ~30 s before Playwright kills the
+ * process, leaving Chrome's "didn't shut down correctly" state in the
+ * profile; CDP Browser.close exits cleanly in ~100 ms.
+ */
+async function closeContext(context) {
+  if (!context) return;
+  const closed = new Promise((resolve) => context.once('close', resolve));
+  try {
+    const browser = context.browser();
+    if (browser) {
+      const cdp = await browser.newBrowserCDPSession();
+      await cdp.send('Browser.close').catch(() => {});
+      await Promise.race([closed, new Promise((r) => setTimeout(r, 10000))]);
+    }
+  } catch (e) {
+    // fall through to Playwright's own close
+  }
+  await context.close().catch(() => {});
+}
+
 module.exports = {
   findChromeExecutable,
   findBraveExecutable,
@@ -216,6 +239,7 @@ module.exports = {
   pickExecutable,
   launchOptions,
   launchStealthContext,
+  closeContext,
   ensurePdfDownloadPref,
   STEALTH_INIT_SCRIPT,
 };

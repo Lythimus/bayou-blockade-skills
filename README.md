@@ -94,8 +94,8 @@ Some skills need per-machine setup that is **deliberately not in this repo**:
   watchlist is per-investigation data (real companies, tail numbers, research notes).
   Copy [skills/exec-travel-monitor/watchlist.example.json](skills/exec-travel-monitor/watchlist.example.json)
   there and fill it in.
-- **Node dependencies** — `skills/ldeq-permit-status/` and `skills/ldeq-edms-download/`
-  each need `npm install` (Playwright).
+- **Node dependencies** — `skills/ldeq-permit-status/`, `skills/ldeq-edms-download/` and
+  `skills/epa-webfire-reports/` each need `npm install` (Playwright).
 - **Bulk datasets** — `skills/aircraft-registry-lookup/` downloads the FAA releasable
   registry into its own `cache/` on first use.
 - **OCR** — `/bayou:document-ocr` runs Surya locally (`surya_ocr` on `PATH`, or a `conda` env) for
@@ -128,7 +128,10 @@ Some skills need per-machine setup that is **deliberately not in this repo**:
    purpose: the retrieval agents are forbidden from drawing conclusions.
 
 Output is a numbered section set under `verification/` with document-level provenance
-(`<file>.txt:<line>`), a findings report, and a research to-do list.
+(`<file>.txt:<line>`), a findings report, and a research to-do list. For an air permit it
+also writes `verification/proposed-emissions.csv`, which `/bayou:tri-release-report`
+layers onto the existing TRI releases within a radius to chart cumulative burden, and
+`/bayou:comparable-facilities` sets against the reported emissions of industry peers.
 
 Feed it machine-readable text. Raw agency PDFs are usually scanned images — run
 `/bayou:document-ocr <in-dir> <out-dir>` first.
@@ -169,13 +172,17 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | `sonris-well-lookup` | Find a well by serial/name/field or by parish/section-township-range/lat-lon |
 | `sonris-doc-search` | Search and bulk-download SONRIS documents (permits, orders, applications) by operator/well/parish/doctype |
 | `la-class-vi` | Louisiana Class VI/CCS program tracker — application status, issued permits, no CAPTCHA session needed |
+| `la-coastal-use-permits` | Coastal use permits by parish/applicant from OCM status reports, current OCM notices, and St. Charles LCP legals; CUP number → site via SONRIS |
 
 **Federal environmental & enforcement**
 | Skill | What it does |
 |---|---|
 | `epa-echo-search` | Facility compliance/enforcement history (CAA, CWA, RCRA, SDWA) ¹ |
 | `epa-tri-search` | Toxics Release Inventory — year-over-year releases by medium and carcinogen status ¹ |
+| `tri-release-report` | TRI release reports and campaign charts — one facility's multi-year history (permit renewal), or every facility within a radius plus a proposed facility's permitted emissions; social (1080×1080, 1080×1350) and print PNG/PDF charts. Needs `uv` |
+| `comparable-facilities` | Peer benchmark for a repermit — finds active facilities with the same SIC/NAICS codes (state, then EPA region, then national), sizes them by GHGRP CO2e plus stated capacity, and compares NEI/GHGRP emissions and the proposed permit limits; REPORT.md, CSV, and social/print charts. Needs `uv` |
 | `epa-frs-crosswalk` | Resolve a facility to its FRS registry ID and every program ID it holds (TRI, NPDES, RCRAInfo, AIRS/AFS, GHGRP, LA-TEMPO) |
+| `epa-webfire-reports` | NESHAP/NSPS compliance reports filed through CEDRI and published in WebFIRE — periodic/excess-emissions reports (flare root-cause analyses, LDAR, PRD releases), performance tests, NOCS |
 | `epa-ghgrp-search` | Greenhouse Gas Reporting Program — facility CO2e emissions by subpart and gas |
 | `epa-rcra-waste` | RCRA Biennial Report — self-reported hazardous waste generation tonnage by cycle and waste type ¹ |
 | `epa-campd-search` | Clean Air Markets emissions, unit compliance, allowances (needs API key) |
@@ -186,7 +193,7 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | `doj-sec-search` | DOJ ENRD press releases + SEC EDGAR full-text (investor-disclosed liabilities) |
 | `pacer-case-search` | Free CourtListener/RECAP first, paid PACER only on confirmation |
 | `nrc-adams-search` | Nuclear Regulatory Commission ADAMS documents |
-| `usace-408-permits` | Section 408 permissions and Corps regulatory permits (ORM-Public) ² |
+| `usace-408-permits` | Section 408 permissions and Corps regulatory permits (ORM-Public, MVN public notices via a browser tab) ² |
 | `phmsa-npms-search` | Pipelines near a facility, plus incident and enforcement history |
 | `fema-flood` | openFEMA NFIP claims, policies, disaster declarations |
 

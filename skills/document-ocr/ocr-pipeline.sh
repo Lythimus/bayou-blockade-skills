@@ -36,6 +36,8 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RENDERTXT="${RENDERTXT:-$SCRIPT_DIR/render-txt.py}"
+# shellcheck source=lib/proc.sh
+. "$SCRIPT_DIR/lib/proc.sh"
 
 # --- Argument parsing --------------------------------------------------------
 # Positional args in order of first appearance; --rerender is a flag, anywhere; --backend takes
@@ -198,14 +200,14 @@ while IFS= read -r -d '' pdf; do
   # "${RUN[@]+...}" keeps an empty prefix array safe under `set -u` on bash 3.2 (macOS).
   mkdir -p "$WORK/logs"
   surya_log="$WORK/logs/$stem.surya.log"
-  if ! PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
+  if ! run_child env PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
       "${RUN[@]+"${RUN[@]}"}" surya_ocr "$pdf" --results_dir "$WORK/results" >"$surya_log" 2>&1; then
     if grep -qE 'CERTIFICATE_VERIFY_FAILED|self-signed certificate|huggingface\.co' "$surya_log"; then
       # huggingface_hub revalidates cached model files over the network on every call
       # (HEAD request for the etag) unless told not to. If the models were already
       # downloaded in an earlier run, that revalidation is the only thing a VPN/proxy's
       # SSL interception can break — retry fully offline before giving up.
-      if PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
+      if run_child env PYTORCH_MPS_HIGH_WATERMARK_RATIO=1.6 RECOGNITION_BATCH_SIZE=16 \
           HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
           "${RUN[@]+"${RUN[@]}"}" surya_ocr "$pdf" --results_dir "$WORK/results" >>"$surya_log" 2>&1; then
         : # offline retry succeeded, fall through to results_json check below

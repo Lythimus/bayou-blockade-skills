@@ -81,8 +81,11 @@ file in place rather than letting the finding evaporate.
    ```
    `dDocname` is the Oracle UCM content-item ID (what search results list as the
    document's identifier) — **confirmed 2026-08-15** as the correct form for this
-   endpoint, from inspecting SONRIS's own generated links; not yet confirmed against a
-   live authenticated fetch (needs a session).
+   endpoint, from inspecting SONRIS's own generated links. **Confirmed against a live
+   authenticated fetch 2026-10-07**: coastal use permit AUTHORIZATIONS PDFs downloaded
+   this way. The server's filename looks like `<n>~1.pdf` (hypothesized to come from
+   Content-Disposition, not from local collision handling). Not yet known whether it
+   redirects to another host; see `sonris-session` "The browser transport".
 
 ## Metadata field vocabulary (Oracle UCM `x`-prefixed)
 
@@ -93,8 +96,21 @@ file in place rather than letting the finding evaporate.
 | `xDocType` | **partially confirmed** | `UIC CLASS VI APPLICATIONS` confirmed from the user's example (`p22_doctype=UIC CLASS VI APPLICATIONS`). The full enumeration is unknown — SONRIS's own search UI almost certainly has a doctype `<select>` with the complete list; read it directly from the live page during a session rather than guessing values, and record what's found here. |
 | `xOperatorName` | **confirmed 2026-08-31** | `idx=xOperatorName&val=EXXON` returned 51 real rows (mostly Field Name "DEEP BAYOU", Field Code 3204); `val=EXXON MOBIL` returned 1 (an offshore Main Pass Block 74 commingling order); `val=EXXONMOBIL` (no space) returned 0. Confirms both that the field is real and that matching is a literal/exact-ish string match, not fuzzy — spacing and punctuation variants must be tried separately rather than assumed equivalent. |
 | `xFieldName` | **confirmed 2026-08-31** | `idx=xFieldName&val=PECAN ISLAND` and `val=PECAN ISLAND FIELD` both returned the genuine `"No documents found"` empty state (not an error) — the field itself works (see `DEEP BAYOU` hits above under `xOperatorName`), this specific value just has no matches under either spelling tried. |
+| `xRefNum` | **confirmed 2026-10-07** | The coastal use permit number, for example `idx=xRefNum&val=P20260443` returned that permit's documents (OUTGOING CORRESPONDENCE, INTERNAL COMMENTS, AUTHORIZATIONS, NEEDS / ALTERNATIVES REVIEW, APPLICATION PLATS REVISIONS). The fastest route from a CUP number to a site: the AUTHORIZATIONS PDF has `LOCATION:` and `DESCRIPTION:` headers. See `sonris-doc-search` "Coastal use permits". |
+| `xApplicantName` | **field exists; exact match** | `val=ENTERGY LOUISIANA, LLC` returned "No documents found" on 2026-10-07, though Entergy CUPs exist. The stored form differs, so try variants, or search by `xRefNum` when the permit number is known. |
 | `xWellSerialNumber` | **hypothesized** | Naming-convention guess, used as the `idx=` value in `sonris_session.js`'s probe URL. Not independently re-tested 2026-08-31 (only `xParishCode`, `xOperatorName`, `xFieldName` were exercised that session) — still needs its own live-session check. |
 | `xWellName`, `xFieldCode` | **hypothesized** | Naming-convention guesses only — not tested. (`xFieldCode` appears as a real *column* in results, e.g. `3204` for Deep Bayou — but that's observed output, not confirmation it also works as an `idx=` input field.) |
+
+### Result table columns (confirmed 2026-10-07)
+
+Info, View Doc, Alt View, Content Id, Create Date, Document Type, Type, Date, Well Serial
+Num, Ref Num, Operator Code, Field Code, Field Name, Description, Comments, Docket Num,
+Scale, Category, Company Name, Lease Number, Applicant Name, Tract Num, Company Code,
+Operation Type, Date of Letter. Content Id is the `dDocname`. Ref Num holds the CUP number
+for coastal documents.
+
+`xParishCode=45` returns mostly Class VI documents (2026-10-07), so it is no way to list
+a parish's coastal use permits.
 
 ### The 64-parish code table
 

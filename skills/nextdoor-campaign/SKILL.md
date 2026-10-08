@@ -158,7 +158,9 @@ Each post gets:
 - A hook opener, then a body blending one profile angle (Step 3) with campaign-specific
   facts (Step 4) — grounded, not invented; every hard claim traces back to the research.
 - A bracketed image-suggestion line describing what photo/graphic would pair with the
-  post (text description only — this skill does not generate images).
+  post (text description only — this skill does not generate images; for TRI release
+  charts sized for social posts, see `bayou:tri-release-report` and name the chart file
+  in the suggestion line).
 - A CTA block — every post must end with a concrete call to action, never a vague
   "get involved." Decide which kind per the logic below.
 

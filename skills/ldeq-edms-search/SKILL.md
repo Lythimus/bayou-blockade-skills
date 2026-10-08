@@ -204,6 +204,15 @@ Parse the JSON response. Key fields per document:
 | "all permits" | documentTypes: ["Permits"] |
 | "water discharge monitoring" | medias: ["Surface Water"], documentSubtypes: ["DMR"] |
 | "flaring variances" | medias: ["Air Quality"], rows: 500; pull rows, then client-side filter `description` contains "variance" (this is the pattern that resolved the AI 41475 campaign's variance-history lookup) |
+| "maintenance / repair history", "was this equipment fixed before", "repeat leaks" | medias: ["Air Quality"], documentTypes: ["Reports"], documentSubtypes: ["Semi-Annual", "Annual"], plus functions: ["Inspections"] as a second query; client-side filter `description` for "Semi-Annual Monitoring", "Deviation", "Compliance Certification" (see note below) |
+
+**Maintenance and repair history.** Operators do not file maintenance logs with LDEQ, but their own reports carry a repair trail. Each Title V **semiannual monitoring (deviation) report** and **Annual Compliance Certification** row gives the deviation, its cause, and the "corrective action taken". Examples: an LDAR leak found and repaired, a controller repaired, a heat exchanger or condenser cleaned. Reading consecutive periods shows repeat failures of the same equipment, and **inspection reports** list the LDAR and repair records the inspector reviewed. To build the trail:
+- Pull every period, not just the one around the event.
+- Query **every AI at the site**, since co-located facilities often share equipment and cross-file.
+- OCR the scans with `/bayou:document-ocr`.
+- Grep the corrective-action text for the equipment tag and its plain-language name.
+
+For federal NESHAP periodic reports (flare root-cause analyses, LDAR and PRD reports), see `/bayou:epa-webfire-reports`.
 
 When the user's request is ambiguous, prefer casting a wider net (fewer filters) and letting them refine, rather than being too restrictive and missing relevant documents.
 

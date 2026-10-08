@@ -224,7 +224,7 @@ async function headfulSolve(timeoutSeconds) {
     console.log(`Saved session -> ${sessionProfile.PROFILE_FILE}`);
     console.log(`Cookies captured: ${Object.keys(cookieMap).join(', ')}`);
   } finally {
-    await context.close().catch(() => {});
+    await stealth.closeContext(context);
   }
 }
 

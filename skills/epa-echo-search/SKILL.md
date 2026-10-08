@@ -34,8 +34,10 @@ Key query parameters:
 - `p_city` — city name
 - `p_zip` — zip code
 - `p_fips` — 5-digit state+county FIPS code (e.g. `22121` = West Baton Rouge Parish, LA). **This is the working way to scope a query to one county.** `p_county` is accepted by the endpoint but silently ignored — verified live (2026-08-12): `p_st=LA&p_county=West Baton Rouge` (and four other value formats: uppercase, `"... Parish"`, the FIPS code itself, `p_cnty`) all returned the identical statewide "Queryset Limit would be exceeded" error as omitting the param entirely. Reach for `p_fips`, not `p_county`.
-- `p_id` — registry ID (exact)
+- `p_frs` — registry ID (exact). **Not `p_id`:** `get_facilities` silently ignores `p_id` and runs nationwide (verified 2026-10-08: "Rows Returned would be 5742849. Queryset Limit would be exceeded"). `p_id` is the right name only for `get_facility_info` and `get_dfr`.
 - `p_act` — active facilities only: `Y`
+- `p_sic` — 4-digit SIC code (e.g. `2911` petroleum refining). **One code per query:** `p_sic=2911,2869` returns an error, so run one query per code. Verified live 2026-10-07: `p_sic=2911&p_st=LA&p_act=Y` returned 35 rows, and national `p_sic=2911&p_act=Y` returned 470 rows with no queryset error.
+- `p_ncs` — NAICS code (e.g. `324110`). **`p_naics` is silently ignored**: `p_naics=324110&p_st=LA` returned all 39,861 Louisiana facilities. Always use `p_ncs`.
 - `p_rows` — max rows (default 100)
 - `p_c1lat`, `p_c1lon`, `p_c2lat`, `p_c2lon` — bounding box search (WGS84 decimal degrees; c1 = SW corner, c2 = NE corner)
 
@@ -60,6 +62,19 @@ curl -s "https://echodata.epa.gov/echo/echo_rest_services.get_qid?output=json&qi
 ```bash
 curl -s "https://echodata.epa.gov/echo/echo_rest_services.get_facility_info?output=json&p_id=REGISTRY_ID" 2>/dev/null
 ```
+
+### SIC/NAICS codes by source system
+
+`dfr_rest_services.get_dfr?output=JSON&p_id=REGISTRY_ID` returns `Results.SIC.Sources[].SICCodes[]` and `Results.NAICS.Sources[].NAICSCodes[]`. Each entry carries `EPASystem` (`ICIS-Air`, `TRI`, `GHGRP`, `EIS`, `ICIS-NPDES`, `RMP`) and `SourceID`, which shows which code belongs to the air permit and which to another program. The facility-search `FacSICCodes`/`FacNAICSCodes` fields merge them all into one space-separated string. The codes can be wrong: Shell Norco's EIS record lists NAICS 311812 (commercial bakeries). Prefer the ICIS-Air SIC for anything about the air permit. The endpoint sometimes returns 503, so retry.
+
+To find industry peers by these codes and compare their emissions, use `bayou:comparable-facilities`.
+
+### Demographics around a facility (official ACS profile)
+
+The Detailed Facility Report endpoint, `https://echodata.epa.gov/echo/dfr_rest_services.get_dfr?output=JSON&p_id=REGISTRY_ID`, returns `Results.ACS2024Demographics` and `Results.ACS2023Demographics`. Each block holds population, % people of color, % below low-income and poverty levels, and race, age, education, and income breakdowns for the population within **1 mile** of the facility's ECHO coordinate. With EJScreen offline, this is the remaining EPA-hosted source for fenceline demographics. Verified live 2026-10-07:
+- The radius is fixed at 1 mile; `p_radius`, `p_dist`, and `radius` are ignored.
+- The facility-search demographic fields (`FacPercentMinority`, `PercentPeopleOfColor`, `PercentBelowLowincome3mile`, `AcsPopulationDensity`) appear in the `metadata` column list but return null.
+- It returns no percentiles and no EJ indexes. For those, and for the screening workflow that pairs them with this profile, use `bayou:ejscreen-report` (its Step 3 has the parsing snippet and the citation format).
 
 ## GPS Coordinates
 
@@ -147,5 +162,7 @@ No API key required. QIDs expire after ~30 minutes.
 Cross-link `bayou:epa-frs-crosswalk` for full program-ID resolution — one FRS `registry_id` lookup returns every program ID a facility holds (TRI, NPDES, RCRAInfo, AIRS/AFS, GHGRP `E-GGRT`, and LDEQ's `LA-TEMPO` ID), which is faster than resolving each one individually through its own program's search.
 
 > **⚠️ Rate limit (verified 2026-06-09).** ECHO throttles at **300 requests/hour and 1,500/day**. Exceeding it returns **HTTP 429** with an error body — `"If your requests exceed 300 per hour or 1,500 per day, we will throttle your request. ECHO has exports of bulk data available for download at https://echo.epa.gov/tools/data-downloads."` — and the same-day quota does not reset until the next day. Pace requests (don't loop tightly over many RegistryIDs), and for multi-facility sweeps prefer the **bulk data downloads** (https://echo.epa.gov/tools/data-downloads) over the REST endpoints.
+>
+> **Maintenance outages are a different failure.** ECHO REST often goes down around midnight Central, sometimes for hours. It returns **HTTP 503** with an Apache "maintenance downtime or capacity problems" page, or the request times out. That is not throttling; only 429 means the quota is spent. Retry later.
 
 $ARGUMENTS

@@ -39,7 +39,11 @@ explicitly rather than re-downloading.
 - If given a company name instead of an operator code, run `bayou:sonris-operator-lookup`
   first.
 - Confirm a session: `node ~/.claude/plugins/bayou/skills/sonris-session/sonris_session.js --check`.
-  If none, walk the user through `bayou:sonris-session` before continuing.
+  If none, walk the user through `bayou:sonris-session` before continuing. If the user
+  pastes a "Copy as cURL" capture, save it to a scratch file, load it with `--curl-file`,
+  then delete the file. It holds their cookies. Never echo cookie values back.
+- If given a coastal use permit number (`P2026nnnn`), use the recipe under "Coastal use
+  permits" below.
 
 ## Step 2 — build the search
 
@@ -59,6 +63,12 @@ node ~/.claude/plugins/bayou/skills/sonris-session/sonris_get.js \
   --url "https://sonlite.dnr.state.la.us/ords/r/sonris/ucmsearch/finddocuments?idx=xOperatorCode&val=H1166" \
   --throttle 2500
 ```
+
+**Batch every search for a step into one call** (`--url-file`, one URL per line). With the
+browser transport, each `sonris_get.js` run opens one visible Chrome window. One call per
+URL from a shell loop means a window opening and closing every few seconds, which looks
+machine-like to the site and risks crash dialogs for the user. To keep each search's
+HTML, add `--out-dir <dir>`; searches are saved as `search_<idx>_<val>.html`.
 
 **Only one `idx`/`val` pair per request is confirmed to work.** For a multi-condition
 search (operator + parish + doctype, matching what the user's own example search does),
@@ -102,7 +112,8 @@ node ~/.claude/plugins/bayou/skills/sonris-session/sonris_get.js \
   --out-dir . --throttle 2500
 ```
 
-Pass `--url` once per document (repeatable) or `--url-file` for a longer list. Default
+Pass `--url` once per document (repeatable) or `--url-file` for a longer list. **Put all
+the downloads for the task in one run**; don't call `sonris_get.js` once per document. Default
 output directory should be the current case-file directory unless the user names another,
 matching the existing `~1.pdf`-style convention already used for hand-downloaded SONRIS
 files in these folders.
@@ -110,6 +121,33 @@ files in these folders.
 If the user asks to "download all" on a large result set, warn them first how many
 documents that is and confirm before running — mirrors `bayou:ldeq-edms-download`'s
 batching warning, even though this flow has no per-batch CAPTCHA (just the throttle).
+
+## Coastal use permits (CUP number → site)
+
+The OCM semi-monthly status reports and the parish notices give only applicant, parish and
+CUP number. To find where a permit is, read its AUTHORIZATIONS document. Confirmed
+2026-10-07:
+
+1. **Search by permit number.** `idx=xRefNum&val=<CUP number>` (for example
+   `P20260443`) returns that permit's documents. Types seen: OUTGOING CORRESPONDENCE,
+   INTERNAL COMMENTS, AUTHORIZATIONS, NEEDS / ALTERNATIVES REVIEW, APPLICATION PLATS
+   REVISIONS. Put all the permits' searches in **one** `sonris_get.js --url-file … --out-dir
+   <dir>` run.
+2. **Pick one document per permit:** the newest AUTHORIZATIONS row's Content Id
+   (`dDocname`), else the newest APPLICATION. Don't download everything.
+3. **Download all the picks in one second run** (`redirectUrl.jsp?dDocname=<id>&showInline=True`).
+4. **Read the site:**
+   `pdftotext -layout <file> - | rg -i -m3 -A2 "^LOCATION:|^DESCRIPTION:"`.
+   `LOCATION:` gives lat/long, parish and section/township, and `DESCRIPTION:` gives the
+   work.
+
+If a step stops with exit 4 (the browser window died), resume from the
+`sonris_resume_<ts>.txt` it writes once the cause is known. Don't relaunch in a loop.
+
+Other searches tried on 2026-10-07, and why they don't enumerate CUPs:
+- `xApplicantName=ENTERGY LOUISIANA, LLC` returned "No documents found". The match is
+  exact and the stored form differs.
+- `xParishCode=45` returns mostly Class VI documents.
 
 ## Step 5 — hand off
 
@@ -144,6 +182,9 @@ user-pasted URL or a constructed `idx`/`val` search.
   company name) is what's in `val=`, and that `idx=` field casing/name is right per the
   vocabulary reference; try the DCE Class VI page or `bayou:la-class-vi` as a
   cross-check if the operator is CCS-related.
+- **`sonris_get.js` exits 4 / "Google Chrome quit unexpectedly" dialogs**: the visible
+  browser window crashed or was closed. See `bayou:sonris-session` Troubleshooting. Check it
+  offline before spending more SONRIS requests.
 - **A downloaded file is 0 bytes or looks like an HTML error page, not a PDF** —
   `sonris_get.js` now catches this itself (exit 3, file not written); if one slips
   through anyway, confirm with `file <path>`.

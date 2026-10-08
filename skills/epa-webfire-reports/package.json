@@ -1,0 +1,9 @@
+{
+  "name": "epa-webfire-reports",
+  "private": true,
+  "description": "Playwright harness for the epa-webfire-reports Claude Code skill (local-only, never published).",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

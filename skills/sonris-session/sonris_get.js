@@ -55,8 +55,7 @@ function parseArgs(argv) {
       printHelp();
       process.exit(0);
     } else {
-      console.error(`Unknown argument: ${a}`);
-      printHelp();
+      console.error(`error: unknown argument "${a}" (run with --help for the flag list)`);
       process.exit(1);
     }
   }
@@ -92,7 +91,9 @@ sonris_get.js — session-authenticated fetch for SONRIS, transport-ladder repla
   --throttle <ms>      Minimum delay between requests (default: 2500), plus
                         a right-skewed random jitter and an occasional
                         longer pause so the cadence isn't a uniform block —
-                        pacing courtesy, not evasion.
+                        pacing courtesy, not evasion. Enforced across runs
+                        too (timestamp in .session/), so calling this once
+                        per URL from a loop is paced the same as a batch.
   --max <n>            Max URLs to fetch in this run (default: 200).
   --transport <t>      auto (default) | impersonate | browser | curl | node
                         auto picks the best available: curl-impersonate >
@@ -107,10 +108,44 @@ sonris_get.js — session-authenticated fetch for SONRIS, transport-ladder repla
   --dry-run            Print the exact request that would be sent (headers
                         in order, cookie values redacted) without sending it.
 
+The browser transport opens ONE visible window for the whole run and quits
+it cleanly at the end, so pass every URL for a step in one call (--url-file)
+rather than one call per URL.
+
 Exit codes: 0 ok, 1 error, 2 CAPTCHA-gated (run sonris_session.js again),
 3 transport blocked or edge rejected the request (see printed reason —
-this is NOT the same as session expiry; try a stronger --transport).
+this is NOT the same as session expiry; try a stronger --transport),
+4 the browser window crashed or was closed mid-run (remaining URLs are
+written to a resume file; do not loop on this — find out why first).
 `);
+}
+
+const LAST_REQUEST_FILE = path.join(__dirname, '.session', 'last_request');
+
+function readLastRequest() {
+  try {
+    return parseInt(fs.readFileSync(LAST_REQUEST_FILE, 'utf8'), 10) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function writeLastRequest() {
+  try {
+    fs.mkdirSync(path.dirname(LAST_REQUEST_FILE), { recursive: true });
+    fs.writeFileSync(LAST_REQUEST_FILE, String(Date.now()));
+  } catch (e) {
+    // pacing still holds within this run
+  }
+}
+
+/**
+ * Waits until `delay` ms have passed since the last SONRIS request from any
+ * run, so a shell loop calling this once per URL is paced like one batch.
+ */
+async function waitForTurn(delay) {
+  const since = Date.now() - readLastRequest();
+  if (since < delay) await new Promise((r) => setTimeout(r, delay - since));
 }
 
 function filenameFor(url, headers) {
@@ -127,6 +162,11 @@ function filenameFor(url, headers) {
       const ext = ct.includes('pdf') ? '.pdf' : '';
       return `${dDocname}${ext}`;
     }
+    // idx/val searches all share one path; name them by query so a batch of
+    // searches saved with --out-dir doesn't overwrite itself.
+    const idx = u.searchParams.get('idx');
+    const val = u.searchParams.get('val');
+    if (idx && val) return `search_${idx}_${val.replace(/[^A-Za-z0-9._-]+/g, '_')}.html`;
     const last = u.pathname.split('/').filter(Boolean).pop();
     return last || 'download';
   } catch (e) {
@@ -142,6 +182,8 @@ function nextDelay(baseMs, index) {
   if (index > 0 && index % 15 === 0) delay += baseMs * (2 + Math.random() * 2); // occasional longer pause
   return Math.round(delay);
 }
+
+let activeBrowserSession = null;
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -180,29 +222,65 @@ async function main() {
 
   if (args.outDir) fs.mkdirSync(args.outDir, { recursive: true });
 
+  const transport = transports.resolveTransport(args.transport);
+  const browserSession = transport === 'browser' ? new transports.BrowserSession(profile) : null;
+  activeBrowserSession = browserSession;
+
+  // Every way out of this process quits the window cleanly: a window left
+  // behind is an orphan, and a killed one is a crash dialog for the user.
+  const finish = async (code) => {
+    if (browserSession) await browserSession.close();
+    process.exit(code);
+  };
+  for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.on(sig, () => {
+      console.error(`\n${sig} — closing the browser window and stopping.`);
+      finish(130);
+    });
+  }
+
+  let failures = 0;
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
-    if (i > 0) {
-      await new Promise((r) => setTimeout(r, nextDelay(args.throttle, i)));
-    }
+    await waitForTurn(nextDelay(args.throttle, i));
 
     let result;
     try {
-      result = await transports.request(url, profile, { transport: args.transport, as: args.as, referer: args.referer });
+      result = await transports.request(url, profile, {
+        transport,
+        as: args.as,
+        referer: args.referer,
+        browserSession,
+      });
     } catch (e) {
-      console.error(`[${i + 1}/${urls.length}] error fetching ${url}: ${e.message}`);
+      writeLastRequest();
+      if (e instanceof transports.BrowserGoneError) {
+        const rest = urls.slice(i);
+        const resumeFile = path.join(args.outDir || process.cwd(), `sonris_resume_${Date.now()}.txt`);
+        fs.writeFileSync(resumeFile, rest.join('\n') + '\n');
+        console.error(`[${i + 1}/${urls.length}] ${e.message}`);
+        console.error(`Stopped. ${rest.length} URL(s) not fetched, saved to ${resumeFile}`);
+        console.error('Resume later with --url-file; do not relaunch in a loop.');
+        await finish(4);
+        return;
+      }
+      failures++;
+      console.error(`[${i + 1}/${urls.length}] FAILED ${url}: ${e.message}`);
       continue;
     }
+    writeLastRequest();
 
-    const expectBinary = Boolean(new URL(url).searchParams.get('dDocname')) || args.outDir;
-    const classification = transports.classifyResponse(result, { expectBinary: Boolean(expectBinary) });
+    // Only document URLs must come back as binary; search pages saved with
+    // --out-dir are legitimately HTML.
+    const expectBinary = Boolean(new URL(url).searchParams.get('dDocname'));
+    const classification = transports.classifyResponse(result, { expectBinary });
 
     if (!classification.ok) {
       console.error(`[${i + 1}/${urls.length}] ${classification.reason} (${url})`);
       if (classification.exitCode === 2) {
         console.error('Run: node ~/.claude/plugins/bayou/skills/sonris-session/sonris_session.js');
       }
-      process.exit(classification.exitCode);
+      await finish(classification.exitCode);
       return;
     }
 
@@ -215,9 +293,13 @@ async function main() {
       console.log(JSON.stringify({ url, status: result.status, transport: result.transport, body: result.body.toString('utf8') }));
     }
   }
+
+  if (failures) console.error(`${failures} of ${urls.length} URL(s) failed; see FAILED lines above.`);
+  await finish(failures ? 1 : 0);
 }
 
-main().catch((e) => {
+main().catch(async (e) => {
   console.error(`\nerror: ${e.message}`);
+  if (activeBrowserSession) await activeBrowserSession.close();
   process.exit(1);
 });
