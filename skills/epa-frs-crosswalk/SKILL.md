@@ -69,6 +69,7 @@ Verified live 2026-08-20: querying a made-up or nonexistent `registry_id` return
 |---|---|---|
 | `TRIS` | Toxics Release Inventory | `bayou:epa-tri-search` (this is the `tri_facility_id`) |
 | `AIRS/AFS` | Air Facility System | `bayou:epa-echo-search` CAA data |
+| `AIR` | ICIS-Air program ID, e.g. `LA0000002208900002` | `bayou:epa-echo-search` bulk ICIS-Air history. Its `PGM_SYS_ID` matches this value, not the bare `AIRS/AFS` number (verified 2026-10-08). |
 | `NPDES` | Water discharge permits | `bayou:epa-echo-search` CWA data |
 | `RCRAINFO` | Hazardous waste handler ID | `bayou:epa-rcra-waste` (this is the `handler_id`) |
 | `ICIS` | Integrated Compliance Information System | general EPA enforcement records |

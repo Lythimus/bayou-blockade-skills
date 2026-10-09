@@ -73,6 +73,16 @@ CAMPD_API_KEY: <key>
 
 ---
 
+## EPA ATTAINS (api.data.gov)
+
+Used by `bayou:cwa-watershed-context` for 303(d) assessments, TMDLs and wasteload allocations.
+Register at https://api.data.gov/signup/ (free, instant). `DEMO_KEY` throttles after a few
+calls. Any api.data.gov key works, so the `CAMPD_API_KEY` value can be reused here.
+
+ATTAINS_API_KEY: <key>
+
+---
+
 ## OpenSky Network API
 
 Used by `bayou:adsb-flight-search` and `bayou:exec-travel-monitor`. Free account.

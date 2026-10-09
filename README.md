@@ -178,6 +178,7 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | Skill | What it does |
 |---|---|
 | `epa-echo-search` | Facility compliance/enforcement history (CAA, CWA, RCRA, SDWA) ¹ |
+| `cwa-watershed-context` | Receiving-water context for an NPDES/LPDES permit — HUC12/HUC8, 303(d) causes, TMDLs and wasteload allocations (ATTAINS, needs API key), watershed dischargers ranked by calculated load and exceedances, the applicant's limits and multi-year loads |
 | `epa-tri-search` | Toxics Release Inventory — year-over-year releases by medium and carcinogen status ¹ |
 | `tri-release-report` | TRI release reports and campaign charts — one facility's multi-year history (permit renewal), or every facility within a radius plus a proposed facility's permitted emissions; social (1080×1080, 1080×1350) and print PNG/PDF charts. Needs `uv` |
 | `comparable-facilities` | Peer benchmark for a repermit — finds active facilities with the same SIC/NAICS codes (state, then EPA region, then national), sizes them by GHGRP CO2e plus stated capacity, and compares NEI/GHGRP emissions and the proposed permit limits; REPORT.md, CSV, and social/print charts. Needs `uv` |

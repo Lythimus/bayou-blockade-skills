@@ -1,6 +1,6 @@
 ---
 name: ejscreen-report
-description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset, and corroborate a facility's demographics against EPA ECHO's official ACS profile
+description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset or a block-weighted EJAM buffer report (state and national percentiles, EJ indexes, RSEI), and corroborate a facility's demographics against EPA ECHO's official ACS profile
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -43,7 +43,53 @@ curl -s --get "https://services2.arcgis.com/w4yiQqB14ZaAGzJq/arcgis/rest/service
 
 `ID` is the 12-digit Census block group FIPS. This gives the single block group the point falls inside — fine for "what does EJScreen say at this exact address" but not EPA's radius-based Standard Report methodology. (Note: the field is `LINGISOPCT`, not `LINGISPCT` — verified live 2026-07-21; a bad field name anywhere in `outFields` makes the whole query fail with a generic "Invalid query parameters" 400, not a per-field error, so double-check spelling against the field reference below if a query fails.)
 
-## Step 2: Radius (buffer) query — matches EPA's Standard Report approach
+## Step 2: Radius report via EJAM (preferred)
+
+EPA's EJAM (Environmental Justice Analysis Multisite) tool is EJScreen's successor for buffer reports. EDGI runs a public instance as an API. It needs no key and does the radius aggregation server-side: it population-weights by **Census block** within the circle, which is EPA's own buffer method. Step 2b approximates that method with whole block groups.
+
+```bash
+LAT=29.99435
+LON=-90.40726
+MILES=1
+
+curl -s -X POST -H 'Content-Type: application/json' \
+  -d "{\"sites\":[{\"lat\":${LAT},\"lon\":${LON}}],\"buffer\":${MILES},\"scale\":\"blockgroup\",\"geometries\":false}" \
+  "https://ejamapi-84652557241.us-central1.run.app/data" 2>/dev/null | python3 -c "
+import sys, json
+r = json.load(sys.stdin)
+if not r:
+    sys.exit('EJAM returned no result (empty response)')
+r = r[0]
+for k in ('radius.miles','pop','bgcount_near_site','blockcount_near_site',
+          'pctmin','pctlowinc','Demog.Index','pctile.Demog.Index','state.pctile.Demog.Index',
+          'pm','pctile.pm','state.pctile.pm','dpm','pctile.dpm','state.pctile.dpm',
+          'o3','pctile.o3','proximity.rmp','pctile.proximity.rmp','proximity.tsdf','pctile.proximity.tsdf',
+          'rsei','pctile.rsei','pctile.EJ.DISPARITY.dpm.eo','pctile.EJ.DISPARITY.rsei.eo',
+          'count.NPL','count.TSDF','EJAM Report'):
+    print(f'{k}: {r.get(k)}')
+"
+```
+
+Verified live 2026-10-08 at Shell Norco (ECHO's center point, 1 mi): population 1,288.2, 85 blocks in 5 block groups, people of color 10%, low-income 37%, diesel PM at the 78th national and 85th state percentile, RMP proximity at the 99th.
+
+What the response holds (683 keys per site):
+- **Raw values** use EJAM's short names. `pctmin` and `pctlowinc` are fractions from 0 to 1. Other examples are `pm`, `dpm`, `o3`, `no2`, `rsei` and `proximity.rmp`/`.tsdf`/`.npl`/`.npdes`. `pop` is a block-weighted estimate, so it is not a whole number.
+- **Percentiles** come in two forms: `pctile.<x>` is national and `state.pctile.<x>` is state, each 0–100. Use them the way you use `P_` fields from the ArcGIS mirror.
+- **EJ indexes** are `pctile.EJ.DISPARITY.<x>.eo` and `.supp`, plus the `state.` variants. They are percentiles of the combined environmental-times-demographic index.
+- **Ratios** are `ratio.to.avg.<x>` and `ratio.to.state.avg.<x>`, as multiples of the national or state average.
+- **RSEI** is the `rsei` field, a modeled toxic-air score from TRI. The ArcGIS mirror has no equivalent. For actual reported releases, use `bayou:epa-tri-search`.
+- `EJAM Report` is an HTML link to a PDF site report from `api.ejanalysis.com`. Attach the PDF to a filed comment.
+
+Data vintage: EJAM uses the same EJScreen v2.32 environmental inputs as the ArcGIS mirror. Verified 2026-10-08 at 29.9976, −90.4113, inside block group 220890625002. At a 0.1-mile EJAM buffer, which lies within that one block group, `pctile.dpm` was 80, matching the mirror's `P_DSLPM` of 80. The mirror's `PM25` (8.3404) and `OZONE` (59.89) for that block group equal EJAM's 1-mile `pm` and `o3` there. Demographics differ, because EJAM weights by block and Step 2b by whole block group.
+
+Gotchas (verified 2026-10-08):
+- `buffer` is in miles and must be greater than 0. `0.01` returned `{}`, while `0.1` and up worked. For a single block group at a point, use Step 1.
+- One request can take several seconds. Several `sites` in one POST come back as one row per site, in order, numbered by `ejam_uniq_id` from 1 (verified with two sites). Use that rather than looping. The snippet above prints only `r[0]`.
+- This is an EDGI-hosted instance of EPA's EJAM code, not an EPA URL. Disclose it as such (see Presenting).
+
+If EJAM is down or returns an error, fall back to Step 2b.
+
+## Step 2b (fallback): Radius query against the ArcGIS mirror
 
 The service accepts `distance`/`units` buffer parameters on the same point geometry:
 
@@ -83,9 +129,9 @@ for f in fields:
 "
 ```
 
-State plainly that this is an **approximation** of EPA's exact buffer methodology (EPA's original tool clips block-group polygons to the exact circle and area-weights sub-polygon population; this pulls whole intersecting block groups and population-weights them) — close enough for a fenceline-community argument, not exact enough to cite as an official EJScreen Standard Report figure.
+When this fallback is used, state plainly that it is an **approximation** of EPA's exact buffer methodology (EPA's tools weight by the blocks inside the circle; this pulls whole intersecting block groups and population-weights them) — close enough for a fenceline-community argument, not exact enough to cite as an official EJScreen Standard Report figure.
 
-Also list the **per-block-group values**, not just the weighted average. A whole-block-group buffer can mix a small, heavily burdened fenceline pocket with larger low-burden neighborhoods, and the average hides the pocket (see the worked example in Step 3).
+Even when Step 2 ran, use this query to list the **per-block-group values**, not just the weighted average. A whole-block-group buffer can mix a small, heavily burdened fenceline pocket with larger low-burden neighborhoods, and the average hides the pocket (see the worked example in Step 3).
 
 ## Step 3: Official-record corroboration via EPA ECHO
 
@@ -130,17 +176,17 @@ Field correspondence (EJScreen raw `*PCT` fields are **fractions 0–1**; ECHO's
 | `PercentPeopleOfColor` | `PEOPCOLORPCT` |
 | `PercentBelowLowIncomeLevel` | `LOWINCPCT` |
 
-**Expect the two sources to disagree, and report both side by side without reconciling them.** They use different ACS vintages (EJScreen v2.32 uses the 2018–2022 ACS 5-year; ECHO labels its block by a later release year). They also use different geometry: ECHO clips an exact circle, while Step 2 takes whole intersecting block groups. And they can use different center points.
+**Expect the two sources to disagree, and report both side by side without reconciling them.** They use different ACS vintages (EJScreen v2.32 uses the 2018–2022 ACS 5-year; ECHO labels its block by a later release year). They also use different geometry: ECHO clips an exact circle, EJAM (Step 2) weights the blocks inside the circle, and Step 2b takes whole intersecting block groups. And they can use different center points.
 
 Worked example: Shell Norco, at ECHO's center point 29.99435, −90.40726, checked 2026-10-07.
 
-| | ECHO DFR (1-mi circle) | EJScreen Step 2 (6 whole block groups) |
-|---|---|---|
-| Population | 1,391 | 7,294 |
-| People of color | 16% | 28% (weighted) |
-| Low-income | 39% | 26% (weighted) |
+| | ECHO DFR (1-mi circle) | EJAM Step 2 (85 blocks, 2026-10-08) | EJScreen Step 2b (6 whole block groups) |
+|---|---|---|---|
+| Population | 1,391 | 1,288 | 7,294 |
+| People of color | 16% | 10% | 28% (weighted) |
+| Low-income | 39% | 37% | 26% (weighted) |
 
-One of those block groups, 220890627001, is 67% people of color and at the 83rd national demographic percentile. ECHO's circle captures little of it, and EJScreen's weighted average dilutes it to 39th. Neither number is wrong. Each answers a different question, which is why the per-block-group listing from Step 2 matters.
+EJAM's block weighting lands close to ECHO's circle. Step 2b's whole block groups reach well past the radius. One of those block groups, 220890627001, is 67% people of color and at the 83rd national demographic percentile. ECHO's circle captures little of it, and Step 2b's weighted average dilutes it to 39th. Neither number is wrong. Each answers a different question, which is why the per-block-group listing from Step 2 matters.
 
 ## Field reference
 
@@ -158,18 +204,20 @@ Other prefixes present on the service, not requested by default above: `D2_`/`D5
 
 ## Presenting the results
 
-1. **Source disclosure, first line, unavoidable**: "Data from EPA's EJScreen v2.32 dataset (2023 ACS/pollution vintage), served via a community-hosted ArcGIS mirror of EPA's Public Environmental Data Portal — EPA's own `ejscreen.epa.gov` and `screeningtool.geoplatform.gov` are no longer live as of this writing. Retrieved [date]."
+1. **Source disclosure, first line, unavoidable**: "Data from EPA's EJScreen v2.32 dataset (2023 ACS/pollution vintage), served via a community-hosted ArcGIS mirror of EPA's Public Environmental Data Portal — EPA's own `ejscreen.epa.gov` and `screeningtool.geoplatform.gov` are no longer live as of this writing. Retrieved [date]." If Step 2 (EJAM) supplied the radius figures, add: "Radius figures from EPA's EJAM tool (same EJScreen v2.32 indicators), run on a public instance hosted by the Environmental Data & Governance Initiative, not an EPA URL. Retrieved [date]."
 2. **Location**: point coordinates, block group ID(s), county/state, and (for a radius report) the radius used and number of block groups included.
 3. **Table**: Indicator | Raw Value | National Percentile — demographic indicators first, then environmental/proximity indicators. If Step 3 ran, add an **"ECHO official (ACS, 1 mi)"** column, filled for the demographic rows only.
 4. **Flag any percentile ≥ 80** explicitly in prose — that's EPA's own screening threshold for elevated EJ concern.
-5. State population covered (`ACSTOTPOP` sum for a radius report).
-6. If a radius report: disclose the population-weighting approximation caveat from Step 2.
+5. State population covered (EJAM `pop`, or the `ACSTOTPOP` sum under Step 2b).
+6. If a radius report came from Step 2b, disclose its whole-block-group approximation caveat. EJAM figures need no such caveat.
 7. **Splitting citations for a filed comment.** Cite demographic facts (population, people of color, low-income) to ECHO first, because ECHO is the EPA-hosted record. Cite percentile rankings, the ≥80th-percentile threshold, and environmental indicators to EJScreen, since ECHO has no equivalent. Both sources are cited openly. Never word an ECHO figure as though it confirms an EJScreen percentile.
 8. Cross-link: `bayou:epa-echo-search` for compliance history of specific facilities identified nearby, as well as the DFR demographics in Step 3. Use `bayou:epa-tri-search` for their actual reported releases (the `PNPL`/`PTSDF`/`PTRAF` proximity scores are generic distance-based scores, not facility-specific release data).
 
 ### Citation format
 
 > **EJScreen v2.32 (2023 vintage) via ArcGIS mirror of EPA Public Environmental Data Portal**, block group [ID], [County], LA, source: [services2.arcgis.com FeatureServer](https://services2.arcgis.com/w4yiQqB14ZaAGzJq/arcgis/rest/services/EJScreen_US_Percentiles_Block_Group_gdb_V_2.32_(Parent)_view/FeatureServer/0) (retrieved 2026-07-21) — not EPA's official `ejscreen.epa.gov` (offline). PM2.5: [X] µg/m³ ([Y]th percentile nationally). Demographic Index: [Z]th percentile.
+
+> **EPA EJAM site report**, [N]-mile radius around [lat], [lon], EJScreen v2.32 indicators, run on EDGI's public EJAM instance (ejamapi-84652557241.us-central1.run.app; PDF report via api.ejanalysis.com), retrieved [date]. Not an EPA-hosted URL. Population [N]; diesel PM [X]th percentile nationally ([Y]th in state).
 
 > **EPA ECHO Detailed Facility Report**, [Facility Name] (FRS [RegistryID]), ACS demographic profile, 1-mile radius, [ACS block label, e.g. ACS2024], source: [echo.epa.gov](https://echo.epa.gov/detailed-facility-report?fid=[RegistryID]) (retrieved [date]). Population [N]; people of color [X]%; below low-income level [Y]%.
 

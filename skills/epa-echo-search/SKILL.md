@@ -1,6 +1,6 @@
 ---
 name: epa-echo-search
-description: Search EPA ECHO for facility compliance and enforcement history; also returns GPS coordinates (lat/lon) for regulated facilities
+description: Search EPA ECHO for facility compliance and enforcement history (recent five years via REST, decades of CAA/CWA/RCRA violations, inspections and enforcement cases via EPA's bulk downloads); also returns GPS coordinates (lat/lon) for regulated facilities
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -62,6 +62,47 @@ curl -s "https://echodata.epa.gov/echo/echo_rest_services.get_qid?output=json&qi
 ```bash
 curl -s "https://echodata.epa.gov/echo/echo_rest_services.get_facility_info?output=json&p_id=REGISTRY_ID" 2>/dev/null
 ```
+
+### Full history: ECHO bulk downloads
+
+The DFR's enforcement and compliance sections (`FormalActions`, `EnforcementComplianceSummaries`) cover only five years. Its TRI and waste history blocks reach further back. Verified 2026-10-08: Shell Norco's DFR `FormalActions` window opens 10/03/2021 and lists 9 actions. The bulk files cover decades. For the refinery's one air ID (`LA0000002208900002`) they hold 30 CAA formal actions dated 1986-08-26 to 2026-08-25, and for its RCRA ID (`LAD008186579`) 17 violations dated 1987–2002. Use them for "pattern of non-compliance" history and for any sweep across many facilities, since they also sidestep the rate limit below.
+
+Zips live at `https://echo.epa.gov/files/echodownloads/<name>`, are refreshed weekly (per echo.epa.gov/tools/data-downloads), and need no key. Every member listed below decoded as strict UTF-8 in a full pass on 2026-10-08. Contents as listed that day:
+
+| Zip (size) | Member CSVs worth knowing | Facility key column | FRS `pgm_sys_acrnm` to look up |
+|---|---|---|---|
+| `ICIS-AIR_downloads.zip` (70 MB) | `ICIS-AIR_VIOLATION_HISTORY` (HPV/FRV), `ICIS-AIR_FORMAL_ACTIONS` (`PENALTY_AMOUNT`), `ICIS-AIR_INFORMAL_ACTIONS` (NOVs), `ICIS-AIR_FCES_PCES` (inspections), `ICIS-AIR_STACK_TESTS`, `ICIS-AIR_TITLEV_CERTS` | `PGM_SYS_ID` | **`AIR`** (e.g. `LA0000002208900002`). The 10-digit `AIRS/AFS` ID matches nothing. |
+| `npdes_downloads.zip` (355 MB) | `NPDES_QNCR_HISTORY` (quarterly noncompliance), `NPDES_SE_VIOLATIONS` / `NPDES_PS_VIOLATIONS` / `NPDES_CS_VIOLATIONS`, `NPDES_INSPECTIONS`, `NPDES_FORMAL_ENFORCEMENT_ACTIONS` | `NPDES_ID` | `NPDES` |
+| `rcra_downloads.zip` (120 MB) | `RCRA_VIOLATIONS`, `RCRA_VIOSNC_HISTORY`, `RCRA_EVALUATIONS` (inspections), `RCRA_ENFORCEMENTS` | `ID_NUMBER` | `RCRAINFO` |
+| `case_downloads.zip` (82 MB) | `CASE_FACILITIES` (has `REGISTRY_ID`), `CASE_ENFORCEMENTS` (`ENF_SUMMARY_TEXT`), `CASE_PENALTIES`, `CASE_DEFENDANTS`, `CASE_ENFORCEMENT_CONCLUSION_SEP` | `ACTIVITY_ID` / `CASE_NUMBER` | Start from `REGISTRY_ID` in `CASE_FACILITIES`. |
+
+Get the program IDs from `bayou:epa-frs-crosswalk`. One registry ID usually maps to several air, NPDES and RCRA IDs, so pass them all.
+
+Cache the zips in `~/.cache/bayou/echo/`, where `bayou:comparable-facilities` keeps its bulk file. Stream one member and filter as you go, so the 100–500 MB CSVs never load whole:
+
+```bash
+mkdir -p ~/.cache/bayou/echo
+Z=ICIS-AIR_downloads.zip
+[ -f ~/.cache/bayou/echo/$Z ] || curl -s -f -o ~/.cache/bayou/echo/$Z "https://echo.epa.gov/files/echodownloads/$Z"
+
+python3 -I -c "
+import sys, zipfile, io, csv
+zpath, member, key, *ids = sys.argv[1:]
+with zipfile.ZipFile(zpath).open(member) as fh:
+    for r in csv.DictReader(io.TextIOWrapper(fh, encoding='utf-8', newline='')):
+        if r[key] in ids:
+            print({k: v for k, v in r.items() if v.strip()})
+" ~/.cache/bayou/echo/$Z ICIS-AIR_FORMAL_ACTIONS.csv PGM_SYS_ID LA0000002208900002 LA0000002208900079
+```
+
+**Date formats are not uniform.** A tally of the first 300,000 rows of each file, run 2026-10-08, found:
+- `ICIS-AIR_VIOLATION_HISTORY` (every date column) and `ICIS-AIR_FCES_PCES` (`ACTUAL_END_DATE`) use `MM-DD-YYYY`.
+- Every other file above uses `MM/DD/YYYY`.
+- `NPDES_QNCR_HISTORY.YEARQTR` is `YYYYQ`, e.g. `20061` for 2006 Q1.
+
+Parse each file with its own format. Sorting the strings as they are mixes up years.
+
+Re-download a zip when its `Last-Modified` header (`curl -sI`) is newer than the cached copy. Name the file and its `Last-Modified` date in any citation.
 
 ### SIC/NAICS codes by source system
 
@@ -147,6 +188,15 @@ Parse `Results.Facilities[]` from the `get_qid` JSON response. Key fields per fa
 - Construct the ECHO detail link: `https://echo.epa.gov/facilities/facility-search/facility?fid=REGISTRY_ID`
 - If more than 10 results, show top 10 and note total count
 
+### Interpreting ECHO data
+
+ECHO records what agencies and facilities reported, not what happened. Word findings to match:
+- Say "reported violations" and "estimated emissions". Emissions figures are mostly facility estimates, not measurements.
+- **No recorded violation is not evidence of compliance.** A violation is recorded only if the facility reports it or an inspector finds it, and inspections have been declining for years. Treat a clean record as "none recorded", and pair it with the inspection count and the last inspection date.
+- **Compliance with a permit does not make the permit adequate.** Permit limits seldom account for cumulative exposure from neighboring sources. Keep "in compliance" separate from "safe".
+- **Missing data is common and uneven.** EDGI's *Gaps and Disparities* report (2022) found that most program-specific fields were blank for the typical facility, and that gaps were worse in majority-minority areas. Cite it by name and year as a documented pattern. Do not quote its percentages as current figures.
+- CWA/NPDES records are generally the most *reliable*, because federal rules require permittees to submit DMRs electronically to EPA (Cynthia Giles, *Next Generation Compliance*, 2020). Reliable does not mean complete: EDGI found CWA-specific fields blank more often than CAA ones.
+
 ### Compliance status values
 
 The values below are per-program (`FacComplianceStatus`, `CAAComplianceStatus`, `CWAComplianceStatus`, `RCRAComplianceStatus` each have their own vocabulary) and were confirmed against a live sample (West Baton Rouge Parish, LA, n=408 facilities, 2026-08-12) — an earlier version of this list was largely fictional (`No Violation`, `In Violation`, `High Priority Violation` do not occur in live data) and its presentation rule flagged every facility as a result, because `No Violation` never matches the real value `No Violation Identified`.
@@ -159,9 +209,11 @@ The values below are per-program (`FacComplianceStatus`, `CAAComplianceStatus`, 
 
 No API key required. QIDs expire after ~30 minutes.
 
+For a water permit's receiving-water context (303(d) impairments, TMDLs, other dischargers in the watershed, calculated loads), use `bayou:cwa-watershed-context`.
+
 Cross-link `bayou:epa-frs-crosswalk` for full program-ID resolution — one FRS `registry_id` lookup returns every program ID a facility holds (TRI, NPDES, RCRAInfo, AIRS/AFS, GHGRP `E-GGRT`, and LDEQ's `LA-TEMPO` ID), which is faster than resolving each one individually through its own program's search.
 
-> **⚠️ Rate limit (verified 2026-06-09).** ECHO throttles at **300 requests/hour and 1,500/day**. Exceeding it returns **HTTP 429** with an error body — `"If your requests exceed 300 per hour or 1,500 per day, we will throttle your request. ECHO has exports of bulk data available for download at https://echo.epa.gov/tools/data-downloads."` — and the same-day quota does not reset until the next day. Pace requests (don't loop tightly over many RegistryIDs), and for multi-facility sweeps prefer the **bulk data downloads** (https://echo.epa.gov/tools/data-downloads) over the REST endpoints.
+> **⚠️ Rate limit (verified 2026-06-09).** ECHO throttles at **300 requests/hour and 1,500/day**. Exceeding it returns **HTTP 429** with an error body — `"If your requests exceed 300 per hour or 1,500 per day, we will throttle your request. ECHO has exports of bulk data available for download at https://echo.epa.gov/tools/data-downloads."` — and the same-day quota does not reset until the next day. Pace requests (don't loop tightly over many RegistryIDs), and for multi-facility sweeps prefer the **bulk data downloads** (see "Full history: ECHO bulk downloads" above) over the REST endpoints.
 >
 > **Maintenance outages are a different failure.** ECHO REST often goes down around midnight Central, sometimes for hours. It returns **HTTP 503** with an Apache "maintenance downtime or capacity problems" page, or the request times out. That is not throttling; only 429 means the quota is spent. Retry later.
 
