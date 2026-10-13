@@ -8,7 +8,7 @@ It bundles two things:
 1. **`/bayou:permit-analysis`** — a multi-step pipeline that reads OCRed permit
    applications, interrogates them against a curated question bank, and produces a
    provenance-cited findings report you can build a public comment on top of.
-2. **~38 research skills** — thin, documented wrappers over the public data sources
+2. **60+ research skills** — thin, documented wrappers over the public data sources
    that fenceline-community work actually depends on: LDEQ EDMS, EPA ECHO/TRI/CAMPD,
    PACER/CourtListener, OSHA, PHMSA, USACE, FEMA, CPRA, NASA FIRMS, USGS/NOAA water
    data, the Federal Register, FAA/ADS-B flight records, and more.
@@ -138,16 +138,12 @@ Feed it machine-readable text. Raw agency PDFs are usually scanned images — ru
 
 ## Skills
 
-**Overlapping MCP servers.** A couple of these skills cover ground that a
-general-purpose MCP server already serves, if you'd rather connect to a
-standing server than install this whole plugin: [`envirofacts-mcp`][envirofacts-mcp]
-(marked ¹ below) wraps the same EPA Envirofacts tables — ECHO, TRI, RCRAInfo,
-and others; [`nepa-mcp`][nepa-mcp] (marked ²) is a much broader NEPA-screening
-toolkit spanning ~13 federal agencies' GIS/data layers, including USACE, USGS,
-USFWS, and NIFC. Neither does the Louisiana-agency-specific portal navigation
-(CAPTCHA handling, undocumented endpoints), the OCR-to-verified-citation
-pipeline, or the comment-drafting half of what's here — they're a substitute
-for the individual federal data-lookup skills only, not for the pipeline.
+**Overlapping MCP servers.** A few of these skills cover ground that a general-purpose MCP
+server already serves: [`envirofacts-mcp`][envirofacts-mcp] (marked ¹ below) wraps the same EPA
+Envirofacts tables, and [`nepa-mcp`][nepa-mcp] (marked ²) is a broader NEPA-screening toolkit
+across federal GIS layers. Neither does the Louisiana portal navigation, the
+OCR-to-verified-citation pipeline, or the comment drafting. When to use them, and how to
+install them, is under [External skills and MCP servers](#external-skills-and-mcp-servers).
 
 [envirofacts-mcp]: https://github.com/zachegner/envirofacts-mcp
 [nepa-mcp]: https://github.com/pnnl/nepa-mcp
@@ -165,13 +161,15 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | `lpsc-dockets` | Louisiana Public Service Commission dockets and orders |
 | `itep-lookup` | Industrial Tax Exemption Program awards and applications |
 | `cpra-master-plan` | CPRA 2023 Coastal Master Plan projects, land-change and flood-risk data |
-| `la-species-cultural-review` | LDWF rare/T&E species lists, project-review request, NRHP search — the ESA/Section 106 bundle ² |
+| `la-species-cultural-review` | LDWF rare/T&E species lists, project-review request, NRHP search, tribes with a consultation interest in the parish — the ESA/Section 106 bundle ² |
 | `slfpaw-geotechnical` | SLFPA-W soil borings, piezometers, cross-sections via the USACE National Levee Database ² |
 | `sonris-session` | Establish/check the SONRIS CAPTCHA session cookie other sonris-* skills need (headful solve, ~7-day validity) |
 | `sonris-operator-lookup` | Company name → SONRIS operator code (wells, injection, coastal, mineral-lease filings — not just O&G) |
 | `sonris-well-lookup` | Find a well by serial/name/field or by parish/section-township-range/lat-lon |
 | `sonris-doc-search` | Search and bulk-download SONRIS documents (permits, orders, applications) by operator/well/parish/doctype |
 | `la-class-vi` | Louisiana Class VI/CCS program tracker — application status, issued permits, no CAPTCHA session needed |
+| `la-public-records-request` | Draft (never send) a Louisiana Public Records Act request to LDEQ, a parish, or another custodian, with deadlines and fee language quoted from the current statute |
+| `la-power-map` | Who lobbies for and gives money on behalf of an applicant — Louisiana Ethics lobbyist registrations and campaign contributions; OpenCorporates first pass on ownership, then the manual path for Secretary of State filings |
 | `la-coastal-use-permits` | Coastal use permits by parish/applicant from OCM status reports, current OCM notices, and St. Charles LCP legals; CUP number → site via SONRIS |
 
 **Federal environmental & enforcement**
@@ -180,8 +178,10 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | `epa-echo-search` | Facility compliance/enforcement history (CAA, CWA, RCRA, SDWA) ¹ |
 | `cwa-watershed-context` | Receiving-water context for an NPDES/LPDES permit — HUC12/HUC8, 303(d) causes, TMDLs and wasteload allocations (ATTAINS, needs API key), watershed dischargers ranked by calculated load and exceedances, the applicant's limits and multi-year loads |
 | `epa-tri-search` | Toxics Release Inventory — year-over-year releases by medium and carcinogen status ¹ |
+| `chemical-hazard-profile` | CAS number, name, or TRI chemical list → GHS hazard statements and IARC cancer group (PubChem), plus EPA cancer calls and IRIS values (CompTox, optional key) |
 | `tri-release-report` | TRI release reports and campaign charts — one facility's multi-year history (permit renewal), or every facility within a radius plus a proposed facility's permitted emissions; social (1080×1080, 1080×1350) and print PNG/PDF charts. Needs `uv` |
 | `comparable-facilities` | Peer benchmark for a repermit — finds active facilities with the same SIC/NAICS codes (state, then EPA region, then national), sizes them by GHGRP CO2e plus stated capacity, and compares NEI/GHGRP emissions and the proposed permit limits; REPORT.md, CSV, and social/print charts. Needs `uv` |
+| `household-exposure` | One Louisiana home's exposure to industrial air toxics — EPA RSEI modeled concentrations over each person's years at the address (screening cancer risk, hazard index by organ), plus what a proposed facility could add from an AERMOD run on the applicant's own modeling files; private and address-withheld public REPORT.md, CSV, charts and manifest. Needs `uv`; the proposed-facility tier needs `gfortran`. Large downloads (1–22 GB per year, streamed) are confirmed first |
 | `epa-frs-crosswalk` | Resolve a facility to its FRS registry ID and every program ID it holds (TRI, NPDES, RCRAInfo, AIRS/AFS, GHGRP, LA-TEMPO) |
 | `epa-webfire-reports` | NESHAP/NSPS compliance reports filed through CEDRI and published in WebFIRE — periodic/excess-emissions reports (flare root-cause analyses, LDAR, PRD releases), performance tests, NOCS |
 | `epa-ghgrp-search` | Greenhouse Gas Reporting Program — facility CO2e emissions by subpart and gas |
@@ -221,6 +221,7 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | Skill | What it does |
 |---|---|
 | `permit-analysis` | The pipeline above |
+| [`environmental-data-audit`](skills/environmental-data-audit/SKILL.md) | Assess whether existing environmental data support a claim; cited limitations, defensible wording, targeted next steps, and proportional evidence retention. Runs on request or when a material limitation could change a finding; not a mandatory lookup or pipeline stage |
 | `public-comment` | Findings report or research memo + profile → a filed-ready public comment. Covers three postures: a permit or license, a rulemaking, and a public financing approval such as a TEFRA bond hearing. Includes standing/interest, numbered requests, a candor section, and an optional styled PDF. *Renamed from `permit-comment` in 1.9.0: use `/bayou:public-comment`.* |
 | `hearing-prep` | In-person engagements. Three modes: questions grouped by the staffer likely to field them, a 2–3 minute oral version of a filed comment, and a debrief of a meeting transcript against the written record |
 | `document-ocr` | Multi-backend OCR (Surya geometry + olmOCR/Chandra/MinerU readers, optional Azure) for a folder or single scanned PDF, with per-line confidence and cross-reader agreement |
@@ -230,6 +231,105 @@ for the individual federal data-lookup skills only, not for the pipeline.
 | `ej-comment-style` | Writing style for the filed administrative comment itself — register, structure, and the argumentative moves from four successful Louisiana permit comments, with verbatim samples (invoke by name) |
 | `kit-dissemination` | Draft (never auto-send) Kit.com email broadcasts — case updates, calls for community testimony |
 | `nextdoor-campaign` | Research + profile → dated Nextdoor post series, one audience archetype per post, paced to a comment/hearing deadline |
+| `ej-meme` | Research → a few sourced, plain-language memes (one "bum deal" each), template picked by rhetorical move, with pre-render lint, a review pause, and phone-width legibility QA; also re-renders old meme CSVs |
+
+## External skills and MCP servers
+
+Some work this plugin does not do is already done well by third-party tools. They are not
+bundled and not installed by this plugin. This section says when each is worth reaching for
+and gives an install command Claude Code can run.
+
+**Rules for an agent reading this:**
+
+1. Check whether the tool is already present before suggesting it: `claude mcp list` for MCP
+   servers, the session's skill list for skills.
+2. These are third-party and unaudited by this project. Ask the user before installing
+   anything, and say what will be installed and from where.
+3. If the user agrees and a shell is available, run `install`. Otherwise print the command for
+   the user to run.
+4. If `user_action` is set, stop and give the user that instruction first. It covers things an
+   agent cannot or should not do alone: obtaining an API key, cloning and starting a server.
+5. Install one named skill at a time (`--skill <name>`), never a whole repository. The
+   journalism repository below holds about 60 skills, including one that tells the agent to
+   invoke it before every response.
+6. After installing, tell the user to restart Claude Code; new skills and servers load at
+   startup.
+
+| Tool | Use it when |
+|---|---|
+| `web-archiving` skill | Saving many cited web pages to the Wayback Machine and Archive.today before filing or publishing. `public-comment` handles the single-page case itself |
+| `internet-archive` MCP | An agency page or dataset was removed and an earlier capture is needed (read-only: finds and fetches snapshots, does not save new ones) |
+| `foia-requests` skill | Drafting a *federal* FOIA request (EPA, the Corps, PHMSA), tracking it, or appealing a denial. Its template is written for a reporter: replace the outlet and "representative of the news media" language unless the requester is one, and keep the public-interest fee waiver. Louisiana requests use `la-public-records-request` |
+| `pubchem` MCP | Chemical properties and identifiers beyond the hazard statements `chemical-hazard-profile` returns |
+| `comptox` MCP | Exploring EPA toxicity values, exposure and bioactivity data in depth. `chemical-hazard-profile` covers the cancer call and IRIS values |
+| `envirofacts-mcp` | A standing server for the EPA lookups marked ¹, in a client where this plugin's Bash-based skills cannot run |
+| `nepa-mcp` | NEPA screening across federal GIS layers; overlaps the skills marked ² |
+
+```json
+[
+  {
+    "id": "web-archiving",
+    "kind": "skill",
+    "source": "https://github.com/jamditis/claude-skills-journalism",
+    "license": "MIT",
+    "install": "npx -y skills@latest add jamditis/claude-skills-journalism --skill web-archiving --agent claude-code -g -y",
+    "user_action": null
+  },
+  {
+    "id": "foia-requests",
+    "kind": "skill",
+    "source": "https://github.com/jamditis/claude-skills-journalism",
+    "license": "MIT",
+    "install": "npx -y skills@latest add jamditis/claude-skills-journalism --skill foia-requests --agent claude-code -g -y",
+    "user_action": null
+  },
+  {
+    "id": "internet-archive",
+    "kind": "mcp",
+    "source": "https://github.com/cyanheads/internet-archive-mcp-server",
+    "license": "Apache-2.0",
+    "install": "claude mcp add -s user internet-archive -e MCP_TRANSPORT_TYPE=stdio -- npx -y @cyanheads/internet-archive-mcp-server@latest",
+    "user_action": null
+  },
+  {
+    "id": "pubchem",
+    "kind": "mcp",
+    "source": "https://github.com/cyanheads/pubchem-mcp-server",
+    "license": "Apache-2.0",
+    "install": "claude mcp add -s user pubchem -e MCP_TRANSPORT_TYPE=stdio -- npx -y @cyanheads/pubchem-mcp-server@latest",
+    "user_action": null
+  },
+  {
+    "id": "comptox",
+    "kind": "mcp",
+    "source": "https://github.com/ToxMCP/comptox-mcp",
+    "license": "Apache-2.0",
+    "install": "claude mcp add -s user --transport http comptox http://localhost:8000/mcp",
+    "user_action": "Get a free API key by emailing ccte_api@epa.gov. Then: git clone https://github.com/ToxMCP/comptox-mcp.git && cd comptox-mcp && pip install -e . && cp .env.example .env, set CTX_API_KEY in .env, and start the server with: uvicorn epacomp_tox.transport.websocket:app --host 127.0.0.1 --port 8000. The server must be running whenever the tool is used."
+  },
+  {
+    "id": "envirofacts-mcp",
+    "kind": "mcp",
+    "source": "https://github.com/zachegner/envirofacts-mcp",
+    "license": "MIT",
+    "install": "claude mcp add -s user epa-envirofacts -- uv --directory <ABSOLUTE_PATH_TO_CLONE> run python server.py",
+    "user_action": "Not published as a package. Install uv, then: git clone https://github.com/zachegner/envirofacts-mcp && cd envirofacts-mcp && uv sync. Substitute the clone's absolute path in the install command."
+  },
+  {
+    "id": "nepa-mcp",
+    "kind": "mcp",
+    "source": "https://github.com/pnnl/nepa-mcp",
+    "license": "BSD-3-Clause",
+    "install": "pipx install nepa-mcp && nepa-mcp doctor && nepa-mcp configure claude",
+    "user_action": "Needs pipx and Python 3.12 or newer. `configure claude` writes the server entries into the current directory's project configuration, so run it from the project where the tools are wanted."
+  }
+]
+```
+
+Commands were checked against each project's README and the `skills` and `claude mcp` command
+help on 2026-10-11; none was installed or run as part of writing this section. Not listed, by
+decision: a LittleSis MCP server (unmaintained since 2025, and unverified), and FracFocus and
+EJScreen wrappers with one or two users each.
 
 ## Layout
 
@@ -244,5 +344,10 @@ skills/<name>/SKILL.md       one skill per directory; bundled data alongside
 - A skill's `SKILL.md` is the contract. Document the endpoint, the auth requirement,
   the argument parsing, and the failure modes — including sources you tried that are
   dead, and why you concluded they were dead rather than blocked locally.
+- Before writing a new skill, check whether one already exists. Search
+  [claudemarketplaces.com](https://claudemarketplaces.com) (skills, plugins, and MCP
+  servers; `https://claudemarketplaces.com/search?q=<term>` is server-rendered, so `curl`
+  works, but matching is fuzzy and rare terms return unrelated listings) and run
+  `npx skills find <term>`.
 - Keep retrieval separate from judgment. Extractor agents cite; the orchestrator rules.
 - Never commit credentials, browser profiles, or bulk downloaded datasets.

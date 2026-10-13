@@ -111,6 +111,8 @@ curl -s "https://data.epa.gov/efservice/tri_chem_info/tri_chem_id/${CHEMID}/rows
 
 Key fields: `chem_name`, `cas_registry_number`, `carc_ind` (`"1"` = EPA-designated carcinogen for TRI purposes), `pbt_ind` (persistent bioaccumulative toxic), `pfas_ind`.
 
+For what each chemical does to people (GHS hazard statements, IARC group, EPA reference values), pass the chemical list or the basic data file to `/bayou:chemical-hazard-profile`. Chemical lookups beyond that (physical properties, bioassay data) are served by the `pubchem` and `comptox` MCP servers listed under "External skills and MCP servers" in `${CLAUDE_PLUGIN_ROOT}/README.md`.
+
 ## Step 5 (optional): Off-site waste transfers
 
 Where the facility's waste physically goes (recycling, treatment, disposal) rather than what it releases directly:

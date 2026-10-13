@@ -1,0 +1,694 @@
+{
+    "_about": "Machine-readable sidecar for templates.md. roles/target_words/custom_ok/recognizability are curated (roles were checked by rendering BOX 1..N labels); lines, box_count, blank_url and verified_at are filled by `scripts/templates.py refresh` from the live memegen and imgflip catalogs. Templates not listed here are still usable — lint.py falls back to the cached catalogs for box counts.",
+    "defaults": {
+        "target_words_per_box": 6,
+        "max_words_per_box": 12,
+        "target_words_single_box": 14,
+        "max_words_single_box": 20,
+        "target_words_total": 15,
+        "max_words_total": 24
+    },
+    "templates": {
+        "monkey-puppet": {
+            "name": "Monkey Puppet (awkward side-eye)",
+            "move": "shrugs-off-harm",
+            "memegen": null,
+            "imgflip": 148909805,
+            "boxes": 1,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "setup — '<Company> when residents mention <specific harm>'"
+            ],
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/2gnnjh.jpg",
+            "imgflip_name": "Monkey Puppet",
+            "target_words": [
+                18
+            ]
+        },
+        "harold": {
+            "name": "Hide the Pain Harold",
+            "move": "shrugs-off-harm",
+            "memegen": "harold",
+            "imgflip": 27813981,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — the promise or claim",
+                "bottom — the painful reality (optional; 1-box use puts it all on top)"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/gk5el.jpg",
+            "imgflip_name": "Hide the Pain Harold",
+            "target_words": [
+                14,
+                10
+            ]
+        },
+        "disastergirl": {
+            "name": "Disaster Girl",
+            "move": "causes-disaster-pleased",
+            "memegen": "disastergirl",
+            "imgflip": 97984,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — who and the disaster ('<Company> after their 3rd fire in 3 years')",
+                "bottom — optional smug line"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/23ls.jpg",
+            "imgflip_name": "Disaster Girl",
+            "target_words": [
+                14,
+                6
+            ]
+        },
+        "panik-kalm-panik": {
+            "name": "Panik Kalm Panik",
+            "move": "escalating-alarm",
+            "memegen": "panik-kalm-panik",
+            "imgflip": 226297822,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "panik — the lived symptom",
+                "kalm — the reassuring explanation",
+                "panik — why the explanation is worse"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/3qqcim.png",
+            "imgflip_name": "Panik Kalm Panik",
+            "target_words": [
+                8,
+                8,
+                8
+            ]
+        },
+        "two-buttons": {
+            "name": "Two Buttons (Daily Struggle)",
+            "move": "false-choice",
+            "memegen": "ds",
+            "imgflip": 87743020,
+            "boxes": 3,
+            "min_boxes": 2,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "left button — the cheap/self-serving option",
+                "right button — the responsible option",
+                "sweating guy — who is choosing (optional)"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/1g8my4.jpg",
+            "imgflip_name": "Two Buttons",
+            "target_words": [
+                7,
+                7,
+                4
+            ]
+        },
+        "gru": {
+            "name": "Gru's Plan",
+            "move": "plan-undermines-itself",
+            "memegen": "gru",
+            "imgflip": 131940431,
+            "boxes": 4,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "step 1 — the promise",
+                "step 2 — the step that sounds fine",
+                "step 3 — the catch",
+                "step 4 — repeat step 3 (Gru rereads it)"
+            ],
+            "memegen_lines": 4,
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/26jxvz.jpg",
+            "imgflip_name": "Gru's Plan",
+            "target_words": [
+                7,
+                7,
+                7,
+                7
+            ]
+        },
+        "boardroom": {
+            "name": "Boardroom Meeting Suggestion",
+            "move": "plan-undermines-itself",
+            "memegen": null,
+            "imgflip": 1035805,
+            "boxes": 4,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "boss's question",
+                "first answer the boss likes — what the company actually does",
+                "second answer the boss likes — what the company actually does",
+                "the honest suggestion (this speaker gets thrown out the window in the uncaptioned last panels)"
+            ],
+            "notes": "imgflip only; 4 boxes, all in the top two panels. The last two panels (the throw) take no text. Box 4's speaker is the one thrown out, so box 4 is the honest suggestion; the joke is that sense loses.",
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/m78d.jpg",
+            "imgflip_name": "Boardroom Meeting Suggestion",
+            "target_words": [
+                8,
+                3,
+                3,
+                6
+            ]
+        },
+        "rollsafe": {
+            "name": "Roll Safe (Think About It)",
+            "move": "loophole-logic",
+            "memegen": "rollsafe",
+            "imgflip": 89370399,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — the problem that magically goes away",
+                "bottom — the dodge that 'solves' it"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/1h7in3.jpg",
+            "imgflip_name": "Roll Safe Think About It",
+            "target_words": [
+                8,
+                8
+            ]
+        },
+        "woman-cat": {
+            "name": "Woman Yelling at Cat",
+            "move": "outrage-vs-indifference",
+            "memegen": "woman-cat",
+            "imgflip": 188390779,
+            "boxes": 2,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "woman (left) — the outraged fact or resident",
+                "cat (right) — the company's indifferent response"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/345v97.jpg",
+            "imgflip_name": "Woman Yelling At Cat",
+            "target_words": [
+                14,
+                10
+            ]
+        },
+        "kermit": {
+            "name": "But That's None of My Business (Kermit tea)",
+            "move": "sarcastic-aside",
+            "memegen": "kermit",
+            "imgflip": 16464531,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — the uncomfortable fact, deadpan",
+                "bottom — 'but that's none of my business' or a sarcastic aside"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/9sw43.jpg",
+            "imgflip_name": "But That's None Of My Business",
+            "target_words": [
+                14,
+                8
+            ]
+        },
+        "galaxy-brain": {
+            "name": "Galaxy Brain / Expanding Brain",
+            "move": "escalating-absurdity",
+            "memegen": "gb",
+            "imgflip": 93895088,
+            "boxes": 4,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "step 1 — reasonable-sounding",
+                "step 2 — worse",
+                "step 3 — worse still",
+                "step 4 — the company's actual claim, presented as 'enlightened'"
+            ],
+            "memegen_lines": 4,
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/1jwhww.jpg",
+            "imgflip_name": "Expanding Brain",
+            "target_words": [
+                6,
+                6,
+                6,
+                8
+            ]
+        },
+        "distracted-boyfriend": {
+            "name": "Distracted Boyfriend",
+            "move": "betrayed-priorities",
+            "memegen": "db",
+            "imgflip": 112126428,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "woman in red (left) — what the company is chasing",
+                "boyfriend (middle) — the company or agency",
+                "girlfriend (right) — what it's supposed to protect"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/1ur9b0.jpg",
+            "imgflip_name": "Distracted Boyfriend",
+            "target_words": [
+                5,
+                3,
+                5
+            ]
+        },
+        "this-is-fine": {
+            "name": "This Is Fine",
+            "move": "ignoring-crisis",
+            "memegen": "fine",
+            "imgflip": 55311130,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — the crisis, concretely",
+                "bottom — the official reassurance ('this is fine' or the real quote, attributed only if sourced)"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/wxica.jpg",
+            "imgflip_name": "This Is Fine",
+            "target_words": [
+                12,
+                8
+            ]
+        },
+        "same-picture": {
+            "name": "They're the Same Picture",
+            "move": "greenwash-equivalence",
+            "memegen": "same",
+            "imgflip": 180190441,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "left picture — the 'new/green' label",
+                "right picture — the old/dirty thing",
+                "Pam — usually blank; template already says 'They're the same picture'"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/2za3u1.jpg",
+            "imgflip_name": "They're The Same Picture",
+            "target_words": [
+                6,
+                6,
+                4
+            ]
+        },
+        "drake": {
+            "name": "Drake (rejects / approves)",
+            "move": "rejected-vs-chosen",
+            "memegen": "drake",
+            "imgflip": 181913649,
+            "boxes": 2,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "top (rejects) — the sensible option",
+                "bottom (approves) — what the company chose"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/30b1gx.jpg",
+            "imgflip_name": "Drake Hotline Bling",
+            "target_words": [
+                8,
+                8
+            ]
+        },
+        "buff-doge": {
+            "name": "Buff Doge vs. Cheems",
+            "move": "then-vs-now",
+            "memegen": null,
+            "imgflip": 247375501,
+            "boxes": 2,
+            "max_boxes": 4,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "buff doge — the strong 'then' or the ideal",
+                "cheems — the weak 'now' or the reality",
+                "(boxes 3–4: optional captions under each dog)"
+            ],
+            "notes": "imgflip only. memegen 'cheems' is Cheems alone, not this template.",
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/43a45p.png",
+            "imgflip_name": "Buff Doge vs. Cheems",
+            "target_words": [
+                10,
+                10,
+                6,
+                6
+            ]
+        },
+        "trade-offer": {
+            "name": "Trade Offer",
+            "move": "bum-deal",
+            "memegen": null,
+            "imgflip": 309868304,
+            "boxes": 2,
+            "max_boxes": 3,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "I receive — what the company gets (the image already prints 'i receive:')",
+                "you receive — what the community gets stuck with (the image already prints 'you receive:')",
+                "(box 3: bottom, over the man's face; usually blank)"
+            ],
+            "notes": "The most literal 'bum deal' template. imgflip only in practice: memegen-custom can only place top/bottom text, which covers the 'TRADE OFFER' header and the man's face and loses which side is whose.",
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/54hjww.jpg",
+            "imgflip_name": "Trade Offer",
+            "target_words": [
+                8,
+                8,
+                3
+            ]
+        },
+        "two-guys-bus": {
+            "name": "Two Guys on a Bus",
+            "move": "fenceline-vs-boardroom",
+            "memegen": "bus",
+            "imgflip": 354700819,
+            "boxes": 2,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "left, sad guy facing the rock wall — the fenceline residents' view",
+                "right, happy guy facing the scenery — the company/shareholders' view"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/5v6gwj.jpg",
+            "imgflip_name": "Two guys on a bus",
+            "target_words": [
+                8,
+                8
+            ]
+        },
+        "exit-ramp": {
+            "name": "Left Exit 12 Off Ramp",
+            "move": "swerves-away",
+            "memegen": "exit",
+            "imgflip": 124822590,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "straight ahead — the responsible path",
+                "exit ramp — the swerve",
+                "car — who swerves"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/22bdq6.jpg",
+            "imgflip_name": "Left Exit 12 Off Ramp",
+            "target_words": [
+                5,
+                5,
+                3
+            ]
+        },
+        "running-balloon": {
+            "name": "Running Away Balloon",
+            "move": "pulled-away",
+            "memegen": "balloon",
+            "imgflip": 131087935,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "balloon (top) — what residents want",
+                "balloon (bottom) — same thing, repeated",
+                "pink blob pulling him back — what stops them"
+            ],
+            "notes": "memegen leaves the man unlabeled. imgflip has 5 boxes (man top, balloon top, man bottom, blob, balloon bottom) — check order on first render. Swapped roles are the classic failure here.",
+            "memegen_lines": 3,
+            "imgflip_box_count": 5,
+            "blank_url": "https://i.imgflip.com/261o3j.jpg",
+            "imgflip_name": "Running Away Balloon",
+            "target_words": [
+                5,
+                5,
+                5
+            ]
+        },
+        "scooby-reveal": {
+            "name": "Scooby Doo Mask Reveal",
+            "move": "unmasking",
+            "memegen": "reveal",
+            "imgflip": 145139900,
+            "boxes": 4,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "mask — what it claims to be ('clean hydrogen')",
+                "Fred — who's unmasking (residents, a record)",
+                "unmasked face — what it really is",
+                "Fred's reaction ('I knew it')"
+            ],
+            "memegen_lines": 4,
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/2eeunw.jpg",
+            "imgflip_name": "Scooby doo mask reveal",
+            "target_words": [
+                5,
+                5,
+                5,
+                4
+            ]
+        },
+        "always-has-been": {
+            "name": "Always Has Been (astronauts)",
+            "move": "it-was-always-this",
+            "memegen": "astronaut",
+            "imgflip": 252600902,
+            "boxes": 4,
+            "min_boxes": 2,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "'Wait, it's all <X>?' — the realization",
+                "'Always has been' — the reply",
+                "label for the first astronaut",
+                "label for the second astronaut"
+            ],
+            "memegen_lines": 4,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/46e43q.png",
+            "imgflip_name": "Always Has Been",
+            "target_words": [
+                8,
+                4,
+                3,
+                3
+            ]
+        },
+        "epic-handshake": {
+            "name": "Epic Handshake",
+            "move": "unholy-alliance",
+            "memegen": "handshake",
+            "imgflip": 135256802,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "left arm — party one (the company)",
+                "right arm — party two (the agency/officials)",
+                "center — what they agree on (that residents pay for)"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/28j0te.jpg",
+            "imgflip_name": "Epic Handshake",
+            "target_words": [
+                4,
+                4,
+                6
+            ]
+        },
+        "pool": {
+            "name": "Mother Ignoring Kid Drowning in a Pool",
+            "move": "neglected-in-plain-sight",
+            "memegen": "pool",
+            "imgflip": 252758727,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "girl on shoulders — what gets attention",
+                "drowning kid — what's being neglected",
+                "mother — who's doing the ignoring"
+            ],
+            "notes": "imgflip version has 4 boxes; check order on first render.",
+            "memegen_lines": 3,
+            "imgflip_box_count": 4,
+            "blank_url": "https://i.imgflip.com/46hhvr.jpg",
+            "imgflip_name": "Mother Ignoring Kid Drowning In A Pool",
+            "target_words": [
+                5,
+                5,
+                4
+            ]
+        },
+        "anakin-padme": {
+            "name": "Anakin and Padme (…right?)",
+            "move": "broken-promise",
+            "memegen": "right",
+            "imgflip": 322841258,
+            "boxes": 5,
+            "min_boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "Anakin label — the company",
+                "Padme label — residents",
+                "Anakin's line — the plan",
+                "Padme's hopeful '…for <good thing>, right?'",
+                "Padme repeats '…right?'"
+            ],
+            "memegen_lines": 5,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/5c7lwq.png",
+            "imgflip_name": "Anakin Padme 4 Panel",
+            "target_words": [
+                3,
+                3,
+                8,
+                8,
+                8
+            ]
+        },
+        "pigeon": {
+            "name": "Is This a Pigeon?",
+            "move": "mislabeling",
+            "memegen": "pigeon",
+            "imgflip": 100777631,
+            "boxes": 3,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "guy — who's mislabeling",
+                "butterfly — the real thing",
+                "question — 'Is this <flattering label>?'"
+            ],
+            "memegen_lines": 3,
+            "imgflip_box_count": 3,
+            "blank_url": "https://i.imgflip.com/1o00in.jpg",
+            "imgflip_name": "Is This A Pigeon",
+            "target_words": [
+                3,
+                4,
+                6
+            ]
+        },
+        "spiderman-pointing": {
+            "name": "Spider-Man Pointing at Spider-Man",
+            "move": "blame-each-other",
+            "memegen": "spiderman",
+            "imgflip": 110133729,
+            "boxes": 2,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "left — party one",
+                "right — party two (each says the other is responsible)"
+            ],
+            "memegen_lines": 2,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/1tkjq9.jpg",
+            "imgflip_name": "spiderman pointing at spiderman",
+            "target_words": [
+                6,
+                6
+            ]
+        },
+        "waiting-skeleton": {
+            "name": "Waiting Skeleton",
+            "move": "promise-never-came",
+            "memegen": null,
+            "imgflip": 4087833,
+            "boxes": 2,
+            "custom_ok": true,
+            "recognizability": "high",
+            "roles": [
+                "top — 'Waiting for <the promised thing>'",
+                "bottom — optional"
+            ],
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/2fm6x.jpg",
+            "imgflip_name": "Waiting Skeleton",
+            "target_words": [
+                10,
+                6
+            ]
+        },
+        "uno-draw-25": {
+            "name": "UNO Draw 25",
+            "move": "would-rather-anything",
+            "memegen": null,
+            "imgflip": 217743513,
+            "boxes": 2,
+            "custom_ok": false,
+            "recognizability": "medium",
+            "roles": [
+                "card — just the reasonable fix (the card already prints 'or draw 25')",
+                "guy holding a huge hand — the company"
+            ],
+            "notes": "imgflip places box 1 on the card. memegen-custom can only put it across the top, off the card, which breaks the joke.",
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/3lmzyx.jpg",
+            "imgflip_name": "UNO Draw 25 Cards",
+            "target_words": [
+                6,
+                3
+            ]
+        },
+        "change-my-mind": {
+            "name": "Change My Mind",
+            "move": "plain-assertion",
+            "memegen": "cmm",
+            "imgflip": 129242436,
+            "boxes": 1,
+            "custom_ok": false,
+            "recognizability": "high",
+            "roles": [
+                "sign — the one-line claim"
+            ],
+            "memegen_lines": 1,
+            "imgflip_box_count": 2,
+            "blank_url": "https://i.imgflip.com/24y43o.jpg",
+            "imgflip_name": "Change My Mind",
+            "target_words": [
+                10
+            ]
+        }
+    },
+    "verified_at": "2026-10-09"
+}

@@ -1,0 +1,2 @@
+source_id,chemical,cas,amount,unit,hours,basis,assumption,status,source_doc,page,ocr_verified
+<same ID as source-inventory.csv or the applicant's AERMOD input>,Benzene,71-43-2,0.00,tpy,,PTE,,new,<application file name and table number>,<page>,no

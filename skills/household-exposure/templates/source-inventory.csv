@@ -1,0 +1,2 @@
+source_id,description,lat,lon,utm_zone,utm_e_m,utm_n_m,datum,height,height_unit,diameter,diameter_unit,temp,temp_unit,velocity,velocity_unit,source_doc,page,ocr_verified
+<emission point ID as the application numbers it>,<what it is>,<decimal degrees or blank>,<decimal degrees or blank>,<or UTM: zone>,<easting>,<northing>,<NAD83>,0,ft,0,ft,0,F,0,ft/s,<application file name and table number>,<page>,no

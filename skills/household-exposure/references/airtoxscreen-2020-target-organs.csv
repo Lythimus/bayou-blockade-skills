@@ -1,0 +1,136 @@
+cas,air_toxic,nei_description,organs
+75058,Acetonitrile,Acetonitrile,wholebod
+107028,Acrolein,Acrolein,resp
+79107,Acrylic acid,Acrylic Acid,resp
+7440360,Antimony,Antimony,resp
+112072,Glycol Ethers,2-Butoxyethyl Acetate,reprod
+124174,Glycol Ethers,Butyl Carbitol Acetate,reprod
+156627,Calcium cyanamide,Calcium Cyanamide,neuro;thyroid
+112152,Glycol Ethers,Carbitol Acetate,reprod
+75150,Carbon disulfide,Carbon Disulfide,neuro
+463581,Carbonyl sulfide,Carbonyl Sulfide,neuro
+7782505,Chlorine,Chlorine,resp
+532274,2-Chloroacetophenone,2-Chloroacetophenone,resp
+108907,Chlorobenzene,Chlorobenzene,liver;reprod;kidney
+67663,Chloroform,Chloroform,liver
+7440484,Cobalt,Cobalt,resp
+95487,o-Cresol,o-Cresol,neuro;wholebod
+108394,m-Cresol,m-Cresol,neuro;wholebod
+106445,p-Cresol,p-Cresol,neuro;wholebod
+1319773,Cresols/Cresylic acid (isomers and mixture),Cresol/Cresylic Acid (Mixed Isomers),neuro;wholebod
+98828,Cumene,Cumene,kidney;endoc
+62737,Dichlorvos,Dichlorvos,neuro
+111422,Diethanolamine,Diethanolamine,resp
+7795917,Glycol Ethers,Ethylene Glycol Mono-Sec-Butyl Ether,reprod
+112367,Glycol Ethers,Diethylene Glycol Diethyl Ether,reprod
+111966,Glycol Ethers,Diethylene Glycol Dimethyl Ether,reprod
+1002671,Glycol Ethers,Diethylene Glycol Ethyl Methyl Ether,reprod
+112345,Glycol Ethers,Diethylene Glycol Monobutyl Ether,reprod
+111900,Glycol Ethers,Diethylene Glycol Monoethyl Ether,reprod
+111773,Glycol Ethers,Diethylene Glycol Monomethyl Ether,reprod
+629141,Glycol Ethers,Ethylene Glycol Diethyl Ether,reprod
+110714,Glycol Ethers,"1,2-Dimethoxyethane",reprod
+68122,Dimethyl formamide,"N,N-Dimethylformamide",liver
+20706256,Glycol Ethers,2-Propoxyethyl Acetate,reprod
+171,Glycol Ethers,Glycol Ethers,reprod
+106887,"1,2-Epoxybutane","1,2-Epoxybutane",resp
+112505,Glycol Ethers,Ethoxytriglycol,reprod
+75003,Ethyl chloride (Chloroethane),Ethyl Chloride,dev
+107211,Ethylene glycol,Ethylene Glycol,resp
+110805,Glycol Ethers,Cellosolve Solvent,reprod
+111159,Glycol Ethers,Cellosolve Acetate,reprod
+109864,Glycol Ethers,Ethylene Glycol Methyl Ether,reprod
+112492,Glycol Ethers,Triethylene Glycol Dimethyl Ether,reprod
+77474,Hexachlorocyclopentadiene,Hexachlorocyclopentadiene,resp
+67721,Hexachloroethane,Hexachloroethane,liver;neuro;kidney
+822060,"Hexamethylene-1,6‑diisocyanate",Hexamethylene Diisocyanate,resp
+110543,Hexane,Hexane,neuro
+112594,Glycol Ethers,N-Hexyl Carbitol,reprod
+112254,Glycol Ethers,2-(Hexyloxy)Ethanol,reprod
+7647010,Hydrochloric acid,Hydrochloric Acid,resp
+7664393,Hydrogen fluoride,Hydrogen Fluoride,skeletal
+74908,Cyanide Compounds,Hydrogen Cyanide,neuro;thyroid
+78591,Isophorone,Isophorone,liver;dev
+108316,Maleic anhydride,Maleic Anhydride,resp
+7439965,Manganese Compounds,Manganese,neuro
+7439976,Mercury Compounds,Mercury,neuro
+67561,Methanol,Methanol,dev
+112356,Glycol Ethers,Methoxytriglycol,reprod
+74839,Methyl bromide (Bromomethane),Methyl Bromide,resp
+110496,Glycol Ethers,Ethylene Glycol Monomethyl Ether Acetate,reprod
+74873,Methyl chloride (Chloromethane),Methyl Chloride,neuro
+108101,Methyl isobutyl ketone (Hexone),Methyl Isobutyl Ketone,dev
+624839,Methyl isocyanate,Methyl Isocyanate,resp;wholebod
+80626,Methyl methacrylate,Methyl Methacrylate,resp
+101688,Methylene diphenyl diisocyanate (MDI),"4,4'-Methylenediphenyl Diisocyanate",resp
+108952,Phenol,Phenol,liver
+122996,Glycol Ethers,Phenyl Cellosolve,reprod
+75445,Phosgene,Phosgene,resp
+7803512,Phosphine,Phosphine,wholebod
+85449,Phthalic anhydride,Phthalic Anhydride,resp;ocular
+123386,Propionaldehyde,Propionaldehyde,resp
+2807309,Glycol Ethers,Propyl Cellosolve,reprod
+78875,"Propylene dichloride (1,2‑Dichloropropane)",Propylene Dichloride,resp
+7782492,Selenium Compounds,Selenium,liver;neuro;hemato
+100425,Styrene,Styrene,neuro
+7550450,Titanium tetrachloride,Titanium Tetrachloride,resp
+108883,Toluene,Toluene,neuro
+120821,"1,2,4-Trichlorobenzene","1,2,4-Trichlorobenzene",liver
+71556,"Methyl chloroform (1,1,1‑Trichloroethane)",Methyl Chloroform,neuro
+121448,Triethylamine,Triethylamine,resp
+143226,Glycol Ethers,Triglycol Monobutyl Ether,reprod
+108054,Vinyl acetate,Vinyl Acetate,resp
+75354,"Vinylidene chloride (1,1‑Dichloroethylene)",Vinylidene Chloride,liver
+108383,m-Xylenes,m-Xylene,neuro
+95476,o-Xylenes,o-Xylene,neuro
+106423,p-Xylenes,p-Xylene,neuro
+1330207,Xylenes (isomers and mixture),Xylenes (Mixed Isomers),neuro
+57125,Cyanide Compounds,Cyanide,neuro;thyroid
+DIESEL-PM10,Diesel PM *,PM10-Primary from certain diesel engines,resp
+18912806,Glycol Ethers,Diethylene Glycol Monoisobutyl Ether,reprod
+23495127,Glycol Ethers,Ethyleneglycol Monophenyl Ether Propionate,reprod
+75092,Methylene chloride (Dichloromethane),Methylene Chloride,resp;liver
+1634044,Methyl tert butyl ether,Methyl Tert-Butyl Ether,liver;kidney;ocular
+127184,Tetrachloroethylene (Perchloroethylene),Tetrachloroethylene,neuro
+106898,"Epichlorohydrin (l‑Chloro‑2,3‑epoxypropane)",Epichlorohydrin,resp
+62533,Aniline,Aniline,spleen
+75343,"Ethylidene dichloride (1,1‑Dichloroethane)",Ethylidene Dichloride,kidney
+75070,Acetaldehyde,Acetaldehyde,resp
+100414,Ethyl benzene,Ethyl Benzene,kidney
+75569,Propylene oxide,Propylene Oxide,resp
+542756,"1,3-Dichloropropene","1,3-Dichloropropene",resp
+79016,Trichloroethylene,Trichloroethylene,liver;neuro;dev;reprod;kidney;immune
+123911,"1,4-Dioxane",p-Dioxane,resp;liver
+79469,2-Nitropropane,2-Nitropropane,liver
+107051,Allyl chloride,Allyl Chloride,neuro
+56235,Carbon tetrachloride,Carbon Tetrachloride,liver
+71432,Benzene (including benzene from gasoline),Benzene,immune
+75014,Vinyl chloride,Vinyl Chloride,liver
+106467,"1,4-Dichlorobenzene(p)","1,4-Dichlorobenzene",resp
+584849,"2,4-Toluene diisocyanate","2,4-Toluene Diisocyanate",resp
+50000,Formaldehyde,Formaldehyde,resp
+107062,"Ethylene dichloride (1,2‑Dichloroethane)",Ethylene Dichloride,liver
+106990,"1,3-Butadiene","1,3-Butadiene",reprod
+593602,Vinyl bromide,Vinyl Bromide,liver
+91203,Naphthalene,Naphthalene,resp
+98953,Nitrobenzene,Nitrobenzene,resp
+107131,Acrylonitrile,Acrylonitrile,resp
+57749,Chlordane,Chlordane,liver
+79061,Acrylamide,Acrylamide,neuro
+101779,"4,4'-Methylenedianiline","4,4'-Methylenedianiline",ocular
+126998,Chloroprene,Chloroprene,resp
+7440020,Nickel Compounds,Nickel,resp;immune
+1313991,Nickel Compounds,Nickel Oxide,resp;immune
+604,Nickel Compounds,Nickel Refinery Dust,resp;immune
+12035722,Nickel Compounds,Nickel Subsulfide,resp;immune
+106934,"Ethylene dibromide (1,2-Dibromoethane)",Ethylene Dibromide,resp;reprod
+50328,Polycyclic Organic Matter,Benzo[a]Pyrene,dev;reprod
+7440439,Cadmium,Cadmium,kidney
+96128,"1,2-Dibromo-3-chloropropane","1,2-Dibromo-3-Chloropropane",reprod
+7440417,Beryllium,Beryllium,resp
+7440382,Arsenic,Arsenic,dev
+302012,Hydrazine,Hydrazine,liver;thyroid
+75218,Ethylene oxide,Ethylene Oxide,neuro
+7738945,Chromium Compounds,Chromic Acid (VI),resp
+18540299,Chromium Compounds,Chromium (VI),resp
+1333820,Chromium Compounds,Chromium Trioxide,resp

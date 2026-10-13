@@ -27,6 +27,12 @@ weeks, opening with a broad-alarm post, moving through health → money/property
 → wildlife/waterways → environmental-justice/history/labor, and closing with a 48-hour
 final push carrying a copy/paste comment template.
 
+When using privately supplied community information, personal experiences, sensitive
+locations, or claims to represent a community position, read the shared
+[community-information guidance](../../references/community-information.md)
+(at `${CLAUDE_PLUGIN_ROOT}/references/community-information.md`). Apply it only to
+the affected material; public-record-only drafting proceeds normally.
+
 ## Parsing arguments
 
 Required:
@@ -150,6 +156,11 @@ archetypes from `archetypes.md` — or campaign-specific ones the research doc a
 supports — for each post's theme line. Don't force an angle the research can't back up;
 better to compress the arc than to invent a claim to fit an audience slot.
 
+Across the series, at least one post before the final push must show what neighbors are
+already doing or asking for (who is organizing, what they have won or measured, the specific
+condition they want), drawn from the research doc. A series that only catalogs harm reads as
+a list of things done to a helpless place, and gives a reader no one to join.
+
 ## Step 7: Draft each post
 
 Each post gets:
@@ -160,7 +171,8 @@ Each post gets:
 - A bracketed image-suggestion line describing what photo/graphic would pair with the
   post (text description only — this skill does not generate images; for TRI release
   charts sized for social posts, see `bayou:tri-release-report` and name the chart file
-  in the suggestion line).
+  in the suggestion line; for a meme to run under the post, the user can run
+  `bayou:ej-meme --mode in-post --post <this post>` afterwards).
 - A CTA block — every post must end with a concrete call to action, never a vague
   "get involved." Decide which kind per the logic below.
 

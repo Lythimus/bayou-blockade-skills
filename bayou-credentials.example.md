@@ -83,6 +83,16 @@ ATTAINS_API_KEY: <key>
 
 ---
 
+## EPA CompTox (comptox.epa.gov/ctx-api)
+
+Used by `bayou:chemical-hazard-profile` for EPA cancer calls and IRIS reference values. Optional:
+the skill's PubChem lookups (GHS hazard statements, IARC group) need no key. Free, but issued by
+hand: email ccte_api@epa.gov and ask for a CTX API key. Sent as the `x-api-key` header.
+
+CTX_API_KEY: <key>
+
+---
+
 ## OpenSky Network API
 
 Used by `bayou:adsb-flight-search` and `bayou:exec-travel-monitor`. Free account.
@@ -213,6 +223,25 @@ for direct API calls. Get a key from the Kit dashboard: Settings â†’ Developer â
 API Keys.
 
 KIT_API_KEY: <key>
+
+---
+
+## Imgflip (api.imgflip.com) and memegen.link
+
+Used by `bayou:ej-meme`'s `render.py`. memegen.link is the default backend and needs no
+account. Imgflip is needed only for templates memegen doesn't have (Boardroom Meeting,
+Buff Doge vs. Cheems, and others marked "imgflip only" in
+`skills/ej-meme/references/templates.md`). Free account at https://imgflip.com/signup. The
+caption API takes the account username and password directly, so use a password unique
+to imgflip.
+
+IMGFLIP_USERNAME: <username>
+IMGFLIP_PASSWORD: <password>
+
+Optional: a memegen.link API key, sent as the `X-API-KEY` header (see
+https://memegen.link/ for what a key unlocks). Rendering works without one.
+
+MEMEGEN_API_KEY: <key>
 
 ---
 

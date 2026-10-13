@@ -47,6 +47,12 @@ the opening move; Air Products supplies the health-mechanism section and also th
 phrasings this skill refuses to reproduce; FAA shows interest-without-standing; LPFA shows the
 translation into underwriter terms. Each posture file names its own worked example.
 
+When using privately supplied community information, personal experiences, sensitive
+locations, or claims to represent a community position, read the shared
+[community-information guidance](../../references/community-information.md)
+(at `${CLAUDE_PLUGIN_ROOT}/references/community-information.md`). Apply it only to
+the affected material; public-record-only drafting proceeds normally.
+
 ## Parsing arguments
 
 Positional arguments are paths to the evidence. Any of these is acceptable:
@@ -449,6 +455,28 @@ that contradicts a prior filing, an authority cited from memory.
 
 Report the results to the user with the file path. Note anything the checklist flagged that
 you chose not to change, and why.
+
+## Step 8b — Exhibits, and optionally archived links
+
+Every source the comment relies on goes into the record as an exhibit or is cited to a document
+already in the agency's file (an EDMS document ID, a docket entry). That is what preserves it
+for appeal. A link alone does not: the agency is not obliged to follow it, and the page can
+change.
+
+For cited *web pages* only (an agency web page, a company press release, a news story), offer
+once to save each to the Internet Archive and put the archived link beside the original in the
+footnote. Skip the offer if the comment cites no web pages. If the user accepts:
+
+```bash
+curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" -m 90 "https://web.archive.org/save/<url>"
+```
+
+A 302 with a `web.archive.org/web/<timestamp>/...` location is the archived copy. Anything else
+(a 429, a 5xx, a timeout) means it was not saved; say so and leave the footnote unchanged. This
+does not work for EDMS documents, SONRIS pages, or the results of a data query, none of which
+the Archive can capture; those must be attached as exhibits. For more than a handful of pages,
+or for Archive.today as a second copy, see the `web-archiving` skill under "External skills and
+MCP servers" in `${CLAUDE_PLUGIN_ROOT}/README.md`.
 
 ## Step 9 — Optional styled render (`--render`)
 

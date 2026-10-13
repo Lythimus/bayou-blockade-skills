@@ -31,6 +31,12 @@ Run exactly one mode per invocation. If none is given, ask which one.
 
 ---
 
+When using privately supplied community information, personal experiences, sensitive
+locations, or claims to represent a community position, read the shared
+[community-information guidance](../../references/community-information.md)
+(at `${CLAUDE_PLUGIN_ROOT}/references/community-information.md`). Apply it only to
+the affected material; public-record-only drafting proceeds normally.
+
 ## Shared rules
 
 - **The same honesty rules as `public-comment` apply to anything said aloud**, from

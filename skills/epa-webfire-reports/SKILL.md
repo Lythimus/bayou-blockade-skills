@@ -95,6 +95,30 @@ reports, whose Excel templates carry `Flares` (pilot-flame-absent periods) and `
 sheets. So when unsure, search by facility with no `--part`/`--subpart`, download, and read the
 rules off the file names.
 
+### Refinery fenceline benzene: try EPA's dashboard first
+
+For the two-week benzene readings that refineries report under `Subpart CC` (40 CFR 63.658), EPA
+publishes the same data as a dashboard, which is quicker than downloading each quarterly report:
+`https://awsedap.epa.gov/public/extensions/Fenceline_Monitoring/welcome.html`. It covers every
+refinery from 2019 on, by monitor and sampling period, with the rolling annual average
+concentration difference (Δc) that is compared against the 9 µg/m³ action level. It is a Qlik app
+with no documented API, so open it in a browser (`/bayou:usace-408-permits` shows the browser-tab
+pattern) and export from there.
+
+Come back to WebFIRE for what the dashboard leaves out: the report as filed, which is the
+citable document, and the root-cause analysis and corrective-action plan that follow an
+action-level exceedance. A quarter becomes public up to 30 days after its due date, so the
+newest data is three to four months old.
+
+**Chemical plants are not in the dashboard.** EPA's 2024 amendments to the HON (`Subpart H`)
+and related rules added fenceline monitoring for benzene, 1,3-butadiene, chloroprene, ethylene
+oxide, ethylene dichloride and vinyl chloride, on a later schedule than refineries, and a 2025
+presidential proclamation exempted some named facilities from the compliance dates. Whether any
+chemical plant is reporting yet has not been confirmed here: check the rule's current status
+with `/bayou:federal-register-search` before telling anyone the data exists. A WebFIRE search
+under `Subpart H` that returns no fenceline report may be the expected result, not a failed
+search.
+
 ## Running a search
 
 ```bash

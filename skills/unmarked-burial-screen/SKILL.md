@@ -105,6 +105,10 @@ was the outcome the one run of this skill produced — say exactly that.
 
 ## Step 5 — draft records requests (draft only — never send, never auto-submit)
 
+For the letter itself — statutory citations, response deadlines, fee language — follow
+`/bayou:la-public-records-request` for any Louisiana state or parish custodian below. A federal
+district is a FOIA request, not a Public Records Act request.
+
 Standard recipients, adjust names/contacts per parish and confirm current before sending:
 
 - **LA Division of Archaeology / State Archaeologist** — `archaeology@crt.la.gov`, (225) 342-8200.

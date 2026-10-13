@@ -150,6 +150,14 @@ For each section file, work question by question:
 
 ### 5c — Research sweep (every logged follow-up gets a terminal state)
 
+When requested, or when a material environmental-data limitation could change a finding,
+use [`bayou:environmental-data-audit`](../environmental-data-audit/SKILL.md) on the relevant
+inputs and claim. Examples include missing records being treated as zero, incompatible
+geographies or averaging periods, and permitted maximums compared with reported releases.
+Log the scoped audit as a SKILL follow-up, carry its supported wording and limitations
+into the affected finding, and link its saved assessment when present. This is conditional;
+routine lookups and well-supported findings do not need an added audit stage.
+
 Work through every `⬜ OPEN` item in `RESEARCH-TODO.md`. The exit condition for this step is not "the highest-value items are done" — it's that **every item is `✅ RESOLVED`, `🟡 PARTIAL`, or `⛔ BLOCKED`**, each with either a written finding (spliced into the question's `OPUS-SKILL:Qn` or `WEBSEARCH:Qn` anchor) or a recorded blocker (the exact endpoint and error). `⬜ OPEN`/"not yet attempted" is not a terminal state for an item this step touches — an item can end `⛔ BLOCKED`, but not untouched.
 
 - **For a SKILL item**: run the skill yourself, write the result under **SKILL findings** with `🔴`/`⚪` relevance, and update the item's status in `RESEARCH-TODO.md`. If the skill call fails (API error, rate limit, auth gate), that failure — endpoint, exact error, date — *is* the terminal state (`⛔ BLOCKED`); do not leave it `⬜` and do not guess at what the result would have been.

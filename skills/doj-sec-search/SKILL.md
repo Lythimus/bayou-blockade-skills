@@ -42,13 +42,14 @@ User-Agent: BayouResearch research@example.com
 Searches the complete text of every public filing — the most powerful path for surfacing buried disclosures.
 
 ```bash
-# URL-encode the query string; use "quoted phrase" for exact matches
-QUERY='Waterford+nuclear+environmental+liability'
+# QUERY is already URL-encoded: %22 wraps an exact phrase, %20 separates AND-ed terms.
+# Do not wrap the whole query in quotes; that turns every term into one long phrase.
+QUERY='%22Waterford%203%22%20decommissioning'
 FORMS='8-K,10-K,10-Q'
 START='2010-01-01'
 END='2026-12-31'
 
-curl -s "https://efts.sec.gov/LATEST/search-index?q=%22${QUERY}%22&forms=${FORMS}&dateRange=custom&startdt=${START}&enddt=${END}" \
+curl -s "https://efts.sec.gov/LATEST/search-index?q=${QUERY}&forms=${FORMS}&dateRange=custom&startdt=${START}&enddt=${END}" \
   -H "User-Agent: BayouResearch research@example.com" \
   2>/dev/null | python3 -c "
 import sys, json
@@ -58,9 +59,13 @@ total = d.get('hits', {}).get('total', {}).get('value', 0)
 print(f'Total results: {total}')
 for h in hits:
     s = h.get('_source', {})
-    print(s.get('file_date',''), '|', s.get('form_type',''), '|', s.get('entity_name',''))
+    print(s.get('file_date',''), '|', s.get('form',''), '|', '; '.join(s.get('display_names',[])), '|', h.get('_id',''))
 "
 ```
+
+Omit `&forms=` to search every form type (prospectus supplements and proxies often carry project
+language that 8-Ks do not). An occasional `Internal server error` response is transient; retry
+before concluding the endpoint is down.
 
 #### Query construction tips
 
@@ -78,24 +83,32 @@ Multiple terms without quotes use AND logic; use `OR` explicitly for alternative
 
 ```python
 hits.hits[]._source:
-  entity_name       # Company filing the report
+  display_names[]   # Every registrant on the filing, each as "NAME  (TICKER)  (CIK 0000000000)"
+  ciks[]            # Zero-padded CIKs, same order as display_names
   file_date         # YYYY-MM-DD
-  form_type         # 8-K, 10-K, 10-Q, etc.
-  period_of_report  # Reporting period end date
-  biz_location      # State where incorporated/operating
+  form              # 8-K, 10-K, 10-Q, etc. (file_type is the type of the matched document)
+  period_ending     # Reporting period end date
+  adsh              # Accession number with hyphens
+  biz_locations[]   # City, state of each registrant
 
-hits.hits[]._id     # Accession number (use to build document URL)
-hits.hits[].highlight  # Text excerpt showing where term appears
+hits.hits[]._id     # "<accession>:<filename>" of the matched document
 ```
+
+The response carries no text excerpt. To see where a term appears, download the document and
+search its text (Step 4).
 
 #### Build the filing URL from accession number
 
-The `_id` field is an accession number formatted as `XXXXXXXXXX-YY-NNNNNN`. Strip hyphens to form the directory path:
+The `_id` field is `<accession>:<filename>`, with the accession formatted as `XXXXXXXXXX-YY-NNNNNN`. Strip hyphens to form the directory path. The directory CIK is any registrant on the filing, without leading zeros; the first entry of `ciks` always works:
 
 ```bash
-ACCESSION="0000039939-22-000123"   # from _id
-CIK="39939"                         # from entity lookup
-ACCNO=$(echo $ACCESSION | tr -d '-')
+ID="0000065984-26-000174:etr-20251231.htm"   # from _id
+CIK="65984"                                   # first entry of ciks, leading zeros removed
+ACCNO=$(echo "${ID%%:*}" | tr -d '-')
+FILE="${ID##*:}"
+
+# The matched document itself
+echo "https://www.sec.gov/Archives/edgar/data/${CIK}/${ACCNO}/${FILE}"
 
 # Filing index page (lists all documents in this filing)
 echo "https://www.sec.gov/Archives/edgar/data/${CIK}/${ACCNO}/"
@@ -134,9 +147,17 @@ Common Entergy entity CIKs for reference:
 | Entity | CIK |
 |---|---|
 | Entergy Corporation (parent) | 65984 |
-| Entergy Louisiana, LLC | 60549 |
+| Entergy Louisiana, LLC | 1348952 |
+| Entergy Arkansas, LLC | 7323 |
+| Entergy Mississippi, LLC | 66901 |
+| Entergy New Orleans, LLC | 71508 |
+| Entergy Texas, Inc. | 1427437 |
+| System Energy Resources, Inc. (SERI) | 202584 |
 | Entergy Nuclear Operations, Inc. | (search to confirm) |
-| System Energy Resources, Inc. (SERI) | (search to confirm) |
+
+Entergy and its operating companies file one combined 10-K and 10-Q under the parent's accession
+prefix (`0000065984-`), so those documents sit under CIK 65984. Bond prospectus supplements are
+filed by the individual operating company.
 
 ---
 

@@ -15,6 +15,12 @@ This is the **most other-visible** skill in the bayou toolkit: a completed send 
 every real subscriber and can't be recalled. Treat "draft a campaign" and "send the
 campaign" as two different requests, never one.
 
+When using privately supplied community information, personal experiences, sensitive
+locations, or claims to represent a community position, read the shared
+[community-information guidance](../../references/community-information.md)
+(at `${CLAUDE_PLUGIN_ROOT}/references/community-information.md`). Apply it only to
+the affected material; public-record-only drafting proceeds normally.
+
 ## System reference
 
 | Field | Value |

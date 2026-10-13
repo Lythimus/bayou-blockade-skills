@@ -1,0 +1,13 @@
+rsei_id,table1_cas,basis,note
+N020,7440-38-2,direct,Table 1 lists arsenic compounds under the elemental CAS number
+N050,7440-41-7,direct,Table 1 lists beryllium compounds under the elemental CAS number
+N078,7440-43-9,direct,Table 1 lists cadmium compounds under the elemental CAS number
+N096,7440-48-4,direct,Table 1 lists cobalt compounds under the elemental CAS number
+N420,7439-92-1,direct,Table 1 lists lead compounds under the elemental CAS number
+N450,7439-96-5,direct,Table 1 lists manganese compounds under the elemental CAS number
+N495,7440-02-0,direct,Table 1 nickel compounds row; it has no unit risk (those exist only for refinery dust and subsulfide) so cancer risk from nickel is unquantified
+N725,7782-49-2,direct,Table 1 lists selenium compounds under the elemental CAS number
+N106,57-12-5,direct,Table 1 cyanide compounds row; it carries no value so the result is unquantified
+N458,7439-97-6,assumed,ASSUMPTION: mercury compounds are given the elemental mercury value as AirToxScreen does; the reported form is not known
+N090,18540-29-9,assumed,ASSUMPTION: RSEI models only the share of a chromium release it takes to be hexavalent (a fraction set by the facility's industry) so its concentration is given the chromium (VI) values; if RSEI's figure were total chromium this would overstate
+7440-47-3,18540-29-9,assumed,ASSUMPTION: RSEI models only the share of a chromium release it takes to be hexavalent (a fraction set by the facility's industry) so its concentration is given the chromium (VI) values; if RSEI's figure were total chromium this would overstate
