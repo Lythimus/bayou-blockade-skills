@@ -164,7 +164,7 @@ Show a clean coordinate table:
 
 ## Coordinate precision note
 
-ECHO coordinates are typically accurate to ~100–500 meters for large industrial sites. For precise site boundary work (e.g., setback calculations, fence-line monitoring), verify against USGS topographic maps or the facility's NRC/FERC license documents.
+ECHO coordinates are typically accurate to ~100–500 meters for large industrial sites. For precise site boundary work (e.g., setback calculations, fence-line monitoring), verify against USGS topographic maps or the facility's NRC/FERC license documents (FERC alignment sheets and plot plans are in the certificate docket via `bayou:ferc-elibrary`; detailed alignment sheets are often CEII). In St. Charles, Ascension and St. James, `bayou:parish-assessor-gis` builds the property boundary from the parish parcels (`footprint --owner … --near <ECHO lat> <ECHO lon>`). ECHO's point is good enough as the `--near` seed.
 
 Cross-link `bayou:epa-frs-crosswalk` for full program-ID resolution on the same `RegistryID` — TRI, NPDES, RCRAInfo, AIRS/AFS, GHGRP `E-GGRT`, and LDEQ's `LA-TEMPO` ID.
 

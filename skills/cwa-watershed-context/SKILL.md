@@ -395,6 +395,8 @@ Bridge them with EPA's own linkages, and label every one as **screening**:
 
 122.4(i) applies only to new sources and new dischargers. Do not cite it for a renewal or an expansion.
 
+**Drinking-water intakes.** When an AU carries a Drinking Water Supply use, run `bayou:ldh-drinking-water` `downstream <lat> <lon>` on the outfall. It lists the public-supply intakes below the discharge, with flow km, the SWAP 5-mile critical-area flag and, on the Mississippi, the corridor rule that puts the outfall inside every downstream intake's protection area. A linked pollutant (as above) on a Drinking Water Supply listing, with intakes downstream, is the strongest form of this finding.
+
 ## How to present results
 
 1. **Receiving water.** Give:
@@ -433,7 +435,9 @@ Bridge them with EPA's own linkages, and label every one as **screening**:
 | WTR-007 (discharge composition vs receiving-water criteria) | AU causes, linked pollutants, the applicant's limits and calculated loads |
 | WTR-008 (mixing zone, WET, low-flow margin) | Impairment status and cumulative watershed load (a mixing zone in impaired water is a standard comment point). Flow statistics come from `bayou:usgs-water-data` |
 | WTR-006 (§316(b) intake) | ESA-species flag (`EsaAquaticSpeciesFlg` in DFR `WBD12s`) and receiving-water identity only. Intake design comes from the application |
+| WTR-011 (listed species at the outfall and intake, which Service reviewed) | Outfall coordinates and the ESA-species flag. The species and the NMFS/FWS split come from `bayou:la-species-cultural-review` Step 2b |
 | WTR-003, WTR-004 (treatment O&M, hydrostatic test water) | The applicant's exceedance history as evidence about O&M performance |
+| WTR-012 (were the labs LELAP-accredited) | Nothing: ECHO DMRs do not name the lab. Take lab, method and sample date from the DMR attachments or application lab reports, then run `bayou:ldeq-lelap-labs` `check` |
 | WQC-001, WQC-002 (401 certification, LAC 33:IX Ch. 11) | AU IDs = LDEQ subsegments, which is the key into the Chapter 11 criteria tables. 303(d) causes and TMDL status |
 
 ### Citation format
@@ -448,9 +452,11 @@ Bridge them with EPA's own linkages, and label every one as **screening**:
   - These calls were not tested for throttling. Assume the general ECHO REST limit applies.
   - A full report is about 15 ECHO calls, plus 3 ATTAINS calls per AU (assessmentUnits, assessments, actions) and 1 per TMDL.
   - For many facilities, use the bulk files instead (`bayou:epa-echo-search`).
-- **ESA-listed aquatic species.** The DFR's `EsaAquaticSpeciesFlg` per HUC12 is a screen. Use `bayou:la-species-cultural-review` for the species.
+- **ESA-listed aquatic species.** The DFR's `EsaAquaticSpeciesFlg` per HUC12 is a screen. For the species, run `bayou:la-species-cultural-review` Step 2b at each outfall and intake coordinate.
+  - It queries NMFS and FWS separately. On a river, expect the NMFS result to be empty and the FWS result to carry the species (pallid sturgeon on the Mississippi).
+  - An outfall that drains toward tidal marsh or a lake can sit a few miles from an NMFS consultation area. Report that distance.
 - **Flow and low-flow (7Q10).** These are outside this skill. Use `bayou:usgs-water-data`.
 - **LDEQ documents.** The permit itself, the fact sheet, and the water-quality screen come from `bayou:ldeq-edms-search`. ATTAINS and ECHO do not replace the fact sheet's own reasonable-potential analysis.
-- Cross-links: `bayou:epa-frs-crosswalk` (resolve IDs), `bayou:epa-echo-search` (compliance, bulk history), `bayou:epa-tri-search` (TRI side of DMR vs TRI), `bayou:ejscreen-report` (demographics), `bayou:permit-analysis`.
+- Cross-links: `bayou:epa-frs-crosswalk` (resolve IDs), `bayou:epa-echo-search` (compliance, bulk history), `bayou:epa-tri-search` (TRI side of DMR vs TRI), `bayou:ejscreen-report` (demographics), `bayou:ldeq-lelap-labs` (was the lab behind the DMR data accredited for that method on the sample date), `bayou:permit-analysis`.
 
 $ARGUMENTS

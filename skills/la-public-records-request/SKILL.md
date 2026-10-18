@@ -29,8 +29,10 @@ A request for something already posted wastes the response period. Check first:
 |---|---|
 | LDEQ permits, applications, inspections, enforcement, correspondence | `/bayou:ldeq-edms-search`, `/bayou:ldeq-edms-download` |
 | Oil and gas, injection wells, Class VI, coastal use permits | `/bayou:sonris-doc-search`, `/bayou:la-class-vi`, `/bayou:la-coastal-use-permits` |
+| Public water systems: LDH sample results, violations, sanitary surveys, well and intake locations | `/bayou:ldh-drinking-water` (request the LDEQ SWAP source water assessment report and DCE water-well registrations; those are not posted) |
 | Utility dockets | `/bayou:lpsc-dockets` |
-| Industrial tax exemptions | `/bayou:itep-lookup` |
+| FERC pipeline and LNG dockets (federal records; the Louisiana Public Records Act does not reach them) | `/bayou:ferc-elibrary`, which lists the CEII and FOIA routes for restricted filings |
+| Industrial tax exemptions, Quality Jobs, Enterprise Zone, RTA (FastLane and BCI agendas) | `/bayou:itep-lookup` |
 
 Say in the letter what was already found ("EDMS holds the permit application, document 12345678; this request is for records not in EDMS"). It shows the custodian the request is specific and removes the easiest non-answer.
 
@@ -58,7 +60,8 @@ Confirm every address on the agency's own site on the day of drafting. Agencies 
 
 - **LDEQ.** Verified 2026-10-11 from `https://www.deq.louisiana.gov/page/edms`: requests for records not in EDMS go through the online Public Records Request Form at `https://edms.deq.louisiana.gov/edmsv2/create-my-request`. The Public Records team is `publicrecords@la.gov`, (225) 219-5337, option 3, and takes appointments to view records in person, 8:00 to 4:30 on weekdays. Draft the text so the user can paste it into the form, and keep a dated copy.
 - **Department of Conservation and Energy** (the former Department of Energy and Natural Resources, renamed 1 October 2025; includes the Office of Conservation and the Office of Coastal Management). Its site was still in transition when this was written and no records-request page was found at `dce.louisiana.gov`. Search for the current custodian and address; do not reuse a DENR or DNR address without confirming it.
-- **Parish governments, parish councils, port commissions, levee districts, school boards.** The custodian is the head of the body or a designated records custodian. Find the name on the body's website or by phone. Address the request to the named custodian, with a copy to the parish attorney if the body has ignored earlier requests.
+- **Parish governments, parish councils, port commissions, levee districts, school boards.** The custodian is the head of the body or a designated records custodian. Find the name on the body's website or by phone. Address the request to the named custodian, with a copy to the parish attorney if the body has ignored earlier requests. Before requesting agendas, minutes or packets, check `bayou:parish-council-agendas` for what is already online. Its parish table lists the gaps that need a request, such as Ascension council minutes and the St. James packets.
+- **LED Board of Commerce & Industry packets** (Exhibit A, annual compliance reports, Local ITEP Committee resolutions): email `LEDBoardPacketRequest@la.gov`, naming the project IDs and meeting dates found with `bayou:itep-lookup`.
 - **Other state agencies** (LDH, LED, the Public Service Commission, the Division of Administration): search "<agency> public records request" and use the method the agency publishes.
 
 If the custodian cannot be identified, leave a bracketed placeholder in the draft and say so in the hand-back. Do not guess an email address.

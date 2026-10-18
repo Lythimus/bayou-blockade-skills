@@ -188,6 +188,14 @@ Write for the user:
    `![caption](path){width=100%}`.
 5. Cross-links: `bayou:epa-echo-search` (compliance), `bayou:ejscreen-report` (demographics
    for the same radius), and `bayou:epa-ghgrp-search` (CO2/CH4, which TRI omits).
+6. **Louisiana: reconcile against ERIC.** `bayou:ldeq-eric-emissions` `eric.py facility <AI>` has the
+   state-certified toxic air pollutant emissions (lb) for the same years.
+   - **What to compare.** Use TRI *air* releases only (fugitive plus stack), the same year, joined on the
+     `cas` column of its `pollutants.csv`. Get the AI from the FRS `LA-TEMPO` ID.
+   - **Category rows.** Rows whose `cas_kind` is `element+compounds` or `category-representative` (metal
+     compounds, glycol ethers, PAHs) are reported in TRI under N-codes. Match those by hand.
+   - **Reading a gap.** A gap between the two is a lead for a comment or records request, not proof of
+     misreporting: thresholds, chemical lists and estimation methods differ.
 
 ### Citation format
 

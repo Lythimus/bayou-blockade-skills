@@ -21,7 +21,21 @@ Start with existing case files, cached inputs, and their provenance. Use the rel
 retrieval skill when additional evidence is needed, rather than rebuilding its download or
 search workflow. For example, use `bayou:epa-tri-search` for TRI records,
 `bayou:ejscreen-report` for screening indicators, `bayou:epa-frs-crosswalk` for program IDs,
-and `bayou:ldeq-edms-search` / `bayou:ldeq-edms-download` for agency documents.
+`bayou:ldeq-edms-search` / `bayou:ldeq-edms-download` for agency documents,
+`bayou:ldeq-eric-emissions` for Louisiana's state emissions inventory,
+`bayou:ldeq-lelap-labs` for whether the lab behind analytical data was LELAP-accredited for
+that method on the sample date, and
+`bayou:csb-nrc-hazmat` for National Response Center release reports and CSB records.
+
+When ERIC is part of the evidence, check four things:
+- **Value type.** Its values are self-reported certified estimates.
+- **Coverage.** Facilities below the LAC 33:III.919 and 5107 thresholds do not report, and a blank cell
+  means not reported.
+- **Comparability.** TEMPO permitted rates are current-permit maximums, never summed across statistical
+  basis or group.
+- **Geography and time.** Coordinates are often wrong, revisions arrive all year, and Baseline PM10 is TSP.
+
+`eric.py reconcile` tests whether a release-point figure agrees with the annual file.
 
 Consult authoritative methodology, field definitions, and reporting documentation for the
 data version being evaluated. Cite the relevant sections and version, not just a current
@@ -47,6 +61,12 @@ document ID, date, event period, and reporting limitations where available. Agen
 does not make every statement an agency finding. Do not assume resident intake, add an
 incident-intake workflow, or interpret no retrieved reports as no incidents. Describe the
 search actually completed and any gaps in it.
+
+National Response Center reports are a caller's initial account, which NRC describes as "not
+validated or investigated by a federal/state response agency". Count follow-up and correction
+reports separately from first reports, and treat "unknown amount" as missing, not zero. Facility
+matching rests on name, parish and address, because the reports carry no facility ID. Report the
+alias set and the call years searched as part of the coverage.
 
 Separate **demonstrated problems** (with evidence of the mismatch or error) from
 **unresolved questions** (what has not been established). A possible limitation is not a

@@ -95,6 +95,19 @@ reports, whose Excel templates carry `Flares` (pilot-flame-absent periods) and `
 sheets. So when unsure, search by facility with no `--part`/`--subpart`, download, and read the
 rules off the file names.
 
+### Flare events and pressure-relief releases on a known date
+
+Refinery `Subpart CC` periodic reports, and MON (`Subpart FFFF`) and HON reports filed under the 2020 and 2024 amendments, carry dated event tables. Use them when you have a date of interest (a noise or infrasound recording, a complaint, a night-time flare sighting) and want the facility's own account. The tables are:
+- flare events above the 63.670 limits, with start and end times, cause, and root-cause/corrective-action references;
+- pressure-relief device (PRD) releases to atmosphere, with times and estimated quantities.
+
+To find the right report:
+1. Work out the semiannual period that contains the date. Periods usually run Jan–Jun and Jul–Dec, but some permits use other anchor months.
+2. Search for that period with `--to` at least 90 days past its end, as above.
+3. Open the Excel or PDF and filter its event sheet to the date.
+
+An event that is absent from the table is not proof that nothing happened. Only events that cross a regulatory threshold have to be reported. A flare can be operating, and audible, within its limits. The state-side incident reports are in `ldeq-edms-search`; there is a multi-AI sweep recipe there. For archived infrasound and seismic spectra around a flare event, see `lf-acoustic-baselines`.
+
 ### Refinery fenceline benzene: try EPA's dashboard first
 
 For the two-week benzene readings that refineries report under `Subpart CC` (40 CFR 63.658), EPA
@@ -179,6 +192,11 @@ For each relevant report, give:
 When reporting findings from a report, cite the downloaded file and the table or page, never the
 WebFIRE index row alone. If a search returns nothing, say what was searched (IDs, subparts, dates),
 so that "none filed through CEDRI" stays distinct from "search failed".
+
+For a Louisiana stack test or RATA, note the testing firm, its address, each reference method
+and the test date. Then run `bayou:ldeq-lelap-labs` `check <firm|AI> --matrix AE ...` to
+find out whether the firm held LELAP air-emissions accreditation for that method on that date.
+Firms with one name often run several sites, each with its own AI and scope.
 
 ## Known limits
 

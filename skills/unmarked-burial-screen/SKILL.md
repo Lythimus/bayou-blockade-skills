@@ -55,6 +55,11 @@ screen is in service of. If any of this is missing and the project has a public 
 (USACE, LDEQ), pull it from there rather than asking the user to restate what's already
 documented.
 
+For St. Charles, Ascension or St. James, build the boundary with `bayou:parish-assessor-gis`:
+`parcels.py footprint --owner "<applicant|affiliates>" --near <lat> <lon> --out site.geojson`
+(or `--pins` from the permit). Check the parcel list against the permit's site description
+before using it.
+
 ## Step 2 — historic maps and lidar
 
 Run `bayou:usgs-historic-topo-lidar` against the footprint. Read every edition for: a cemetery
@@ -97,7 +102,9 @@ Write these up as two distinct questions, not one blended impression:
    actual parcel boundary if you have it — a reference-point-to-point distance will overstate
    true separation for any footprint larger than a few acres**, and a project's own permit
    drawings (site plans, "residential offset" exhibits) often already show the real boundary if
-   you look for it rather than assuming a single lat/lon is the whole story.
+   you look for it rather than assuming a single lat/lon is the whole story. With the
+   `parish-assessor-gis` footprint, `parcels.py at <lat> <lon>` on the cemetery gives its
+   parcel, and the edge-to-edge distance between the two polygons is the figure to report.
 
 State the conclusion as a probability judgment against these two triggers, not as a yes/no. If
 the honest answer is "elevated probability, survey warranted" — which is the statutory bar, and

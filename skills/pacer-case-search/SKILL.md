@@ -176,6 +176,9 @@ Pagination: 54 results per page. Use `?page=N` (0-indexed). `pageInfo.totalPages
 - `lawd` — Western District (Lafayette)  
 - `lamd` — Middle District (Baton Rouge)
 - `ca5` — Fifth Circuit (appellate)
+- `cadc` — D.C. Circuit. Petitions for review of FERC orders on pipelines and LNG terminals go here or to the circuit where the natural-gas company is located (15 U.S.C. 717r(b)). The administrative record, rehearing requests and rehearing orders are in the FERC docket (`bayou:ferc-elibrary orders <docket>`).
+
+Louisiana state-court opinions (Supreme Court `la`, Courts of Appeal `lactapp`) are a separate search: use `bayou:la-court-opinions`.
 
 ### Common nature of suit codes:
 - `893` — Environmental matters

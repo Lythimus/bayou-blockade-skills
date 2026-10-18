@@ -29,7 +29,7 @@ application or to the modeling report, or sit on a disc named in the document in
 | Main output | `.out`, `.lst`, `.amo`, `.ado` | `--applicant-out`: states the output units |
 | Building downwash (BPIP) | `.bpi`, `.pro`, `.sum` | Not read; the downwash values are already in the input |
 | Modeling report or protocol | PDF | Coordinate zone and datum, tower base elevation, which run covers which pollutant |
-| Emission inventory questionnaire sheets | PDF | Stack parameters and per-source rates for the two tables below |
+| Emission inventory questionnaire sheets | PDF | Stack parameters and per-source rates for the two tables below. Cross-check them (never replace them) with `bayou:ldeq-eric-emissions` `points <AI> --permitted`, which covers current permits only and has unreliable coordinates |
 
 Extensions depend on the software the consultant used; identify a file by its content. An
 input starts with `CO STARTING`; a plot file's header starts with `* AERMOD`.

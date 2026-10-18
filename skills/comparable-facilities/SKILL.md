@@ -132,6 +132,14 @@ uv run --no-project --with matplotlib python -I $CF/comparables.py emissions --o
 - **HAPs.** Each HAP is compared on its own: benzene, 1,3-butadiene, ethylene oxide, chloroprene, formaldehyde,
   HCl, and H2S, plus any HAP in the proposed layer. NEI lists groups alongside their members (PAH and naphthalene),
   so there is **no HAP total**.
+- **Louisiana targets: add ERIC.** For a Louisiana target, NEI stops at 2020 and is triennial, but
+  `bayou:ldeq-eric-emissions` has annual state-certified data through the latest year:
+  - `eric.py facility <AI>` gives the target's own history.
+  - `eric.py peers <AI> --by naics` ranks Louisiana facilities with the same primary NAICS for any year.
+
+  Put these beside the NEI table under their own heading, labeled "LDEQ ERIC (state inventory)". Never
+  merge ERIC values into NEI rows or swap one for the other: the programs differ in year, estimation
+  and gap-filling. ERIC's primary codes are self-assigned, so review its cohort the same way as here.
 - **Size proxy.** The proxy is GHGRP total CO2e. A site without GHGRP falls back to NEI CO2 converted to
   metric tonnes, and that ratio is not computed against a GHGRP target. A site with neither is "size
   unknown." Peers outside the band (default 1/3× to 3×) are listed in the CSV but not shortlisted.

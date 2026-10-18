@@ -40,6 +40,12 @@ For LDEQ that is La. R.S. 30:2050.21: only an aggrieved person may appeal a fina
 to the 19th JDC, within 30 days of notice. A comment with no stated interest can be answered
 without reaching the merits and leaves nothing to appeal.
 
+Earlier appeals of the same facility's permits show what the First Circuit has already accepted
+from LDEQ, and the agency will cite them. Find them with `bayou:la-court-opinions`
+(`search <facility or company> --court 1`, plus `search Environment --court 1` for the year).
+19th JDC records are subscription-only, so the First Circuit opinion is usually the best
+available account of the district court's ruling.
+
 Cross-check the permit's covered parishes (or the facility location) against the profile's
 parish-reach table. That comparison produces the standing statement. If the profile shows
 **no** connection to the covered area, stop and tell the user. Never invent proximity.

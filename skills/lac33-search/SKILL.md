@@ -165,7 +165,7 @@ Present regulatory text verbatim. Structure:
 
 ### Common cross-reference pattern
 
-LAC 33:I frequently cross-references `R.S. 30:2024` (adjudicatory hearings) and `R.S. 30:2025` (penalties). When you see these in regulatory text, follow up with `bayou:la-rs-search` to fetch the corresponding statutory language.
+LAC 33:I frequently cross-references `R.S. 30:2024` (adjudicatory hearings) and `R.S. 30:2025` (penalties). When you see these in regulatory text, follow up with `bayou:la-rs-search` to fetch the corresponding statutory language. For scheduled adjudicatory hearings in DEQ matters, run `bayou:la-court-opinions dal-docket --agency DEQ`. DAL does not publish its decisions in those matters, so request them with `bayou:la-public-records-request`.
 
 ---
 

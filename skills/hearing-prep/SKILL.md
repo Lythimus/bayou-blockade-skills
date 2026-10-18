@@ -29,6 +29,10 @@ Worked examples in `~/Documents/personal/petro/`:
 
 Run exactly one mode per invocation. If none is given, ask which one.
 
+For a parish council, planning commission or zoning commission meeting, get the agenda items, the
+case history and the hearing date from `bayou:parish-council-agendas` (`items`, `track`) before
+writing questions or an oral statement.
+
 ---
 
 When using privately supplied community information, personal experiences, sensitive
@@ -42,7 +46,7 @@ the affected material; public-record-only drafting proceeds normally.
 - **The same honesty rules as `public-comment` apply to anything said aloud**, from
   `skills/public-comment/SKILL.md` Step 6:
   - no unsourced numbers;
-  - no case law characterized from memory;
+  - no case law characterized from memory (verify Louisiana cases with `bayou:la-court-opinions`);
   - no Tier 4 material;
   - no narrated OCR or pipeline methodology;
   - no file paths or line numbers.
@@ -76,6 +80,11 @@ the event description is absent, ask for the format, because it decides everythi
 
 Skip findings that are already established from the record. Asking only invites a rehearsed
 denial.
+
+For a TEFRA or other financing event, run `bayou:la-bond-dockets` first. A question about the
+next step is stronger with the real SBC date, docket, and item ("this goes to the Bond Commission
+on the 17th as S26-027, so will you send our letters with it?"). So is a question about related
+pieces of the financing stack.
 
 **Step 2 — Group by who will field it** (open house), or order by priority (hearing).
 - Open-house staffing usually runs community relations / PR, then technical floaters (geologist,
@@ -116,6 +125,8 @@ it with 15 seconds to spare.
    - event, date, time, and place;
    - where the written version was or will be submitted, with an instruction to submit it in
      writing regardless of whether anyone speaks;
+   - for a financing event, the SBC meeting date and docket from `bayou:la-bond-dockets`, so the
+     ask ("transmit before the <date> Bond Commission vote") names them;
    - the target length.
 2. **Who I am (two sentences).** Name, where you live, the one connection that matters to this
    room, and "I have no financial interest" where relevant, e.g. in a financing posture. Say

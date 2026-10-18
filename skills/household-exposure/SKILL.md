@@ -57,6 +57,14 @@ Geocode an address with `bayou:geo-distance` Step 1. Tell the user that this sen
 address to a geocoding service, and that `screen` later sends the coordinates to the Census
 Bureau's geocoder to find the census block unless `--block GEOID` or `--no-airtox` is given.
 
+In St. Charles, Ascension or St. James, confirm the home with `bayou:parish-assessor-gis`.
+`parcels.py address "<address>"` snaps to the parish address point and names the parcel; use
+those coordinates. For the distance to the facility's property line, as opposed to its stack
+or centroid, build the facility with `parcels.py footprint`. Then run `receptors --footprint
+… --private`; it lists this home's edge-to-edge distance among the nearest homes. The
+`address` output (it names the owner) and the `--private` output are for the household only,
+so keep both out of the public report.
+
 ## Step 2: `prepare`
 
 ```bash
@@ -113,6 +121,11 @@ In outline:
    scanned emission tables. Look in the toxic air pollutant modeling first: Louisiana's
    annual-average standards (benzene, ethylene oxide, formaldehyde, 1,3-butadiene, vinyl
    chloride) are the runs that can be read as long-term concentrations.
+   `bayou:ldeq-eric-emissions` `eric.py points <AI> --permitted` lists the facility's release points
+   with stack parameters, actual emissions and current permitted rates. Use it only to
+   **cross-check** what you transcribe from the application, never as a source for the two
+   tables: rows there need the application's `source_doc` and `page`, the permitted sheet
+   excludes pending applications, and LDEQ says ERIC coordinates are often wrong.
 3. Fill `source-emissions.csv` (per emission point, per chemical, with page citations).
 4. Run `hx.py model --out "$OUT" --applicant-inp ... --applicant-plot CAS=FILE ... --utm-zone N --datum NAD83`,
    with the zone and datum taken from the modeling report (Louisiana spans zones 15 and 16).
@@ -165,6 +178,11 @@ behind them, then what the proposed facility would add. When you summarize it:
 
 For a public comment, pair this with `bayou:tri-release-report` (what the same facilities
 reported releasing) and `bayou:chemical-hazard-profile` (what the leading chemicals do).
+For accidental-release context, `bayou:epa-rmp-lookup near <lat> <lon> --radius-km 5` lists the
+RMP facilities, substances and past accidents around the home. `bayou:csb-nrc-hazmat nrc --near
+<lat> <lon> --radius-km 5` adds National Response Center release reports that carry coordinates
+(the filter runs locally on cached files). Most plant reports have no coordinates, so also search
+those facilities by parish and company name. Keep both separate from these routine-emission figures.
 
 ## Checks
 

@@ -1,6 +1,6 @@
 ---
 name: wind-history
-description: Look up historical (forensic) wind direction and speed at a specific date/time and place, and state whether wind carried a plume from a facility toward a specific receptor
+description: Look up historical (forensic) wind direction and speed at a specific date/time and place, and state whether wind carried a plume from a facility toward a specific receptor. Optionally screen the vertical temperature/wind profile (KSIL radiosonde, Open-Meteo model levels) for downward- or upward-refracting sound propagation toward a receptor, for low-frequency noise questions
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -10,7 +10,7 @@ Pull actual recorded wind observations for a past date/time window from the Iowa
 
 This is **forensic** wind history — what the wind actually did at a specific hour on a specific day — not a current-conditions tool like Wind Finder. Use it to support or rebut a claim that emissions from an incident traveled toward (or away from) a specific receptor (school, neighborhood, monitor).
 
-Cross-links: `bayou:firms-active-fire` and `bayou:satellite-imagery` for independent visual confirmation of plume direction on the same day; `bayou:geo-distance` for the underlying coordinate math.
+Cross-links: `bayou:firms-active-fire` and `bayou:satellite-imagery` for independent visual confirmation of plume direction on the same day; `bayou:geo-distance` for the underlying coordinate math. For the incident time, `bayou:csb-nrc-hazmat nrc-report <SEQNOS>` gives the incident date and time the NRC caller gave, and when NRC received the call. The data does not state a time zone, so confirm the time against the facility's LDEQ written report before setting the UTC window. When the caller gave weather, it also has `WIND_DIRECTION`, `WIND_SPEED` and `WEATHER_CONDITIONS`, a second self-reported reading to set beside the station record (step 6 below).
 
 ## Parsing arguments
 
@@ -113,6 +113,147 @@ print(f'Angular difference: {diff:.0f} deg', '-> plausible plume path toward rec
 ```
 
 `drct` is where the wind comes **FROM**; add 180° to get where it's blowing **TOWARD**. A ±45° window (one compass octant) around that toward-bearing is a reasonable "plausibly carried toward" threshold for prose claims — narrower (±22.5°, one compass point) for a stronger claim. State the exact angular difference so the reader can judge the threshold themselves.
+
+
+## Step 4 (optional): Vertical profile and sound refraction
+
+Use this for low-frequency noise or infrasound questions: whether sound from a source was bent down toward a receptor (ducted) or up and away from it (a shadow zone). Surface wind alone cannot answer this. The answer depends on how temperature and wind change over the lowest few hundred metres.
+
+**Sources, by date.** Probed 2026-10-17 at 30.0, −90.41.
+
+- **IEM radiosonde archive, `KSIL` (Slidell, ~60 km ENE of Norco).** 00Z and 12Z only, i.e. about 18:00–19:00 and 06:00–07:00 local, from decades back.
+  - The ID is `KSIL`; `KLIX` returns empty profiles. `KLCH` (Lake Charles) is the western alternative.
+  - `hght` is metres above sea level. Levels arrive unsorted and with nulls.
+  - Newer soundings report wind and temperature on separate levels.
+  - This is the only temperature profile before 2021-03-23.
+- **Open-Meteo `historical-forecast-api`, `models=best_match`.**
+  - `temperature_80m` and the 1000/975/950 hPa pressure levels start 2021-03-23.
+  - 120 m starts by 2022-09, and 180 m by 2022-12.
+  - Before 2021-03-23 there is only 2 m temperature and 10/80 m wind, so the thermal gradient is unknown.
+  - Always pass `wind_speed_unit=ms`. `models=gfs_hrrr` returns no height-level temperatures.
+- **Open-Meteo archive (ERA5).** Wind at 10/100 m (and 80/120 m) back to 1940, but **no temperature above 2 m**. It gives wind shear only.
+
+**Effective sound speed** along the source→receptor bearing θ:
+
+c_eff(z) = 331.3·√(1 + T/273.15) + u(z)·cos(θ_toward(z) − θ), with **θ_toward = drct + 180°**
+
+Both IEM and Open-Meteo give `drct` as the direction the wind blows **from**. Using `drct` directly flips the sign of the wind term.
+
+**Reading the result:**
+- If c_eff increases with height (Δc_eff > 0 between the lowest level and ~100–200 m), the profile is downward-refracting. Sound bends back toward the ground, so a receptor can hear a distant source louder than spherical spreading predicts. This is typical on clear, calm nights (surface inversion) and downwind.
+- Δc_eff < 0 is upward-refracting. A shadow zone can form, typical of sunny afternoons and upwind.
+
+```bash
+python3 - <<'PY'
+import json, math, urllib.request
+
+SRC_LAT, SRC_LON = 29.9976, -90.4113   # source (facility)
+RCP_LAT, RCP_LON = 29.9850, -90.3800   # receptor
+WHEN = "2016-06-01T12:00:00Z"          # UTC; KSIL launches at 00Z and 12Z
+TOP_M = 200                            # upper level for the gradient, m above ground
+
+def bearing(a, b, c, d):
+    p1, p2, dl = math.radians(a), math.radians(c), math.radians(d - b)
+    return math.degrees(math.atan2(math.sin(dl) * math.cos(p2),
+                                   math.cos(p1) * math.sin(p2) - math.sin(p1) * math.cos(p2) * math.cos(dl))) % 360
+
+def get(url):
+    return json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "bayou-wind-history"}), timeout=60))
+
+theta = bearing(SRC_LAT, SRC_LON, RCP_LAT, RCP_LON)
+
+def ceff(z, t_c, drct, u):
+    # drct is where the wind blows FROM; the along-path component uses the TOWARD direction.
+    along = u * math.cos(math.radians((drct + 180) - theta))
+    return 331.3 * math.sqrt(1 + t_c / 273.15) + along, along
+
+profiles = {}
+# IEM radiosonde. Levels arrive unsorted and with nulls; hght is metres above sea level.
+r = get("https://mesonet.agron.iastate.edu/json/raob.py?ts=%s&station=KSIL" % WHEN)
+lv = [l for p in r["profiles"] for l in p["profile"] if l.get("hght") is not None]
+tl = sorted((l["hght"], l["tmpc"]) for l in lv if l.get("tmpc") is not None)
+# Newer soundings report wind on separate levels from temperature; carry wind onto the
+# temperature heights as linearly interpolated u/v components (u/v avoid the 359->1 deg wrap).
+wl = sorted((l["hght"], -l["sknt"] * 0.514444 * math.sin(math.radians(l["drct"])),
+             -l["sknt"] * 0.514444 * math.cos(math.radians(l["drct"])))
+            for l in lv if l.get("drct") is not None and l.get("sknt") is not None)
+
+def wind_at(z):
+    if not wl or z < wl[0][0] or z > wl[-1][0]:
+        return None
+    for (za, ua, va), (zb, ub, vb) in zip(wl, wl[1:] + [wl[-1]]):
+        if za <= z <= zb:
+            if zb - za > 300 and z not in (za, zb):
+                return None   # too far from any wind level to interpolate honestly
+            f = 0 if zb == za else (z - za) / (zb - za)
+            u, v = ua + f * (ub - ua), va + f * (vb - va)
+            return (math.degrees(math.atan2(-u, -v)) % 360, math.hypot(u, v))
+
+if tl:
+    z0 = tl[0][0]
+    rows = [(z - z0, t) + (wind_at(z) or (None, None)) for z, t in tl if z - z0 <= 500]
+    if sum(r[2] is not None for r in rows) < 2:
+        # Temperature alone still gives the sign of the thermal gradient; wind shear is unknown.
+        print("KSIL: under two wind levels below 500 m; temperature-only c_eff (wind set to 0)")
+        rows = [(z, t, 0.0, 0.0) for z, t, _, _ in rows]
+    else:
+        rows = [r for r in rows if r[2] is not None]
+    if len(rows) >= 2:
+        profiles["KSIL raob"] = rows
+# Open-Meteo model levels (from 2021-03-23; 120 m from 2022-09 and 180 m from 2022-12). Missing levels are null.
+day = WHEN[:10]
+H = [2, 80, 120, 180]
+W = [10, 80, 120, 180]
+v = ",".join(["temperature_%dm" % h for h in H] + ["wind_speed_%dm" % h for h in W] + ["wind_direction_%dm" % h for h in W])
+try:
+    m = get("https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&start_date=%s"
+            "&end_date=%s&hourly=%s&wind_speed_unit=ms&models=best_match&timezone=GMT" % (SRC_LAT, SRC_LON, day, day, v))
+    i = m["hourly"]["time"].index(WHEN[:13] + ":00")
+    h = m["hourly"]
+    rows = []
+    for z in (10, 80, 120, 180):
+        # 10 m wind pairs with 2 m temperature: the model has no 10 m temperature.
+        t = h["temperature_%dm" % (2 if z == 10 else z)][i]
+        s, d = h["wind_speed_%dm" % z][i], h["wind_direction_%dm" % z][i]
+        if None not in (t, s, d):
+            rows.append((z, t, d, s))
+    if len(rows) >= 2:
+        profiles["Open-Meteo best_match"] = rows
+except Exception as e:
+    print("Open-Meteo:", e)
+
+print("Source -> receptor bearing %.0f deg; %s" % (theta, WHEN))
+for name, rows in profiles.items():
+    print("\n" + name)
+    print("  z(m)   T(C)  from  u(m/s)  along  c_eff")
+    out = []
+    for z, t, d, u in rows:
+        c, al = ceff(z, t, d, u)
+        out.append((z, c))
+        print("  %5.0f  %5.1f  %4.0f  %5.1f  %+5.1f  %6.1f" % (z, t, d, u, al, c))
+    top = min((x for x in out if x[0] > 0), key=lambda x: abs(x[0] - TOP_M), default=None)
+    if top:
+        dc = top[1] - out[0][1]
+        print("  delta c_eff %.0f m -> %.0f m: %+.1f m/s -> %s" % (out[0][0], top[0], dc,
+              "downward-refracting (duct toward receptor)" if dc > 0 else "upward-refracting (possible shadow zone)"))
+PY
+```
+
+**Verified:**
+- **2016-06-01 12Z KSIL** (06:00 CDT), receptor bearing 115°: the surface inversion goes from 20.1 °C at the surface to 24.6 °C at 115 m, and the wind blows from 254° (toward 74°, 41° off the path). Δc_eff is +5.0 m/s up to 153 m: downward-refracting, as expected for a nocturnal inversion.
+- **2023-06-01 12Z** is a caution:
+  - KSIL had no wind levels below 500 m, so the snippet falls back to temperature only (+2.3 m/s, inversion).
+  - Open-Meteo shows an almost isothermal model profile (22.3 → 21.9 °C) and gives −3.8 m/s.
+  - Models smooth out shallow nocturnal inversions. Where both exist for the same hour, prefer the sounding for the temperature gradient, and say so when they disagree.
+
+For archived infrasound and seismic spectra for the same hours, use `bayou:lf-acoustic-baselines`. `ldeq-eric-emissions sources` gives the candidate sources and their stack heights.
+
+**Present this as a screening indicator, not a propagation model.** Give:
+- the source and its distance and time offset from the hour of interest;
+- the levels used;
+- Δc_eff and its sign.
+
+KSIL is 60 km away and launches at most twice a day. Model levels are gridded forecasts, not observations. Terrain, the river valley and the source height also matter. Ray tracing or a parabolic-equation model would be needed for an actual level prediction.
 
 ---
 

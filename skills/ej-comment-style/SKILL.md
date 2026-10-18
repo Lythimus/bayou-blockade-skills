@@ -288,7 +288,8 @@ the reader who matters.
 
 The Formosa letter concedes that the Louisiana First Circuit had recently affirmed LDEQ's
 reliance on SILs in the original PSD permit, then distinguishes it on two independent grounds:
-(1) that case was wrongly decided and certiorari is pending; and (2) — the real work — the First
+(1) that case was wrongly decided and certiorari is pending (the writ was later reported denied
+on Sept. 4, 2024; see the RISE entry in `louisiana-hooks.md` before reusing this move); and (2) — the real work — the First
 Circuit relied on LDEQ's conclusion that violations would touch only industrial areas, not
 residential ones, and *the new modeling shows the violations extend well into residential
 areas*. The precedent is not attacked; its factual predicate is removed.
@@ -444,7 +445,8 @@ a sister facility is very difficult for an agency to credit. *(This technique is
 supplemental CP2 filings that are not among the four source letters excerpted here, so no
 verbatim model is provided for it.)* Use `bayou:epa-echo-search` for compliance and enforcement
 history, `bayou:epa-campd-search` for unit-level excess emissions, `bayou:csb-nrc-hazmat` for
-incident and release reports, and `bayou:osha-inspections` for citations.
+incident and release reports, `bayou:epa-rmp-lookup` for the accident history the facility
+itself filed with EPA, and `bayou:osha-inspections` for citations.
 
 ### Move 13 — Lived experience enters as record evidence tied to a statutory factor
 
@@ -465,7 +467,10 @@ Three verified forms:
   downriver community of Welcome, such as the St. Louis Academy elementary school"; "adjacent to
   Welcome Park, which is a large public complex that includes a walking path, playground
   equipment, ball field… and community meeting hall for District 5." Specific named places
-  inside a modeled violation contour are what make an impact finding unavoidable.
+  inside a modeled violation contour are what make an impact finding unavoidable. Measure the
+  distances from the property line, not the stack: `bayou:parish-assessor-gis receptors` gives
+  edge-to-edge distances to homes. Name institutions (schools, parks, churches), never a
+  household; describe a home by its distance ("a home 135 feet from the property line").
 
 And one rhetorical beat per document, at most. In 62 pages, the CP2 letter spends exactly one:
 
@@ -516,8 +521,9 @@ exceptions and no floating facts.
 - **Science:** author, title, journal or institution, year, page, URL.
 - **Never characterize an authority from memory.** Verify every Louisiana citation against
   `skills/public-comment/references/louisiana-hooks.md`, which carries status and known traps,
-  and use `bayou:la-rs-search` and `bayou:lac33-search` for statutes and LAC provisions. If a
-  case cannot be verified, cut it — one miscited case is used to discredit the entire filing.
+  and use `bayou:la-rs-search` and `bayou:lac33-search` for statutes and LAC provisions. For a
+  Louisiana case not in that file, run `bayou:la-court-opinions verify-cite` and read the pin page
+  (`fetch --find`) before citing it. If a case cannot be verified, cut it — one miscited case is used to discredit the entire filing.
 - **NEPA authorities need re-verification before use.** The segmentation and cumulative-impacts
   case law in the source letters predates significant statutory and judicial change to NEPA's
   scope. The technique transfers; confirm the current standard before citing the case.

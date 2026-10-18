@@ -43,7 +43,9 @@ and why.
       how the sausage was made, and a sentence describing OCR/rendering/fuzzy-matching mechanics
       reads as insider tooling talk, not as an individual's plain reading of the record.
 - [ ] **Every authority checked against `references/louisiana-hooks.md` or
-      `references/federal-hooks.md`.** No authority described from memory or copied from a
+      `references/federal-hooks.md`.** A Louisiana case not in the hooks file has been run
+      through `bayou:la-court-opinions verify-cite`, and its pin page has been read with
+      `fetch --find`. No authority described from memory or copied from a
       research memo unchecked. Nothing described as a win that was a loss. Every clock cites
       the statute that actually sets it, and names the event that starts it.
 

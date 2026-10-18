@@ -12,11 +12,13 @@ Answers three questions about a company seeking a permit, a tax exemption, or a 
 2. **Who has it given money to?** Louisiana Ethics Administration e-filed campaign contributions (scripted).
 3. **Who owns and runs it?** OpenCorporates' mirror of the Louisiana business registry first (scripted), then the Secretary of State filings themselves (manual: the search is reCAPTCHA-gated).
 
+For the tax exemption itself (the ITEP, Quality Jobs or Enterprise Zone contract, the board vote, local recommendations), use `bayou:itep-lookup`.
+
 This skill retrieves records. It does not conclude that a contribution bought a vote or that a lobbyist caused a decision. Report what was filed, by whom, and when, and let the user draw the line between a contribution and an official act.
 
 ## Parsing arguments
 
-- **Company name** (required). Ask for the exact legal name on the permit application and any known parent, subsidiary, or former name. Run each as its own search: the applicant on an LDEQ permit is often an LLC whose name differs from the parent that hires the lobbyists (the registered client for Denka's LaPlace plant is "Denka Performance Elastomer (DPE)"). If the user has no former names to offer, run the Step 3 first pass before Steps 1 and 2: its `Previous Names` and `Branch` fields supply them (Luling Exchange LLC is now IMTT Luling LLC), and each one is another search term for lobbyists and contributions.
+- **Company name** (required). Ask for the exact legal name on the permit application and any known parent, subsidiary, or former name. Run each as its own search: the applicant on an LDEQ permit is often an LLC whose name differs from the parent that hires the lobbyists (the registered client for Denka's LaPlace plant is "Denka Performance Elastomer (DPE)"). If the user has no former names to offer, run the Step 3 first pass before Steps 1 and 2: its `Previous Names` and `Branch` fields supply them (Luling Exchange LLC is now IMTT Luling LLC), and each one is another search term for lobbyists and contributions. The land itself is often held by a further entity. `bayou:parish-assessor-gis` (`at` on the site, or `owner` near it) gives the owner of record of the site parcels; search that name too. A tax agent printed "C/O" is not the owner.
 - **Date range** (optional) for contributions, as `MM/DD/YYYY`.
 - **Officials of interest** (optional): legislators, parish council members, or statewide officials whose filings should be picked out of the contribution results.
 

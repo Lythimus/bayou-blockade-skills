@@ -47,4 +47,6 @@ Always make the AI number prominent — it's the main thing the user is looking 
 
 Cross-link `bayou:epa-frs-crosswalk` — an FRS `registry_id` lookup returns a `LA-TEMPO` program ID, which is LDEQ's own federal↔state bridge and often lines up with (or points to) the AI number found here. Useful when starting from a federal program ID (TRI, NPDES, RCRAInfo) instead of a company name.
 
+Next: `bayou:ldeq-eric-emissions` takes the AI number to the facility's state-certified annual emissions (`eric.py facility <AI>`) and its release points (`eric.py points <AI>`).
+
 $ARGUMENTS

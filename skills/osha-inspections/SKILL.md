@@ -166,6 +166,7 @@ curl -s -G "https://apiprod.dol.gov/v4/get/osha/accident/json?X-API-KEY=${KEY}&s
 3. Note `activity_nr` values for cases with penalties
 4. For each inspection of interest, pull violations using that `activity_nr`
 5. Link results to the public OSHA inspection page: `https://www.osha.gov/ords/imis/establishment.inspection_detail?id=ACTIVITY_NR`
+6. For an accident or inspection that followed a chemical release, look up the same facility and date in `bayou:csb-nrc-hazmat`. `csb-releases` gives the CSB-reported event and its incident report, and `nrc` gives the caller's account of what was released. Line the dates up; don't assume one record caused the other.
 
 ---
 

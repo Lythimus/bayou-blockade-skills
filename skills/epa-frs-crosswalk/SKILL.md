@@ -71,10 +71,10 @@ Verified live 2026-08-20: querying a made-up or nonexistent `registry_id` return
 | `AIRS/AFS` | Air Facility System | `bayou:epa-echo-search` CAA data |
 | `AIR` | ICIS-Air program ID, e.g. `LA0000002208900002` | `bayou:epa-echo-search` bulk ICIS-Air history. Its `PGM_SYS_ID` matches this value, not the bare `AIRS/AFS` number (verified 2026-10-08). |
 | `NPDES` | Water discharge permits | `bayou:epa-echo-search` CWA data |
-| `RCRAINFO` | Hazardous waste handler ID | `bayou:epa-rcra-waste` (this is the `handler_id`) |
+| `RCRAINFO` | Hazardous waste handler ID | `bayou:epa-rcra-waste` (this is the `handler_id`). Also the usual bridge from an EPA RMP: FRS has no RMP program records, so `bayou:epa-rmp-lookup crosswalk` looks up the RMP's `OtherEPAFacilityID`, which is usually this ID and sometimes the TRIS ID (verified 2026-10-16). |
 | `ICIS` | Integrated Compliance Information System | general EPA enforcement records |
 | `E-GGRT` | Greenhouse Gas Reporting Program | `bayou:epa-ghgrp-search` (this is the `facility_id`) — not present at every site; only facilities that exceed GHGRP reporting thresholds have one |
-| `LA-TEMPO` | **Louisiana's own facility ID system** | `bayou:ldeq-ai-lookup` and `bayou:ldeq-permit-status` — this is the federal↔state bridge; the numeric value is LDEQ's AI-adjacent ID used in LA-TEMPO, LDEQ's permit tracking system |
+| `LA-TEMPO` | **Louisiana's own facility ID system** | `bayou:ldeq-ai-lookup`, `bayou:ldeq-permit-status` and `bayou:ldeq-eric-emissions` (state emissions inventory; FRS LA-TEMPO `3483` is ERIC AI 3483, Air Liquide Norco) — this is the federal↔state bridge; the numeric value is LDEQ's AI-adjacent ID used in LA-TEMPO, LDEQ's permit tracking system |
 
 Not every site has every program ID — a small facility might have only `AIRS/AFS`, a major refinery complex will have most of the row above.
 

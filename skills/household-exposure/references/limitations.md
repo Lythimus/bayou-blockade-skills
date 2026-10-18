@@ -92,7 +92,9 @@ Their sum is neither, so the report shows them side by side and gives no combine
 Drinking water, indoor air, time away from home, accidents and upsets, chemicals formed in
 the air after release, sources beyond 50 km, soil, dust, food and skin contact. Distance to
 a water discharge says nothing about tap water; the report carries a short checklist for
-following that up separately.
+following that up separately. For that follow-up, find the system that serves the address
+(`bayou:ldh-drinking-water` `systems --parish`), then run `violations` and `samples` on its
+PWSID, and `downstream` from the discharge to see whether that system's intake is below it.
 
 ## The public version
 

@@ -159,9 +159,18 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 | `lac33-search` | Louisiana Administrative Code Title 33 by section or keyword |
 | `la-rs-search` | Louisiana Revised Statutes by R.S. number or keyword |
 | `lpsc-dockets` | Louisiana Public Service Commission dockets and orders |
-| `itep-lookup` | Industrial Tax Exemption Program awards and applications |
+| `itep-lookup` | LED incentives (ITEP, Quality Jobs, Enterprise Zone, Restoration Tax Abatement) from the FastLane public report and Board of Commerce & Industry agendas and transcripts; promised against reported jobs, payroll and investment; compliance and board votes |
+| `la-bond-dockets` | State Bond Commission agenda dockets (docket, item, issuer, par, Volume Cap) and minutes outcomes; LPFA TEFRA notices and board agendas; Port of South Louisiana, Port NOLA, Port of Greater Baton Rouge, and Ascension Parish IDB agendas |
+| `la-court-opinions` | Louisiana Supreme Court and Court of Appeal opinions (First Circuit index for LDEQ permit appeals, CourtListener for the rest): search, decision date/disposition/rehearing actions from the PDF, pin-page lookup, citation verification with writ history and stated coverage gaps; DAL hearing docket (DEQ/DCE/DENR) and Ethics decisions |
+| `parish-assessor-gis` | Parish parcel at a point or address, owner of record with source vintage, zoning districts, merged project footprint (GeoJSON), and nearest homes and residentially zoned parcels measured from the fenceline (St. Charles, Ascension, St. James) |
+| `ldeq-eric-emissions` | LDEQ ERIC state emissions inventory by AI: annual certified criteria pollutants and LAC 33:III Ch. 51 toxic air pollutants 1991–present, release-point actual emissions with stack parameters, current TEMPO permitted rates, parish totals, Louisiana same-NAICS peer rankings |
+| `ferc-elibrary` | FERC eLibrary dockets (CP pipeline and LNG certificates, PF pre-filing, RP/ER rates, P- hydro): filings, EIS/EA volumes, Commission and delegated orders, notices opening comment or intervention periods, intervention movants with oppositions and late grants, public PDF download with CEII/privileged request routes |
+| `ldeq-lelap-labs` | LDEQ LELAP lab accreditation (LAC 33:I Subpart 3): current scopes by lab, matrix, method and analyte; which labs hold a method; whether a lab was accredited for an analysis on a past sample date, from its EDMS certificates, amendments and suspension notices |
+| `parish-council-agendas` | Parish council and planning/zoning commission agendas and minutes, with keyword alerts for rezonings, special and conditional uses, variances, industrial uses, road/servitude and property actions, and inducement/PILOT/CEA/ITEP items; case tracking from P&Z to council ordinance with hearing dates (St. Charles Legistar, Ascension CivicClerk; East Baton Rouge, Plaquemines, St. Bernard CivicPlus; St. James and Assumption scanned PDFs via OCR) |
+| `la-state-lands` | State Land Office water-bottom claims (state claimed, dual claimed, judgment against the state, title-file index), state-owned land, WMAs and refuges; OSTR (formerly OMR) mineral leases, operating agreements, State Agency Leases and lease-sale history; every SMEB CO2 storage operating agreement (CS number → operator, resolution, stated vs mapped acres, parishes); Class VI AoR overlap with state pore space (CVI-002); current SMEB agenda figures and sequestration items (public SONRIS GIS, no login) |
+| `ldh-drinking-water` | Louisiana public drinking water near an injection well or outfall: public-supply wells near a point or inside a Class VI AoR with the LDEQ SWAP default protection radius (CVI-008); surface intakes downstream of a discharge by USGS NLDI flow trace, with flow km, the SWAP 5-mile critical area, the Mississippi corridor rule and the Bayou Lafourche diversion intakes, and population served including buyers; per-system LDH status (unresolved violations and deficiencies, next sanitary survey), federal SDWIS violations (both Envirofacts tables) and lead/copper 90th percentiles; LDH chemical/coliform/lead-copper results, state violations (boil advisories) and sanitary surveys captured from a visible browser after a user-solved reCAPTCHA, year by year to stay under LDH's 5,000-result cut-off (`dww_capture.js`) |
 | `cpra-master-plan` | CPRA 2023 Coastal Master Plan projects, land-change and flood-risk data |
-| `la-species-cultural-review` | LDWF rare/T&E species lists, project-review request, NRHP search, tribes with a consultation interest in the parish — the ESA/Section 106 bundle ² |
+| `la-species-cultural-review` | LDWF rare/T&E species lists, project-review request, NMFS/FWS listed species at a point, coastal waterbird nesting colonies (nest counts, aerial imagery), NRHP search, tribes with a consultation interest in the parish — the ESA/Section 106 bundle ² |
 | `slfpaw-geotechnical` | SLFPA-W soil borings, piezometers, cross-sections via the USACE National Levee Database ² |
 | `sonris-session` | Establish/check the SONRIS CAPTCHA session cookie other sonris-* skills need (headful solve, ~7-day validity) |
 | `sonris-operator-lookup` | Company name → SONRIS operator code (wells, injection, coastal, mineral-lease filings — not just O&G) |
@@ -188,8 +197,9 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 | `epa-rcra-waste` | RCRA Biennial Report — self-reported hazardous waste generation tonnage by cycle and waste type ¹ |
 | `epa-campd-search` | Clean Air Markets emissions, unit compliance, allowances (needs API key) |
 | `ejscreen-report` | EJScreen indicators, via the ArcGIS layer still backing EPA's own portal |
-| `federal-register-search` | Notices, proposed rules, open comment deadlines |
-| `csb-nrc-hazmat` | CSB investigations + USCG National Response Center release reports |
+| `federal-register-search` | Notices, proposed rules, open comment deadlines; regulations.gov dockets, documents and comments (MARAD deepwater ports, USCG waterway suitability assessments) |
+| `csb-nrc-hazmat` | USCG National Response Center spill and release reports from the yearly FOIA workbooks (1990 to date; by parish, company aliases, material or radius; per-report detail and summaries), CSB investigations with every recommendation and its status, and CSB Accidental Release Events under 40 CFR 1604 (2020 on) with incident-report PDFs. Confirms before multi-file NRC downloads. Needs `uv` |
+| `epa-rmp-lookup` | EPA Risk Management Plans (CAA 112(r)) from the Data Liberation Project's FOIA'd copy: regulated substances and quantities by process, program levels, prevention program, emergency response, executive summary, and an all-time deduplicated accident history; facilities by name or radius; FRS crosswalk. Worst-case (OCA) data is reading-room only and stated as such. Needs `uv` |
 | `osha-inspections` | OSHA inspections, violations, citations |
 | `doj-sec-search` | DOJ ENRD press releases + SEC EDGAR full-text (investor-disclosed liabilities) |
 | `pacer-case-search` | Free CourtListener/RECAP first, paid PACER only on confirmation |
@@ -205,7 +215,9 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 | `geo-distance` | Straight-line distance between addresses, place names, or coordinates |
 | `satellite-imagery` | Free imagery for a place and date, auto-selecting the best source |
 | `firms-active-fire` | NASA FIRMS active-fire detections with fire radiative power and overpass timestamps ² |
-| `wind-history` | Forensic wind direction/speed — did the plume reach this receptor? |
+| `wind-history` | Forensic wind direction/speed — did the plume reach this receptor? Optional vertical profile (KSIL radiosonde, Open-Meteo levels) for a sound-refraction screen |
+| `lf-acoustic-baselines` | Archived infrasound (BDF) and seismic spectra near a point from EarthScope: station epochs and instrument changes, MUSTANG and miniSEED PSDs, season-matched before/after peak comparison, infrasound↔seismic coherence, ComCat events |
+| `lf-source-locate` | Bearing inference for a low-frequency tonal at one infrasound site: wind-conditioned bearing posterior and arc with permutation test, ERIC release points ranked against it, hourly features CSV seam; 2011–12 TA arrival-time locator for impulsive events with picks CSV seam (cross-spectral bearing and `tdoa` failed validation, diagnostic only) |
 | `usgs-water-data` | Nearby gauges, discharge/gage-height/water-quality, NOAA flood forecast ² |
 | `dot-geo-search` | USDOT ArcGIS layers — pipelines, airports, railroads |
 | `dot-datahub-search` | USDOT Socrata catalog + SODA queries |

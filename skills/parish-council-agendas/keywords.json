@@ -1,0 +1,36 @@
+{
+  "_about": "Alert categories for 'agendas.py alerts'. Each pattern is a case-insensitive Python regex matched against an agenda item's title (and, for scanned parishes, the OCR text of the item). Parish-specific patterns are in parishes.json 'terms'. A match is a lead to read, not a finding.",
+  "categories": {
+    "rezoning": [
+      "change (?:of|in) (?:the )?zoning", "zoning classification", "\\brezon", "zoning map",
+      "zoning district (?:change|amendment)", "from [A-Z]{1,3}-?\\d?[A-Z]?(?:\\([A-Z]\\))?,? [^.]{0,60}?to [A-Z]{1,3}-\\d",
+      "future land use", "\\bFLUM\\b", "land use (?:map|plan) amendment"
+    ],
+    "special-use": [
+      "special (?:permit )?use", "conditional use", "special exception", "planned (?:unit )?development",
+      "\\bPUD\\b", "site plan (?:approval|review)"
+    ],
+    "variance": ["\\bvariance", "board of (?:zoning )?adjust"],
+    "industrial": [
+      "\\bM-[123]\\b", "heavy (?:manufacturing|industr)", "light manufacturing", "industrial (?:district|zon|park|site|use)",
+      "high impact development", "\\bHIDF\\b", "data cent(?:er|re)", "pipeline", "petrochemical", "chemical plant",
+      "(?<!and )(?<!& )\\bterminal\\b(?!,? district)", "\\bLNG\\b", "carbon (?:capture|sequestration|storage)", "\\bCO2\\b", "\\bCCS\\b",
+      "injection well", "class vi", "hydrogen", "ammonia", "methanol", "refiner", "solar (?:farm|facility|project)",
+      "battery (?:energy )?storage", "landfill", "incinerat", "grain elevator", "rail (?:spur|yard)"
+    ],
+    "road-property": [
+      "servitude", "right[- ]of[- ]way(?! maintenance)", "(?:road|street|highway) closure", "clos(?:e|ing|ure) (?:of )?(?:a )?(?:portion of )?[^.]{0,40}?(?:road|street|lane|avenue)",
+      "revo(?:ke|cation)[^.]{0,60}?(?:dedication|road|street|servitude|right)", "\\babandon(?:ment|ing)?\\b", "expropriat",
+      "act of (?:sale|donation|exchange)", "immovable property", "declar[^.]{0,30}surplus[^.]{0,40}(?:property|land|lot|tract)"
+    ],
+    "financing-incentive": [
+      "inducement", "intent to issue", "\\bbonds?\\b", "\\bPILOT\\b", "payment[s]? in lieu", "industrial development (?:board|revenue)",
+      "cooperative endeavor", "\\bITEP\\b", "industrial tax exemption", "tax abatement", "restoration tax", "enterprise zone",
+      "tax increment", "\\bTIF\\b", "economic development district", "\\bTEFRA\\b", "lease (?:agreement|of) [^.]{0,40}(?:port|industrial|parish property)"
+    ],
+    "land-use-code": [
+      "(?:unified )?land development code", "zoning ordinance[^.]{0,40}(?:section|sec\\.|article|appendix|chapter|table)", "text amendment", "amend[^.]{0,60}development code", "comprehensive (?:land use )?plan",
+      "master plan", "moratorium", "zoning tables?", "overlay district", "buffer (?:zone|requirement)", "setback (?:requirement|regulation|standard)s?"
+    ]
+  }
+}

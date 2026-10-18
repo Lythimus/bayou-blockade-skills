@@ -40,8 +40,8 @@ assuming PM-only.
 Cross-links: `bayou:wind-history` (did wind carry the plume toward this sensor at the observed
 time?), `bayou:firms-active-fire` + `bayou:satellite-imagery` (independent heat/optical
 confirmation for the same window), `bayou:facility-coordinates` / `bayou:geo-distance` (resolve
-facility lat/lon and distance to each sensor), `bayou:csb-nrc-hazmat` + `bayou:epa-echo-search`
-(the incident record this data is corroborating), `bayou:la-rs-search R.S. 30:2383` (pull the
+facility lat/lon and distance to each sensor), `bayou:csb-nrc-hazmat` + `bayou:epa-rmp-lookup` +
+`bayou:epa-echo-search` (the incident record this data is corroborating), `bayou:la-rs-search R.S. 30:2383` (pull the
 live CAMRA statute text).
 
 ## Tools available in this environment

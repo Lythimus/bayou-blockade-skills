@@ -173,5 +173,12 @@ A typical Section 408 permission includes:
 3. Flag any pending permits (review in progress)
 4. Note the reviewing district and contact info for follow-up
 5. Link to the full permit record in ORM-Public or the district's Regulatory page
+6. For an LNG terminal or interstate gas pipeline, FERC is the lead NEPA agency, and the Corps'
+   404/Section 10 review typically relies on FERC's EIS. Pull the EIS with `bayou:ferc-elibrary
+   eis <docket>`
+7. For Section 10 or 404 work in a lake, bay or bayou, check the state's claim to the bottom and
+   any state lease or CCS operating agreement there with `bayou:la-state-lands at <lat> <lon>
+   --radius 100`. A CO2 injection well or pipeline in state waters also needs an SMEB storage
+   agreement, which `la-state-lands ccs` lists.
 
 $ARGUMENTS

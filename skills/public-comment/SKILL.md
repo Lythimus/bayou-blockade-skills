@@ -205,7 +205,9 @@ happened once in a filed comment. At least one bond-law clock has already been s
 wrong statute and the wrong trigger in a draft.
 
 If an authority is not in either file, verify it live before citing it. Use
-`bayou:la-rs-search` or `bayou:lac33-search` for Louisiana, and Cornell LII, govinfo, eCFR, or
+`bayou:la-rs-search` or `bayou:lac33-search` for Louisiana statutes and rules,
+`bayou:la-court-opinions` (`verify-cite`, then `fetch --find` for the pin page) for Louisiana
+cases, and Cornell LII, govinfo, eCFR, or
 WebSearch for federal law. Then add it to the right file with its status and date. **Never
 characterize a case or statute from memory, and never copy one from a research memo or AI
 research report without checking the primary text.**

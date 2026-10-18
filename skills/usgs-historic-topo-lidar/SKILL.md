@@ -61,6 +61,12 @@ Historic topo quads download as **GeoPDFs** — ordinary PDFs with embedded geor
 
 ## Step 3: Crop each sheet to the footprint
 
+If a `bayou:parish-assessor-gis` footprint GeoJSON exists, set the crop box from its bounds
+plus a margin instead of guessing `DLAT`/`DLON`. Use
+`python3 -c "import json;c=[p for poly in json.load(open('site.geojson'))['features'][0]['geometry']['coordinates'] for r in poly for p in r];print(min(x for x,y in c),min(y for x,y in c),max(x for x,y in c),max(y for x,y in c))"`
+to print xmin ymin xmax ymax. The same file can be overlaid on the rendered sheets to show the
+parcel lines.
+
 ```bash
 LAT=29.959211
 LON=-90.332609

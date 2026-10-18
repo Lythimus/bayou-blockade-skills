@@ -76,6 +76,7 @@ this build. **Don't guess a URL for these.** The fastest legitimate way to find 
   EPA-registered side of a facility — useful alongside a well lookup when the site is also
   an LDEQ-permitted facility (e.g. a petrochemical plant with an on-site Class I well).
 - `bayou:geo-distance` for any point-to-point distance once coordinates are in hand.
+- `bayou:ldh-drinking-water` for the public-supply water wells near an injection or disposal well (`near`, or `near --aor` for a Class VI area of review). Private domestic water wells are not in it.
 
 ## Presenting results
 

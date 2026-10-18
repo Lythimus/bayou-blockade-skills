@@ -76,6 +76,7 @@ The first call returns `status.observed.primary` (current stage, ft) and flood c
 3. If flood context was pulled: current stage vs. flood category thresholds, in plain language ("X ft, below/at/above [category] stage").
 4. State the retrieval window and whether values are provisional (USGS IV data is explicitly provisional/unreviewed — say so) vs. approved DV data.
 5. Cross-link: `bayou:fema-flood` for NFIP claims/policy history and NFHL flood-zone designation at a specific point.
+6. Cross-link: `bayou:ldh-drinking-water` when the gauge question is about a discharge or spill reaching drinking water: `downstream` lists the public-supply intakes below a point by flow distance, and `near` lists public-supply wells near a groundwater site.
 
 ### Citation format
 

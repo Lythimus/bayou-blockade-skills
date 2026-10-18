@@ -29,9 +29,23 @@ people." The source of the whole IT-factors framework. Safe to cite directly.
 **Where it bites hardest:** factor 3. A record with zero alternatives analysis fails it
 factually, with no legal argument required. Factor 2 is nearly as good where the only stated
 justification is the applicant's own administrative convenience and no public benefit is
-asserted anywhere.
+asserted anywhere. When the applicant does claim jobs or investment, its own incentive filings
+put a number on that claim and show its track record against earlier promises. Pull them with
+`bayou:itep-lookup` (promised against reported jobs, BCI compliance codes and votes).
 
 ### *RISE St. James v. LDEQ* (Formosa) — ⚠️ **READ THIS BEFORE CITING**
+**Verified against the opinion text, 2026-10-16 (`bayou:la-court-opinions`):** RISE St. James v.
+La. Dep't of Envtl. Quality, 2023-0578 (La. App. 1 Cir. 1/19/24). Reporter cite 383 So.3d 956
+appears in a filed Formosa comment (`ej-comment-style/references/excerpts.md`, pin 980 for slip
+p. 32) but is not on CourtListener, so it is unverified; slip p. 32 does discuss SILs. The decree reads "JUDGMENT
+REVERSED; PERMITS REINSTATED; JUDGMENT RENDERED." Rehearing applications by LDEQ, Beverly
+Alexander and the RISE plaintiffs were acted on Feb. 15, 2024 (two read "DENIED"; the third
+stamp is illegible in the scan). LASC writ history: the plaintiffs applied for writs on March 18, 2024 (Earthjustice's filed
+application), and a Liskow & Lewis client note says "On September 4, 2024, the Supreme Court
+summarily denied these petitions." **Docket number and the LASC action itself not yet seen.**
+Confirm on lasc.org before writing "writ denied, 2024-____ (La. 9/4/24)". CourtListener has no
+record of the denial, which is the writ-denial gap `bayou:la-court-opinions` warns about. *Alexander v. St. James Parish*, 2025-C-00866 (La. 3/6/26), shares parties but is a parish
+land-use case, not history of this appeal.
 
 **Do not describe this as a ruling against Formosa. It reinstated Formosa's permits.**
 
@@ -41,12 +55,14 @@ asserted anywhere.
   every permit. This is the operative decision.
 
 **What you can accurately cite from the First Circuit opinion:** it held the *Save Ourselves*
-directives "broad enough to include an analysis of environmental justice" (Op. at 46) — so EJ
+directives "broad enough to include an analysis of environmental justice, as defined by the EPA"
+(Op. at 46) — so EJ
 analysis being part of the Louisiana public trust duty is First Circuit law.
 
 **The trap, and it is a real one:** the same opinion endorses the sequence where, **upon
 finding no adverse impact, the agency need not analyze disparate impact.** That is the
-applicant's standard defense, and this case supplies it. Citing the case for EJ without
+applicant's standard defense, and this case supplies it (Op. at 51: DEQ's "determination that
+there were no 'adverse impacts' made it unnecessary to reach the issue of 'disparate impact'"). Citing the case for EJ without
 addressing this hands the agency its own answer.
 
 **How to use it correctly:** cite it for the EJ holding, then **distinguish it on the
@@ -80,6 +96,21 @@ is given.
 Consequences for drafting: state standing in the letter; request written notice of the final
 decision so the 30-day clock starts cleanly; do not let the comment period close without every
 colorable issue raised, because unraised issues are generally waived.
+
+### La. R.S. 30:209(4)(e) — state CO2 storage agreements need a parish hearing
+**Verified against primary text at `legis.la.gov` (2026-10-17).** The State Mineral and Energy
+Board may enter an operating agreement for CO2 (or hydrocarbon) storage beneath state land only
+"upon a two-thirds vote of the members", after notice to the affected parish's governing
+authority, and after "a public hearing conducted by a hearing officer ... in each affected
+parish pursuant to R.S. 30:6". Use it to demand the hearing in the right parish when an AoR
+crosses a parish line (`bayou:la-state-lands ccs` shows each agreement's parish split). Count
+the votes against the two-thirds requirement.
+
+### La. R.S. 41:1701 — state water bottoms are public-trust lands
+**Verified against primary text (2026-10-17).** The beds of navigable waters and the shores of
+bays, the Gulf and navigable lakes belong to the state and "shall be protected, administered,
+and conserved". This pairs with Art. IX § 1 for pore-space agreements under state lakes.
+`bayou:la-state-lands at` shows whether the State Land Office claims a given bottom.
 
 ### La. R.S. 30:2024 — do not confuse with the above
 Pertains **exclusively to the permit applicant's** own request for a hearing within 30 days.
@@ -134,9 +165,11 @@ this state." For public-trust bonds, the period is 9:2347(G) above. The Gemini-d
 resolution" under 13:5121. **That is wrong on both the statute and the trigger.**
 
 ### *Louisiana Public Facilities Authority v. Foster*, No. 2001-CA-0009 (La. 9/18/01)
-**Status: holding verified (FindLaw text), 2026-09-24. So.2d cite unconfirmed:** two sources
-give conflicting reporter cites (789 So.2d 1196 and 795 So.2d 288). Cite by docket number and
-date until one is confirmed.
+**Status: holding verified (FindLaw text), 2026-09-24. So.2d cite still unconfirmed (checked
+2026-10-16):** CourtListener lists 795 So.2d 288 (and 2001 WL 1085064) for docket 2001-CA-0009,
+decided 9/18/01, and does not list 789 So.2d 1196. But it also assigns 795 So.2d 288 to *In re
+Hardy*, 2001-OB-2428 (La. 9/13/01), so one of the two records is wrong. Cite by docket number
+and date until someone checks the first page in the reporter.
 
 Held: "the LPFA is a public entity, subject to legislative regulation," not a private citizen
 protected by the contract clause (La. Const. art. I, § 23). The court also noted the legislature
@@ -160,7 +193,7 @@ The court upheld tax-increment bonds for a private retail store.
 
 **The trap:** this case is why "no public purpose" arguments against industrial financing lose.
 **The usable part is prong (iii).** Where public funds or property actually move, as with a
-PILOT lease-back, a cooperative endeavor agreement, or incentives, ask the public body to put
+PILOT lease-back, a cooperative endeavor agreement, or incentives (`bayou:itep-lookup`), ask the public body to put
 its *demonstrable, objective* expectation of equivalent value in the record. Frame it as a
 disclosure request, not as a claim that the test fails. A pure conduit bond secured only by the
 borrower may not involve public funds at all. Check that before invoking art. VII, § 14.
@@ -206,8 +239,20 @@ require today?" Never assert that the deficiency is current.
 
 ## Case law — other
 
-### *Matter of Browning-Ferris Industries Petit Bois Landfill*, 657 So.2d 633, 637 (La. App. 1 Cir. 1992)
-⚠️ **Status: CITATION UNVERIFIED — do not cite until confirmed (flagged 2026-08-29, HPLS campaign).**
+### *In re Browning-Ferris Industries Petit Bois Landfill*, 93-2050 (La. App. 1 Cir. 6/23/95), 657 So.2d 633
+⚠️ **Status: CITATION CORRECTED, PROPOSITION UNVERIFIED — do not cite for the alternative-site
+point until someone reads p. 637 (flagged 2026-08-29, HPLS campaign; cite corrected 2026-10-16).**
+`bayou:la-court-opinions verify-cite` confirmed the case on CourtListener: La. App. 1 Cir.,
+docket 93 CA 2050, decided **June 23, 1995** (the 1992 date below was the error), 657 So.2d 633.
+LASC writ actions: Nos. 95-C-2127 and 95-C-2155 (La. 11/27/95), 663 So.2d 742. A web index
+summarizes 95-C-2155 as "Denied"; read the LASC action before writing "writ denied". The opinion
+text is not retrievable anonymously (CourtListener's page is bot-gated and the API text endpoint
+needs a token), so the p. 637 proposition below is still unchecked. A scoped CourtListener
+search shows the opinion's text does contain "alternative sites" and "Save Ourselves" and does not
+contain "already owns": the topic is there, but whether it holds what the proposition says needs a
+reading.
+
+Original flag:
 The proposition attributed to it — that an alternative-site analysis performed to justify the site
 the applicant already owns does not satisfy the IT factor — is the right argument and is directly on
 point whenever an EAS screens alternatives by criteria only the chosen site can meet. **But the

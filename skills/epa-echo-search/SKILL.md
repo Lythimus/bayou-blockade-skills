@@ -8,6 +8,8 @@ allowed-tools: Bash, AskUserQuestion
 
 Search the EPA Enforcement and Compliance History Online (ECHO) database for facilities regulated under CAA, CWA, RCRA, and SDWA programs. ECHO is also a reliable source of **GPS coordinates** for petrochemical, O&G, utility, and manufacturing facilities — see the coordinates section below.
 
+For a Louisiana public water system, use `bayou:ldh-drinking-water` as well. ECHO's SDWA data is the federal SDWIS extract, which lags LDH and omits state-only entries such as system-issued boil advisories. That skill reads LDH's status gauges, wells and intakes with coordinates, and points to the LDH sample results.
+
 ## Parsing arguments
 
 The user may provide:

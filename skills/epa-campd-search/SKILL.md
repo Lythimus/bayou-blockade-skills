@@ -218,6 +218,86 @@ for r in data:
 | `grossLoad` | Gross electrical load (MWh) |
 | `operatingTime` | Operating hours |
 
+
+---
+
+## Step 6b: Hourly operations (start-ups, shutdowns, load)
+
+Use this to line up a unit's on/off state and load with an hour of interest: a noise or infrasound recording, an odor complaint, a flaring event. The endpoint is `emissions-mgmt/emissions/apportioned/hourly`, with one row per unit-hour.
+
+- **Paging.** `page` and `perPage` are required (`perPage` at most 500; leaving them out returns 400). `x-total-count` is not sent on every response, so page until a batch comes back shorter than `perPage`.
+- **Volume.** A month for a 3-unit plant is 2,232 rows (5 pages). DEMO_KEY is rate-limited, so use `CAMPD_KEY` for multi-month pulls.
+- **Response shape.** It arrives as `{"items": [...]}`. The script also accepts a bare list.
+- **Time.** `date` and `hour` are the hour beginning, in **local standard time**, all year. Part 75 does not shift for daylight saving. Convert before matching to a CDT recording.
+
+Field names, verified live on 2026-10-17 (ORISPL 8056 Waterford, 6055 Big Cajun 2):
+
+| Field | Meaning |
+|---|---|
+| `unitId`, `unitType` | Unit and type (`Combustion turbine`, `Dry bottom wall-fired boiler`, …) |
+| `date`, `hour` | Hour beginning, local standard time |
+| `opTime` | Fraction of the hour operating, from 0 to 1. A value strictly between 0 and 1 marks a start-up or shutdown hour. |
+| `grossLoad` | Gross load, MW. Null when not operating. |
+| `steamLoad` | Steam load, 1000 lb/h (cogeneration units) |
+| `heatInput` | Heat input, mmBtu |
+| `so2Mass`, `noxMass`, `co2Mass` | Hourly mass, with `*MeasureFlg` giving measured or substituted |
+
+Note that this endpoint uses `opTime`, not `operatingTime` (the annual `unit-data` field in Step 6).
+
+```bash
+python3 - <<'PY'
+import json, os, urllib.request
+ORISPL, BEGIN, END = 8056, "2023-07-01", "2023-07-31"   # dates inclusive, local standard time
+KEY = os.environ.get("CAMPD_KEY") or "DEMO_KEY"
+SHOW_ALL = False                                          # True prints every hour, not only transitions
+rows, page = [], 1
+while True:
+    url = ("https://api.epa.gov/easey/emissions-mgmt/emissions/apportioned/hourly?facilityId=%s&beginDate=%s"
+           "&endDate=%s&page=%d&perPage=500&api_key=%s" % (ORISPL, BEGIN, END, page, KEY))
+    with urllib.request.urlopen(url, timeout=120) as r:
+        body = json.load(r)
+    batch = body["items"] if isinstance(body, dict) else body
+    rows += batch
+    # x-total-count is not sent on every response; a short page is the reliable end signal.
+    if len(batch) < 500:
+        break
+    page += 1
+print("ORISPL %s, %s..%s: %d unit-hours" % (ORISPL, BEGIN, END, len(rows)))
+by = {}
+for r in rows:
+    by.setdefault(r["unitId"], []).append(r)
+for unit, rs in sorted(by.items()):
+    rs.sort(key=lambda r: (r["date"], r["hour"]))
+    on_hours = sum(r["opTime"] or 0 for r in rs)
+    loads = [r["grossLoad"] for r in rs if r["grossLoad"]]
+    print("\nUnit %s (%s): %.1f operating hours of %d; gross load max %s MW" % (
+        unit, rs[0].get("unitType"), on_hours, len(rs), max(loads) if loads else "-"))
+    prev = None
+    for r in rs:
+        on = (r["opTime"] or 0) > 0
+        flag = ""
+        if prev is not None and on != prev:
+            flag = "START-UP" if on else "SHUTDOWN"
+        # 0 < opTime < 1 marks the hour a unit came on or went off line.
+        if on and r["opTime"] < 1:
+            flag += " (partial %.2f h)" % r["opTime"]
+        if SHOW_ALL or flag:
+            print("  %s %02d:00  opTime %-5s grossLoad %-6s MW  heatInput %-8s mmBtu  %s" % (
+                r["date"], r["hour"], r["opTime"], r["grossLoad"], r["heatInput"], flag))
+        prev = on
+PY
+```
+
+The output for July 2023 at Waterford (ORISPL 8056):
+- Unit 2 shut down 2023-07-04 02:00.
+- It started up 2023-07-17 15:00, with 0.88 h of operation and 0 MW in the first hour.
+- It shut down again 2023-07-20 19:00.
+- Units 1 and 4 did not run.
+
+A start-up hour reports heat input with zero gross load, because the unit is firing before it syncs to the grid.
+
+To set these hours against archived infrasound or seismic spectra, use `bayou:lf-acoustic-baselines` (`psd`/`compare` with matching `--hours`). Convert local standard time to the CDT/CST `--hours` it expects.
+
 ---
 
 ## Step 7: Allowance accounts and transactions

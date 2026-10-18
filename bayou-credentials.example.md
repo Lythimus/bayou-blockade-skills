@@ -83,6 +83,18 @@ ATTAINS_API_KEY: <key>
 
 ---
 
+## Regulations.gov (api.data.gov)
+
+Used by `bayou:federal-register-search` to pull regulations.gov dockets, documents, attachments
+and public comments (including MARAD deepwater port and USCG waterway suitability dockets).
+Register at https://api.data.gov/signup/ (free, instant). A registered key allows 1,000
+requests/hour; `DEMO_KEY` allows 10. Any api.data.gov key works, and the skill falls back to
+`CAMPD_API_KEY` or `ATTAINS_API_KEY` when this entry is missing.
+
+REGULATIONS_GOV_API_KEY: <key>
+
+---
+
 ## EPA CompTox (comptox.epa.gov/ctx-api)
 
 Used by `bayou:chemical-hazard-profile` for EPA cancer calls and IRIS reference values. Optional:

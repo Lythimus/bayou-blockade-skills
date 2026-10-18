@@ -175,6 +175,16 @@ def tri_chemicals(path):
     return terms
 
 
+def iris_value(v):
+    # The API drops IRIS's superscript, leaving "2 x 10 -2" for 2 x 10^-2.
+    return re.sub(r"10 (-?\d+)", r"10^\1", v) if v else "none"
+
+
+def iris_list(v):
+    # IRIS multi-value fields arrive newline-separated, which would break the Markdown bullet.
+    return ", ".join(s.strip() for s in v.splitlines() if s.strip()) if v else "none"
+
+
 def render(p, all_sources=False):
     if not p["found"]:
         return "## %s\n\nNot found in PubChem. TRI categories and mixtures (\"Certain glycol ethers\", \"Xylene (mixed isomers)\", \"Lead and lead compounds\") are groups, not single compounds; look up a member compound by CAS number.\n" % p["query"]
@@ -200,11 +210,15 @@ def render(p, all_sources=False):
                   % (hidden, ", ".join(cancer) or "none"), ""]
     ctx = p.get("comptox")
     if ctx:
-        lines.append("**EPA CompTox** (%s)" % ctx["dtxsid"])
-        lines += ["- Cancer call: %s, %s route (%s)" % (c["cancerCall"], c["exposureRoute"], c["source"]) for c in ctx["cancer_calls"]]
+        lines.append("**EPA CompTox** (%s, %s)" % (ctx["dtxsid"], ctx["dashboard"]))
+        for c in ctx["cancer_calls"]:
+            route = c["exposureRoute"]
+            route = "%s route" % route if route and route != "-" else "route not specified"
+            lines.append("- Cancer call: %s, %s (%s)" % (c["cancerCall"], route, c["source"]))
         for r in ctx["iris"]:
-            lines.append("- IRIS: chronic RfD %s, chronic RfC %s; critical effects: %s; tumor site: %s (%s)" % (
-                r["rfdChronic"], r["rfcChronic"], r["criticalEffectsSystems"], r["tumorSite"], r["irisUrl"]))
+            lines.append("- IRIS (revised %s): chronic RfD %s, chronic RfC %s; critical effects: %s; tumor sites: %s (%s)" % (
+                r["lastSignificantRevision"] or "date not given", iris_value(r["rfdChronic"]), iris_value(r["rfcChronic"]),
+                iris_list(r["criticalEffectsSystems"]), iris_list(r["tumorSite"]), r["irisUrl"]))
         lines.append("")
     elif "comptox_error" in p:
         lines += ["EPA CompTox: " + p["comptox_error"], ""]

@@ -107,6 +107,9 @@ noon in Hahnville. The parish coastal contact named in the notices is Clay Ledet
 
 Other coastal parishes also run LCPs. Only St. Charles's publication channel is documented here.
 For another parish, find its legal-notice newspaper before assuming OCM's reports are complete.
+Parish bodies that act on coastal projects also post agendas, read with `bayou:parish-council-agendas`:
+the St. James Coastal Zone committee, and the Plaquemines and St. Bernard councils, which issue parish
+construction permits for terminals, LNG and pipelines.
 
 ## How to present results
 
@@ -116,5 +119,14 @@ For another parish, find its legal-notice newspaper before assuming OCM's report
 3. Say which sources were checked and which periods were missing.
 4. Status reports carry no location. A CUP that hasn't been resolved through SONRIS is a
    candidate, not a match.
+5. For a resolved CUP that fills, dredges or builds near open water, run the surveyed
+   waterbird-colony screen at its `LOCATION:` (`bayou:la-species-cultural-review` Step 2c).
+6. When the applicant is an LNG terminal or an interstate gas pipeline, the federal record
+   (EIS, certificate order, intervenors) is in its FERC docket: `bayou:ferc-elibrary search
+   "<applicant>"`. CP2 LNG holds both a CUP (P20211131) and FERC docket CP22-21.
+7. For work in open water, check whether the bottom is state-claimed and whether it lies inside
+   a state mineral lease or CCS operating agreement: `bayou:la-state-lands at <lat> <lon>
+   --radius 100`. Work on state water bottoms needs a State Land Office right-of-way, and the
+   State Land Office is one of the reviewers in the CUP comment log.
 
 $ARGUMENTS

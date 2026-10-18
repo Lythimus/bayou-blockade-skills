@@ -76,5 +76,6 @@ Replace `POINT_A_LAT`/`POINT_A_LON`/`POINT_B_LAT`/`POINT_B_LON` with the geocode
 - State this is straight-line ("as the crow flies") distance, not driving distance or downwind plume distance — call that out explicitly if the context is air dispersion or emergency planning, since actual exposure distance depends on wind direction, terrain, and plume modeling, not just radius.
 - Note the geocoding source (Nominatim/OpenStreetMap) and that address-level geocoding is typically accurate to within ~10-50 meters for a rooftop match, less precise for a place-name match.
 - If one point came from `bayou:facility-coordinates` (EPA ECHO), note that ECHO coordinates are accurate to ~100-500 meters for large industrial sites — compound that into the precision caveat.
+- For distance from a facility's property line rather than a point (fenceline to home, site to cemetery), use `bayou:parish-assessor-gis` (`footprint` then `receptors`). Point-to-point overstates separation for any site larger than a few acres.
 
 $ARGUMENTS

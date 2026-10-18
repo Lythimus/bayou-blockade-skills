@@ -1,0 +1,313 @@
+{
+  "_about": "Per-parish registry of parish council and planning/zoning agenda platforms. 'platform' selects the adapter in agendas.py. 'skip_bodies' are left out of meetings/alerts unless --all-bodies is given. 'terms' are extra alert patterns (regex, case-insensitive) added to the categories in keywords.json for that parish only. Status: 'verified' entries work; 'probed-unusable' and 'unprobed' entries carry what a probe found. 'layout' (CivicPlus) adjusts item splitting: item_start (extra item-number regex; the number it captures is also the matter file, as for St. Bernard dockets), ignore (page-header lines), section (mixed-case heading regex), agenda_end (extra closing-line regex), matter (regex pulling a matter number from the item title). Verified 2026-10-17.",
+  "parishes": {
+    "st-charles": {
+      "name": "St. Charles Parish",
+      "status": "verified",
+      "platform": "legistar",
+      "client": "stcharlesgov",
+      "api": "https://webapi.legistar.com/v1/stcharlesgov",
+      "web": "https://stcharlesgov.legistar.com/Calendar.aspx",
+      "matter_link": "https://stcharlesgov.legistar.com/gateway.aspx?m=l&id=/matter.aspx?key=",
+      "attachments": "https://stcharlesgov.legistar1.com/stcharlesgov/attachments/",
+      "skip_bodies": [
+        "SCP Bids",
+        "SCP General Chamber Booking",
+        "Council Secretary",
+        "Council Member(s)",
+        "Council Chairman"
+      ],
+      "notes": [
+        "Council items carry the matter file (2026-0340), type, action and pass flag. P&Z Commission items are title-only and carry the case number (2026-12-R rezoning, -SPU special permit use, -MIN minor resubdivision, -HOP home occupation).",
+        "The council ordinance for a rezoning does not cite the P&Z case number. 'track' links them on applicant and lot text; the matter history then shows 'Planning Commission Recommended Approval/Denial'.",
+        "Ordinances are introduced at one council meeting and heard at a later one. The hearing date is a heading line in the agenda just before the introduced ordinances; 'items' copies it onto each one as hearing_date.",
+        "P&Z minutes stay in Draft on Legistar. The P&Z vote shows up in the council matter's history and its 'Minutes' attachment."
+      ],
+      "terms": {
+        "rezoning": [
+          "\\b\\d{4}-\\d+-R\\b"
+        ],
+        "special-use": [
+          "\\b\\d{4}-\\d+-SPU\\b"
+        ]
+      }
+    },
+    "ascension": {
+      "name": "Ascension Parish",
+      "status": "verified",
+      "platform": "civicclerk",
+      "tenant": "ascensionparishla",
+      "api": "https://ascensionparishla.api.civicclerk.com/v1",
+      "web": "https://ascensionparishla.portal.civicclerk.com/",
+      "skip_bodies": [],
+      "notes": [
+        "Meeting ids are CivicClerk agendaIds (Meetings/{agendaId}), not event ids.",
+        "Regular Council meetings post agendas and packets but no minutes, and the item vote fields are empty. Council outcomes are not online: read the next agenda (an ordinance moves from 'Introduction of Ordinance' to 'Public Hearing'), watch the meeting video, or request the minutes (la-public-records-request).",
+        "Planning Commission, Zoning Commission, Board of Adjustments, the drainage boards and the council committees do post minutes.",
+        "Zoning cases are 'Zoning Review ID: PZ-NNNN.YY'. Code amendments are DC-YY.NN (development code) and ZT-YY.NN (zoning tables)."
+      ],
+      "terms": {
+        "rezoning": [
+          "\\bPZ-\\d{3,5}\\.\\d{2}\\b"
+        ],
+        "land-use-code": [
+          "\\b(?:DC|ZT)-\\d{2}\\.\\d{2}\\b"
+        ]
+      }
+    },
+    "st-james": {
+      "name": "St. James Parish",
+      "status": "verified",
+      "platform": "civicplus",
+      "base": "https://www.stjamesla.com",
+      "web": "https://www.stjamesla.com/AgendaCenter",
+      "categories": {
+        "3": "Parish Council",
+        "2": "Planning Commission",
+        "6": "Coastal Zone Commission",
+        "7": "Economic Development Board Meetings",
+        "9": "Board of Building Code Appeals",
+        "5": "Keep St. James Parish Beautiful Board"
+      },
+      "skip_bodies": [
+        "Keep St. James Parish Beautiful Board",
+        "Board of Building Code Appeals"
+      ],
+      "scanned": true,
+      "notes": [
+        "Agendas and minutes are copier scans with no text layer. agendas.py OCRs them with tesseract at 300 dpi and caches the text by file id and PDF hash. Expect OCR typos ('Parsih'); check the PDF before quoting.",
+        "There is no parish zoning layer (see parish-assessor-gis); land-use items come to the Planning Commission and council as land-use or 'Industrial' district changes under the parish land use ordinance."
+      ],
+      "terms": {}
+    },
+    "east-baton-rouge": {
+      "name": "East Baton Rouge Parish (Metro Council)",
+      "status": "verified",
+      "platform": "civicplus",
+      "base": "https://www.brla.gov",
+      "web": "https://www.brla.gov/AgendaCenter",
+      "categories": {
+        "3": "Metropolitan Council",
+        "12": "Planning Commission",
+        "4": "Metro Board of Adjustment",
+        "23": "Local Industrial Tax Exemption Program Committee",
+        "37": "Capitol House Economic Development District Board of Commissioners",
+        "11": "Historic Preservation Committee",
+        "32": "Grants & Contract Review Committee"
+      },
+      "skip_bodies": [
+        "Historic Preservation Committee",
+        "Grants & Contract Review Committee"
+      ],
+      "notes": [
+        "City-parish government: the Metropolitan Council is both the parish council and the Baton Rouge city council. Agendas have a text layer; some Metro Council postings are one-page scanned notices that list no items.",
+        "AgendaCenter's year listing needs the X-Requested-With header (sent on every request).",
+        "Zoning cases: 'Case NN-YY' (rezoning), 'PA-NN-YY' (Comprehensive Land Use Plan amendment), PUD/ISPUD/SPUD/CUP-NN-YY. The Planning Commission agenda separates items that go on to the Metro Council from those it decides alone. The Metro Council introduces Planning Commission cases under 'PLANNING AND ZONING INTRODUCTIONS' and hears them at a later meeting.",
+        "The Local ITEP Committee is the parish's 2025-rules ITEP body (see itep-lookup); it posts rarely."
+      ],
+      "terms": {
+        "rezoning": [
+          "\\bCase \\d{1,3}-\\d{2}\\b"
+        ],
+        "land-use-code": [
+          "\\bPA-\\d{1,3}-\\d{2}\\b"
+        ],
+        "special-use": [
+          "\\b(?:I?S?PUD|CUP|TND)-\\d{1,3}-\\d{2}\\b"
+        ]
+      },
+      "layout": {
+        "matter": "^(\\d{2}-\\d{5})\\b"
+      }
+    },
+    "plaquemines": {
+      "name": "Plaquemines Parish",
+      "status": "verified",
+      "platform": "civicplus",
+      "base": "https://www.plaqueminesparish.gov",
+      "web": "https://www.plaqueminesparish.gov/AgendaCenter",
+      "categories": {
+        "2": "Parish Council",
+        "9": "Public Hearings",
+        "6": "Plaquemines Parish Development Board",
+        "3": "Plaquemines Port",
+        "8": "Real Estate Committee",
+        "7": "Borrow Pit Advisory Committee"
+      },
+      "skip_bodies": [],
+      "notes": [
+        "Agendas have a text layer. Items nest ('7. Building Permits' > 'a) Construction Permits:' > '1. ...'); item numbers repeat across levels.",
+        "The council approves parish construction permits by 'Application No. YYYY-NNN' (LNG terminals, plant work, well plug-and-abandon) and Business Occupancy Certificates naming the zoning district. Rezonings are ordinances amending Ordinance No. 142 (the Comprehensive Zoning Ordinance) by application number; the plain-language DIGEST follows each ordinance.",
+        "Deferred ordinances say '(DEFERRED & CARRIED OVER FROM ...)' with each prior date."
+      ],
+      "terms": {
+        "rezoning": [
+          "Comprehensive Zoning (?:Ordinance|District Map)"
+        ],
+        "industrial": [
+          "Business Occupancy Certificate",
+          "Application No\\. \\d{4}-\\d+"
+        ]
+      },
+      "layout": {
+        "ignore": "^\\s*(?:AGENDA FOR THE .*,|MEETING OF THE PLAQUEMINES PARISH COUNCIL,|\\d:\\d\\d P\\.M\\., POINTE-A-LA|\\d+ HWY\\. 15,|ALSO STREAMED LIVE)"
+      }
+    },
+    "st-bernard": {
+      "name": "St. Bernard Parish",
+      "status": "verified",
+      "platform": "civicplus",
+      "base": "https://www.sbpg.net",
+      "web": "https://www.sbpg.net/AgendaCenter",
+      "categories": {
+        "2": "Council Agendas and Minutes",
+        "9": "Planning Commission",
+        "12": "Board of Zoning Adjustment",
+        "3": "Executive Finance Committee Agendas",
+        "4": "Housing Redevelopment Quality of Life Commission Agendas",
+        "5": "Water & Sewer Committee Agendas"
+      },
+      "skip_bodies": [
+        "Water & Sewer Committee Agendas"
+      ],
+      "layout": {
+        "item_start": "^\\s*((?:S|Z|TC|V|CU|SU)-\\d{4}-\\d{3})\\s+(\\S.*)$",
+        "ignore": "PUBLIC NOTICE - ST\\. BERNARD PARISH COUNCIL MEETING|^\\s*Email: |Page \\d+ of \\d+\\s*$|^Sign Interpreter|^interested person contact",
+        "agenda_end": "^\\s*Approved by:",
+        "matter": "^Summary No\\. (\\d{4})\\b"
+      },
+      "notes": [
+        "Agendas have a text layer. The council agenda PDF carries the packet (draft proceedings extracts) after the agenda; reading stops at the 'Approved by:' line.",
+        "Council ordinances are 'Summary No. NNNN' with their history above the title (P&Z recommendation, introduced, public hearing, tabled dates). Titles are in capitals.",
+        "Planning Commission and BZA items are keyed by docket: Z-YYYY-NNN rezoning, S- resubdivision, TC- zoning text change, V- variance."
+      ],
+      "terms": {
+        "rezoning": [
+          "\\bZ-\\d{4}-\\d{3}\\b"
+        ],
+        "land-use-code": [
+          "\\bTC-\\d{4}-\\d{3}\\b"
+        ],
+        "variance": [
+          "\\bV-\\d{4}-\\d{3}\\b"
+        ]
+      }
+    },
+    "assumption": {
+      "name": "Assumption Parish (Police Jury)",
+      "status": "verified",
+      "platform": "civicplus",
+      "base": "https://www.assumptionla.com",
+      "web": "https://www.assumptionla.com/AgendaCenter",
+      "categories": {
+        "2": "Police Jury Meetings"
+      },
+      "skip_bodies": [],
+      "scanned": true,
+      "notes": [
+        "Agendas and minutes are copier scans, OCR'd as for St. James. Only the police jury posts here."
+      ],
+      "terms": {},
+      "layout": {
+        "section": "^\\s*(?:\\d{1,2}:\\d{2} [AP]\\.M\\. )?((?:[A-Z][\\w/&.,'-]* |(?:and|of|the|&) )+Meeting)\\s*$",
+        "ignore": "^\\s*Members:"
+      }
+    },
+    "st-john-the-baptist": {
+      "name": "St. John the Baptist Parish",
+      "status": "probed-unusable",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: agendas are PDFs on sjbparish.gov's own CMS (files/content/public/v/N/government/st-john-parish-council/...), not AgendaCenter; needs a page-scraping adapter."
+      ]
+    },
+    "iberville": {
+      "name": "Iberville Parish",
+      "status": "unprobed",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: ibervilleparish.com is behind Cloudflare and redirects /AgendaCenter; not examined further."
+      ]
+    },
+    "west-baton-rouge": {
+      "name": "West Baton Rouge Parish",
+      "status": "probed-unusable",
+      "platform": "civicplus",
+      "notes": [
+        "Probed 2026-10-17: AgendaCenter at wbrcouncil.org / wbrparish.org stops at June 2020."
+      ]
+    },
+    "calcasieu": {
+      "name": "Calcasieu Parish (Police Jury)",
+      "status": "unprobed",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: calcasieuparish.gov/AgendaCenter did not answer."
+      ]
+    },
+    "cameron": {
+      "name": "Cameron Parish (Police Jury)",
+      "status": "unprobed",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: parishofcameron.net/AgendaCenter did not answer."
+      ]
+    },
+    "jefferson": {
+      "name": "Jefferson Parish",
+      "status": "probed-unusable",
+      "platform": "civicplus",
+      "notes": [
+        "Probed 2026-10-17: jeffparish.gov/AgendaCenter exists but returns a Cloudflare challenge to scripts; read it in a browser (Claude in Chrome)."
+      ]
+    },
+    "st-landry": {
+      "name": "St. Landry Parish",
+      "status": "probed-unusable",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: stlandrypg.org returns a Cloudflare 403 to scripts; agendas are WordPress PDF uploads."
+      ]
+    },
+    "iberia": {
+      "name": "Iberia Parish",
+      "status": "probed-unusable",
+      "platform": "civicclerk",
+      "notes": [
+        "Probed 2026-10-17: CivicClerk tenant iberiaparishla lists council meetings, but none carry files or agenda items."
+      ]
+    },
+    "tangipahoa": {
+      "name": "Tangipahoa Parish",
+      "status": "probed-unusable",
+      "platform": "civicclerk",
+      "notes": [
+        "Probed 2026-10-17: CivicClerk tenant tangipahoaparishla has two scheduled council meetings and no files."
+      ]
+    },
+    "orleans": {
+      "name": "Orleans Parish (New Orleans City Council)",
+      "status": "probed-unusable",
+      "platform": "legistar",
+      "notes": [
+        "Probed 2026-10-17: Legistar client cityofno answers but has 4 events since August 2026; not where the council works now."
+      ]
+    },
+    "terrebonne": {
+      "name": "Terrebonne Parish",
+      "status": "unprobed",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: tpcg.org/AgendaCenter has no listings; council agendas are at tpcg.org/councilagendas."
+      ]
+    },
+    "livingston": {
+      "name": "Livingston Parish",
+      "status": "unprobed",
+      "platform": null,
+      "notes": [
+        "Probed 2026-10-17: livingstonparishla.gov/AgendaCenter has no listings."
+      ]
+    }
+  }
+}

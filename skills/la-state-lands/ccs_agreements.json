@@ -1,0 +1,102 @@
+{
+  "about": "Crosswalk from the CS numbers on the OMR Active Leases layer (which carry no operator, acreage or parish) to the executed carbon dioxide storage operating agreements. Operator names are from the agency's own listing page; resolution numbers, dates and acreages are from the executed agreement PDFs (OCR of the resolution and first pages) or the posted agreement text. Nothing here is inferred from location or date.",
+  "checked": "2026-10-17",
+  "listing_page": "https://www.denr.louisiana.gov/page/carbon-capture-and-wind-energy-agreements",
+  "pdf_base": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/",
+  "lease_review_report": {
+    "date": "2026-10-14",
+    "oas": 4,
+    "acres": 361705,
+    "source": "https://www.dce.louisiana.gov/assets/OSTR-SMEB/Board-MTG-Notices-Agendas-Reports/2026/2026-10-Notice-Agenda-Reports.pdf",
+    "note": "Unreconciled. The executed agreements state 239,350 acres across six agreements (11 CS numbers); GIS polygons compute to about 211,300 acres across 10. Neither the count nor the acreage matches the report, which draws on the SONRIS lease database rather than the GIS layer. Do not cite either figure as the other."
+  },
+  "agreements": {
+    "CS01": {
+      "operator": "Air Products Blue Energy, LLC",
+      "stated_acres": 122455,
+      "parishes": ["Livingston", "St. James", "St. John the Baptist", "Cameron", "Tangipahoa"],
+      "resolution": "21-10-051",
+      "board_approval": "2021-10-13",
+      "hearing": "OMR public hearing 2021-10-04 (held by Zoom under a certificate of inability to meet)",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/AIR_PRODUCTS_FINAL_AGREEMENT_10-22-2021.pdf",
+      "source": "CS01A.pdf resolution page (OCR); ccusairprodopag2.pdf Art. 1 and Exhibits B-D"
+    },
+    "CS02": {
+      "operator": "Capio Sequestration, LLC",
+      "stated_acres": 44511,
+      "parishes": ["Ascension", "Iberville", "Pointe Coupee", "St. John the Baptist", "St. Martin", "St. Landry"],
+      "resolution": "21-10-052",
+      "board_approval": "2021-10-13",
+      "hearing": "OMR public hearing 2021-10-04 (Zoom)",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/CAPIO_FINAL_AGREEMENT_10-22-2021.pdf",
+      "source": "CS02A.pdf and CS02B.pdf resolution pages (OCR); CapioOAFINALDRAFT20210922.pdf Art. 1 and Exhibits B-C"
+    },
+    "CS003": {
+      "operator": "Venture Global CCS Plaquemines, LLC",
+      "stated_acres": 9101.13,
+      "parishes": ["Plaquemines"],
+      "resolution": "22-09-009",
+      "board_approval": "2022-09-14",
+      "hearing": "Docket OMR 22-01, hearings in Plaquemines (Belle Chasse) and Jefferson Parishes, August 2022",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/VG_PLAQUEMINES_FINAL_AGREEMENT_unsigned_9-14-22.pdf",
+      "source": "CS003.pdf resolution and Art. 1 (OCR): 9,101.13 acres of state waters in Barataria Bay, T20S R25E"
+    },
+    "CS004": {
+      "operator": "Venture Global CCS Cameron, LLC",
+      "stated_acres": 18022.95,
+      "parishes": ["Cameron"],
+      "resolution": "22-09-010",
+      "board_approval": "2022-09-14",
+      "hearing": "Cameron Parish public hearing, 2022 (Public_Notice_VG_Cameron_Final.pdf)",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/VG_CAMERON_FINAL_AGREEMENT_unsigned_9-14-22.pdf",
+      "source": "CS004.pdf resolution and Art. 1 (OCR)"
+    },
+    "CS05": {
+      "operator": "High West Sequestration, LLC",
+      "stated_acres": 21079.18,
+      "parishes": ["Jefferson", "St. Charles"],
+      "resolution": "23-08-013",
+      "board_approval": "2023-08-09",
+      "hearing": "Docket OMR 23-01, hearings in St. Charles and Jefferson Parishes, 2023",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/High_West_Sequestration_CCS_Draft_Agmt_6-27-23.pdf",
+      "text_is_draft": true,
+      "source": "CS05A.pdf resolution and Art. 1 (OCR): 'the tract comprised of 21,079.18 acres of State water bottoms in Lake Cataouatche, located in Jefferson and St. Charles Parishes', storage interval 3,230-11,007 ft in the Waterford Oil Co. No. 1 well (SN 64758). The 6-27-23 draft instead describes WMA land in the Salvador WMA plus Lake Cataouatche water bottoms.",
+      "discrepancy": "The GIS polygons extend over Salvador WMA land (about 4,700 of 6,971 ac in a 3 km test circle are SLABS/WMA surface, and only about 3,400 ac are the Lake Cataouatche claim polygon). The executed text says water bottoms only. Read Exhibit B of CS05A-C before citing which is right.",
+      "gis_note": "The three CS05 polygons first appear on the GIS layer dated 2026-10 with CD_SOURCE '(New)'. The agreement itself dates from August 2023; the new flag marks the mapping, not a new agreement."
+    },
+    "CS006": {
+      "operator": "Castex Carbon Solutions, LLC",
+      "stated_acres": 24181,
+      "parishes": ["Cameron"],
+      "resolution": "23-08-014",
+      "board_approval": "2023-08-09",
+      "hearing": "Cameron Parish public hearing, 2023 (Castex_Carbon_Sol_PUBLIC_NOTICE_CAMERON.pdf)",
+      "text": "https://www.denr.louisiana.gov/assets/OMR/media/forms_pubs/Castex_Carbon_CCS_Agmt_7-5-2023.pdf",
+      "source": "CS006.pdf resolution and Art. 1 (OCR)"
+    }
+  },
+  "parts": {
+    "CS01A": {"agreement": "CS01", "area": "Specific Area of Interest A: Canal Bank area of the Maurepas Swamp WMA, St. James Parish", "stated_acres": 33146, "status": "verified",
+              "notes": "GIS computes 32,863 ac; location matches (St. James side of the Maurepas Swamp WMA)."},
+    "CS01B": {"agreement": "CS01", "area": "Specific Area of Interest B: Lake Maurepas water bottoms (Tangipahoa, Livingston, St. John the Baptist)", "stated_acres": 57100, "status": "verified",
+              "notes": "GIS computes 59,086 ac."},
+    "CS01C": {"agreement": "CS01", "area": "Specific Area of Interest C: Sabine Lake", "stated_acres": 32209, "status": "verified",
+              "notes": "GIS computes 34,019 ac. Same agreement as the Maurepas tracts despite lying on the Texas line."},
+    "CS02A": {"agreement": "CS02", "area": "Specific Area of Interest A: Maurepas Swamp WMA", "stated_acres": 32711, "status": "verified",
+              "notes": "Listed with an executed agreement on the agency page but absent from the Active Leases GIS layer; whether it was released is not established here."},
+    "CS02B": {"agreement": "CS02", "area": "Specific Area of Interest B: Sherburne WMA", "stated_acres": 11800, "status": "verified",
+              "notes": "GIS computes 12,915 ac. The posted CS02B.pdf was replaced on 2025-09-18; the reason is not stated."},
+    "CS003": {"agreement": "CS003", "area": "Barataria Bay, T20S R25E", "stated_acres": 9101.13, "status": "verified",
+              "notes": "GIS computes 9,105 ac."},
+    "CS004": {"agreement": "CS004", "area": "State waters off Cameron Parish", "stated_acres": 18022.95, "status": "verified",
+              "notes": "GIS computes 18,026 ac."},
+    "CS05A": {"agreement": "CS05", "area": "Lake Cataouatche / Salvador area", "stated_acres": null, "status": "verified",
+              "notes": "Operator from the agency listing. The per-part acreage is not stated; the three parts compute to 21,087 ac against 21,079.18 stated."},
+    "CS05B": {"agreement": "CS05", "area": "Lake Cataouatche / Salvador area", "stated_acres": null, "status": "verified",
+              "notes": "See CS05A."},
+    "CS05C": {"agreement": "CS05", "area": "Lake Cataouatche / Salvador area", "stated_acres": null, "status": "verified",
+              "notes": "See CS05A."},
+    "CS006": {"agreement": "CS006", "area": "State waters off Cameron Parish", "stated_acres": 24181, "status": "verified",
+              "notes": "GIS computes 24,199 ac."}
+  }
+}

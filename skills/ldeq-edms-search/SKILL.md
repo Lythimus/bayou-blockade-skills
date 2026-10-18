@@ -20,6 +20,57 @@ Examples:
 - `26336 enforcement actions` — filtered search
 - `26336 flare incidents` — filtered search with description keyword
 
+**Finding the written report for a known release.** A discharger must send LDEQ's Single Point of Contact a written report within 7 calendar days of a reportable unauthorized discharge (LAC 33:I.3925). It usually carries the cause, the quantity estimate and the LSP case number. When you have a release date from `bayou:csb-nrc-hazmat` (an NRC report or a CSB 1604 event), search the AI with functions `Single Point of Contact (SPOC)`, `Incidents - Emergency` and `Incidents - Non-Emergency` over the following 2–3 weeks. The NRC report's state agency report number (`YY-NNNNN`) is the LSP case number to look for in the description.
+
+**Sweeping every facility near a point for an incident window.** Use this when the question is "did anything nearby report a release or upset around this date?" and no single facility is known yet. Typical triggers are a fenceline noise or infrasound recording, an odor complaint, or a flare seen at night.
+
+1. List the AIs within the radius, from `ldeq-eric-emissions radius`/`sources` or `ldeq-ai-lookup`.
+2. Run the same three functions for each AI, from the event date to +21 days.
+
+Points about the results:
+- The document date is when the report was written or received, not when the incident happened. Read each report's incident tracking number (`T-NNNNNN`), LSP case number and incident date before tying it to the event. A document late in the window can concern a later incident.
+- For a noise or infrasound event, set the incident dates against archived spectra with `bayou:lf-acoustic-baselines`.
+- Reports are often indexed under several AIs (a site and its tenants, e.g. `[4384, 26336]`), so the sweep lists each document id once.
+
+```bash
+python3 - <<'PY'
+import datetime, json, urllib.request
+AIS = [1406, 26336, 26003]                 # AIs within the radius (ERIC `radius`/`sources`, or ldeq-ai-lookup)
+EVENT = datetime.date(2025, 12, 21)        # date of the recording, complaint or release
+DAYS = 21                                  # LAC 33:I.3925 written reports are due in 7 days; many arrive later
+FUNCS = ["Single Point of Contact (SPOC)", "Incidents - Emergency", "Incidents - Non-Emergency"]
+URL = "https://edms.deq.louisiana.gov/edmsv2/documentSearch/filter"
+end = EVENT + datetime.timedelta(days=DAYS)
+seen = set()
+for ai in AIS:
+    body = {"filter": {"numberOfRecordsPerPage": 100, "skip": 0, "totalCount": 0, "filters": [], "keywords": [],
+                       "keywordValues": [], "descriptionMode": "Exact", "contentSearchMode": "Exact",
+                       "descriptionFuzzy": False,
+                       "documentDateRange": {"start": EVENT.isoformat() + "T00:00:00Z", "end": end.isoformat() + "T23:59:59Z"},
+                       "entryDateRange": {"start": None, "end": None}, "aiInformation": str(ai)},
+            "refinerFilter": {"documentDates": [], "functions": FUNCS, "medias": [], "documentTypes": [],
+                              "documentSubtypes": [], "ais": [], "activities": [], "classifications": [], "pwsids": []},
+            "start": 0, "rows": 100, "sort": "documentDate", "asc": True, "highlight": False}
+    req = urllib.request.Request(URL, json.dumps(body).encode(), {"content-type": "application/json",
+                                 "accept": "application/json", "user-agent": "Mozilla/5.0 (bayou-ldeq-edms-search)"})
+    j = json.load(urllib.request.urlopen(req, timeout=120))
+    print("AI %s: %d documents %s..%s" % (ai, j["total"], EVENT, end))
+    for d in j["data"]:
+        # A report is often indexed under several AIs (a site and its tenant); list it once.
+        if d["id"] in seen:
+            print("   (also) %s id %s, listed above" % (d["documentDate"][:10], d["id"]))
+            continue
+        seen.add(d["id"])
+        print("   %s  %-26s %-14s %3sp  %-50.50s AIs %s  https://edms.deq.louisiana.gov/edmsv2/document/%s" % (
+            d["documentDate"][:10], d["function"], ",".join(d["media"] or []), d["pages"], d["description"],
+            d["aiNumbers"], d.get("docIDSecured")))
+PY
+```
+
+Verified 2026-10-17 for 2025-12-21 + 21 days at AIs 1406, 26336 and 26003 (Norco):
+- 12 distinct documents, including the preliminary release report for T-227093, dated 2025-12-21.
+- 26003's only hit (T-227113) is indexed under 26336 as well.
+
 ## How to search
 
 Use Bash with curl to POST to `https://edms.deq.louisiana.gov/edmsv2/documentSearch/filter`.
@@ -36,6 +87,7 @@ Analyze what the user is asking for and map it to these filter dimensions. You c
 - `Ground Water`
 - `Hazardous Waste`
 - `Inactive & Abandoned Sites`
+- `LELAP` — laboratory accreditation files, filed under the *lab's* AI (certificates, scopes, suspensions); `bayou:ldeq-lelap-labs` searches and classifies these
 - `Lead`
 - `Multi-Media`
 - `Non-Applicable`
@@ -56,7 +108,8 @@ Analyze what the user is asking for and map it to these filter dimensions. You c
 - `Incidents - Emergency` — use for emergency spills, releases, events
 - `Incidents - Non-Emergency` — use for routine incident reports, excess emissions
 - `Inspections` — use for site inspections, compliance evaluations
-- `Legal` — use for legal actions, consent decrees, adjudicatory hearings
+- `Lab Accreditation (LELAP)` — lab certificates, scope amendments, PT results, assessments (see `bayou:ldeq-lelap-labs`)
+- `Legal` — use for legal actions, consent decrees, adjudicatory hearings (for the DAL hearing schedule and appellate opinions, see `bayou:la-court-opinions`)
 - `Office of the Secretary (OSEC)`
 - `Permit Support Services`
 - `Permits` — use for permit applications, renewals, modifications, final permits

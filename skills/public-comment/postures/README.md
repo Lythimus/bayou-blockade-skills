@@ -44,7 +44,10 @@ so `SKILL.md` can point at them generically:
 The petro campaigns have produced these, but no comment-shaped filing has come out of them yet:
 - **Local land use / ordinance:** parish council rezoning or a future land-use map amendment
   (IMTT, UBE C1), or an ordinance (scp-prr-fees). The oral side of this is covered by
-  `bayou:hearing-prep`.
+  `bayou:hearing-prep`. The current zoning district of every affected parcel, its owner, and the
+  homes already standing on the land being rezoned come from `bayou:parish-assessor-gis`.
+  The case's path from P&Z to the council ordinance, the hearing date and any deferrals come from
+  `bayou:parish-council-agendas track <parish> "<case or applicant>"`.
 - **Enforcement petition:** an EPA/DOJ consent-decree complaint or a CAA § 304 60-day notice
   (shell-norco-26-flare). Standing here is Article III injury, and the request is enforcement,
   not a condition.

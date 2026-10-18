@@ -149,6 +149,14 @@ Other searches tried on 2026-10-07, and why they don't enumerate CUPs:
   exact and the stored form differs.
 - `xParishCode=45` returns mostly Class VI documents.
 
+## State leases and operating agreements
+
+State mineral leases, State Agency Leases and the CCS operating agreements (`CS01A` … `CS006`)
+are indexed by `idx=xstateleasenum`. Get the exact value from `bayou:la-state-lands lease <id>`
+(SL numbers are zero-padded to five digits), which also gives the operator for a CS number.
+The executed CCS agreements are posted outside SONRIS, so `la-state-lands get` fetches them
+without a session.
+
 ## Step 5 — hand off
 
 Once files are down, offer:

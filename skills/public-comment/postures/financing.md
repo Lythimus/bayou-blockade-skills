@@ -98,14 +98,22 @@ The posture-neutral principle and the Tier 4 cut list are in `references/leverag
 ### Tier 2: builds the record for the SBC and any validity contest
 
 - **The financing stack.** Every related bond, lease-back, PILOT, and cooperative endeavor
-  agreement, and which of them has or has not gone before the SBC.
-- **Benefit to the state.** Ask what the borrower has filed. Do not assert that the project
-  fails a test (see the *Gonzales* trap in `references/louisiana-hooks.md`).
+  agreement, and which of them has or has not gone before the SBC. Build it with
+  `bayou:la-bond-dockets` (its financing-stack table). Add the same project's ITEP, Quality Jobs and
+  Enterprise Zone contracts from `bayou:itep-lookup` (its incentive-stack table). Report an absent
+  piece as "not found in SBC agendas <range>", never as "never submitted."
+- **Benefit to the state.** Ask what the borrower has filed. Its incentive applications already
+  state promised investment, jobs and payroll, and `bayou:itep-lookup` retrieves them, along with
+  the affiliate's renewal and compliance record (NC/NCL codes, the board's non-compliance actions).
+  Do not assert that the project fails a test (see the *Gonzales* trap in
+  `references/louisiana-hooks.md`).
 - **Historical findings about the issuer**, such as the Legislative Auditor's 2000 LPFA audit.
   **Always frame these as a question about current practice**, never as a claim that the
   deficiency is current.
 - **Comparable in-state failure precedent**, with the delivered-vs-promised numbers taken from a
-  primary source (for example, the parish's audited financial report, not press).
+  primary source (for example, the parish's audited financial report, not press). For the
+  borrower's own earlier projects, use `bayou:itep-lookup compare` and the BCI non-compliance
+  tables; every figure there is self-reported, so say so.
 
 ### Tier 3: moves discretion
 
@@ -136,7 +144,8 @@ as the wrong forum.
 
 Issuer · bond amount and series name exactly as in the notice ("Not to Exceed $…
 Exempt Facility Revenue Bonds (… Project)") · hearing date · the SBC docket number and agenda
-item once published.
+item. Get the docket, item, caption, and meeting date from `bayou:la-bond-dockets` (`sbc_dockets.py
+search`), and cite the agenda stage (Preliminary, Posted, or Final) that each fact came from.
 
 Use a letter format addressed to the issuer's President/CEO by name, as in the LPFA letter,
 rather than a docket-style RE block. Keep `\filingid` to the bond series plus the SBC docket.
@@ -173,4 +182,5 @@ The requested-relief block opens the letter; it does not close it. The closing:
   lives in (d)(3)(i).
 - Historical audit findings are framed as questions about current practice.
 - The clock names 9:2347(G) and the notice-of-sale trigger.
-- The SBC docket number is included if it is published.
+- The SBC docket number is included if it is published. Rerun `bayou:la-bond-dockets` the day
+  before filing, because a Posted agenda can change the caption or the item number.

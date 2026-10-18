@@ -8,7 +8,7 @@ allowed-tools: Bash, Read, AskUserQuestion
 
 Turns a chemical on a permit or a TRI report into a plain statement of what it does to people: the hazard statements a regulator has assigned, whether it is a known or suspected carcinogen, and (with an EPA key) the reference concentrations EPA uses in risk assessment.
 
-Use it on the TRI basic data file from `/bayou:epa-tri-search` (the same state-year files `/bayou:tri-release-report` caches under its `raw/` directory), or when a permit application names pollutants without saying what they do.
+Use it on the TRI basic data file from `/bayou:epa-tri-search` (the same state-year files `/bayou:tri-release-report` caches under its `raw/` directory), or when a permit application names pollutants without saying what they do. For Louisiana state-inventory pollutants, take CAS numbers from the `cas` column of `bayou:ldeq-eric-emissions`' `pollutants.csv`. Rows with a `cas_kind` of `element+compounds` or `category-representative` stand for a group, not the single substance the CAS number names.
 
 It reports hazard, not risk. A hazard statement says what a chemical can do at some dose. It says nothing about the dose anyone near a facility receives. Do not write "residents are being exposed to a carcinogen at harmful levels" from this output; write that the facility reports releasing a chemical classified as a carcinogen.
 
@@ -58,7 +58,13 @@ Requests go to `https://comptox.epa.gov/ctx-api` with the key in an `x-api-key` 
 | IRIS values | `/hazard/iris/search/by-dtxsid/<dtxsid>` |
 | Every toxicity value on file (large) | `/hazard/toxval/search/by-dtxsid/<dtxsid>` |
 
-**This branch was written from EPA's published OpenAPI description (`https://comptox.epa.gov/ctx-api/docs/hazard.html`) and has only been run as far as the authentication check.** The first time it runs with a real key, compare one chemical's output against the CompTox dashboard before relying on it. A 401 or 403 means the key was rejected.
+A 401 or 403 means the key was rejected.
+
+Quirks of the API's output, which the script normalizes:
+- IRIS values lose their superscript (`2 x 10 -2 mg/m3`); the script prints `2 x 10^-2`.
+- `criticalEffectsSystems` and `tumorSite` are newline-separated lists of organ systems (e.g. "Hematologic"), not specific tumors or endpoints. Quote the IRIS page for the specific effect.
+- A cancer call with exposure route `-` means the source did not tie the call to a route; it prints as "route not specified".
+- A chemical can carry several calls from one source. Benzene has both an older-scheme IRIS "A (Human carcinogen)" and a "Known/likely human carcinogen" call. Cite the one that matches the assessment you quote.
 
 ## Reading the output
 

@@ -102,6 +102,52 @@ separate aeronautical study process.
 
 ---
 
+## FERC (Federal Energy Regulatory Commission)
+
+Interstate gas pipelines and compressor stations, and LNG terminals, under the Natural Gas Act
+(CP dockets, with a PF pre-filing docket first for LNG). Find the docket, its notices and its
+intervenors with `bayou:ferc-elibrary`. The notice states the comment or intervention date; the
+eLibrary description does not.
+
+**Submission** — through FERC Online (eFiling, or eComment for a short individual comment),
+under the docket number with its sub-docket (`CP22-21-000`). Scoping comments filed in the PF
+docket are part of the NEPA record.
+
+**Comment, protest, or intervene.** A comment or protest does not make the filer a party
+(18 C.F.R. 385.211(a)(2)). Only a party can seek rehearing and go to court, so a group that may
+litigate must **move to intervene** (385.214). The motion states the movant's position and its
+interest in enough factual detail (385.214(b)). A motion filed within the draft EIS comment
+period is deemed timely (380.10(a)(1)(i)); after the deadline it must show good cause.
+
+**After the order** — rehearing within **30 days** of the order, by a party, stating every ground
+specifically (15 U.S.C. 717r(a); 385.713(b)). A court will not consider an objection that was
+not urged in the rehearing request, absent reasonable ground (717r(b)). If FERC does not act in 30 days, the request may be deemed denied.
+A petition for review is due within **60 days** of the order on rehearing, in the D.C. Circuit or
+the circuit where the natural-gas company is located or has its principal place of business
+(717r(b)).
+
+**CEII.** Alignment sheets and detailed design are often CEII. An intervenor can get them from the
+filer under a protective agreement (388.113(g)(4)); `bayou:ferc-elibrary get` lists the route.
+
+---
+
+## State Mineral and Energy Board (SMEB) / DCE Office of State Resources
+
+CO2 storage, oil and gas, and wind operating agreements on state land and water bottoms
+(R.S. 30:209(4)(e)). Before the Board's two-thirds vote, OSTR notifies the parish governing
+authority and a hearing officer holds a public hearing **in each affected parish**, under R.S. 30:6.
+Under the 2025 Sequestration Agreement Procurement Guidelines (§10) the hearing follows
+Conditional Approval, and the operator may answer comments within 10 days of it.
+`bayou:la-state-lands` maps the existing CCS agreements (`ccs`), measures an AoR against them
+(`overlap`), and reads this month's agenda (`smeb`).
+
+**Submission**: oral or written comment at the parish hearing, and written comment to OSTR
+under the docket number in the hearing notice (e.g. `OMR 23-01` for High West, St. Charles and
+Jefferson). The notice gives the comment deadline. Comments "may have a material bearing on
+the final terms" (Guidelines §10.03): ask for specific conditions, not just denial.
+
+---
+
 ## LPFA and other Louisiana conduit bond issuers (`postures/financing.md`)
 
 Covers LPFA, parish Industrial Development Boards, LCDA, and ports that issue on behalf of
@@ -127,7 +173,9 @@ requires none. Ask for:
 **Next venue: the State Bond Commission.**
 - La. R.S. 9:2347(H) requires SBC approval for every public-trust bond issue.
 - The SBC meets monthly and publishes a preliminary agenda with docket numbers ahead of each
-  meeting. Check it; it may carry facts the notice does not, such as a "(Volume Cap)" caption.
+  meeting. Check it with `bayou:la-bond-dockets`. It may carry facts the notice does not, such as
+  a "(Volume Cap)" caption. The same skill reads the minutes for the outcome, and it reads the
+  agenda footer for how to email comments to the Commission before the meeting.
 - The SBC is chaired by the State Treasurer and made up of elected officials, so it answers to
   public pressure in a way the issuer's board does not.
 - The interval between the TEFRA hearing and the SBC vote can be days, as with LPFA/HPLS (three

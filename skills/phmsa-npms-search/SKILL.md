@@ -139,6 +139,10 @@ WebFetch url="https://pvnpms.phmsa.dot.gov/PublicViewer/" prompt="Navigate to th
 WebFetch url="https://pvnpms.phmsa.dot.gov/PublicViewer/" prompt="Navigate to the Query menu and select 'Query Accidents (Liquid)'. Filter by state: Louisiana. Return all results including: date, operator, system name, cause, barrels released, fatalities, injuries, and property damage."
 ```
 
+### Initial reports through the National Response Center
+
+Operators must report pipeline incidents and accidents to the National Response Center by telephone (49 CFR 191.5, 195.52). NRC posts each call in its yearly FOIA workbooks, including the PHMSA 48-hour updates. `bayou:csb-nrc-hazmat nrc --state LA --county "<parish>" --type PIPELINE [--company "<operator>"]` returns them with the caller's narrative, and updates are flagged `update of <SEQNOS>`. NRC data is the operator's initial report, so use PHMSA's incident records for final figures.
+
 ### Pipeline operator search
 
 ```
@@ -185,7 +189,7 @@ WebFetch url="https://primis.phmsa.dot.gov/enforcement-data/comm/reports/operato
 | Gulf South Pipeline Co | Interstate | Natural Gas | Operating | — |
 | Enterprise Products | — | HGL | Operating | Dixie |
 
-- Flag **interstate gas pipelines** — these are subject to FERC jurisdiction and PHMSA federal inspection
+- Flag **interstate gas pipelines** — these are subject to FERC jurisdiction and PHMSA federal inspection. Their certificate docket (CP), EIS, orders and intervenors are in FERC eLibrary: `bayou:ferc-elibrary search "<operator or project>"`, then `docket <CP..>`
 - Note when a pipeline is within **1 mile** of the facility (high proximity risk)
 - Separate by commodity: gas transmission (highest consequence if near facility), HGL, crude
 

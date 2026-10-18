@@ -1,0 +1,9 @@
+{
+  "name": "ldh-drinking-water",
+  "private": true,
+  "description": "Playwright harness for the ldh-drinking-water Claude Code skill (local-only, never published).",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "1.61.1"
+  }
+}

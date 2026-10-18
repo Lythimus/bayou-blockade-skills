@@ -1,0 +1,229 @@
+{
+  "_about": "Per-parish registry of public ArcGIS REST layers, by role. 'authority' is who maintains the copy: parish (the parish or its assessor), municipal, consultant-copy (an engineering firm's snapshot, often years old), unofficial (no stated provenance). field_map maps canonical names to layer fields; a list means OR/coalesce across fields. Verified 2026-10-16 unless status says otherwise.",
+  "_canonical_fields": ["pin", "owner", "owner_mail", "situs", "assessed", "last_transfer", "legal"],
+  "parishes": {
+    "st-charles": {
+      "name": "St. Charles Parish",
+      "fips": "22089",
+      "status": "verified",
+      "viewer": "https://apps.geocortex.com/webviewer/?app=9f62ebc43bf245b1ace3e110049247d9",
+      "assessor_link": null,
+      "assessor_note": "St. Charles Assessor: stcharlesassessor.com. The parish GIS layer carries owner and assessed value directly.",
+      "parcels": {
+        "url": "https://maps.scpgis.com/geoserver/rest/services/Public/Planning/FeatureServer/0",
+        "authority": "parish",
+        "max_records": 2000,
+        "field_map": {
+          "pin": "pi_code",
+          "owner": ["owner", "owner_2"],
+          "owner_mail": ["owner_address", "owner_city"],
+          "situs": "address",
+          "assessed": "assessed_v",
+          "last_transfer": "date_",
+          "legal": ["subdivision", "block", "lot"],
+          "community": "community",
+          "parcel_zoning_attr": "zoning"
+        },
+        "vintage_check": {"method": "max_date", "field": "last_edited_date"}
+      },
+      "owner_fallback": {
+        "url": "https://services7.arcgis.com/Nj65ZtNghtksKPeG/arcgis/rest/services/Parcel/FeatureServer/0",
+        "authority": "consultant-copy",
+        "note": "AGOL copy, about 2021. Owner differs from the parish layer on roughly 20% of matched parcels. Not queried automatically; check it by hand only if maps.scpgis.com is down, and label any owner from it as 2021."
+      },
+      "zoning": [
+        {
+          "url": "https://maps.scpgis.com/geoserver/rest/services/Public/Planning/FeatureServer/1",
+          "authority": "parish",
+          "label": "St. Charles Parish zoning",
+          "code_field": "zoning",
+          "desc_field": null,
+          "extra_fields": ["pzr", "oridnance"],
+          "residential_codes": ["R1A", "R1AM", "R1B", "R1M", "R2", "R3", "CR1"],
+          "note": "The parcel layer's own 'zoning' attribute is often blank or stale; this polygon layer is the zoning of record in the parish viewer."
+        }
+      ],
+      "structures": [
+        {
+          "url": "https://maps.scpgis.com/geoserver/rest/services/Public/Structures/FeatureServer/0",
+          "authority": "parish",
+          "label": "SCP building footprints",
+          "geometry": "polygon",
+          "base_where": "status <> 'demolished'",
+          "residential_where": "Shape__Area < 6000 AND (owner_name IS NULL OR NOT (owner_name LIKE '%EXEMP%' AND owner_name NOT LIKE '%HOUS%' AND (owner_name LIKE '%PORT OF%' OR owner_name LIKE '%SCHOOL%' OR owner_name LIKE '%FIRE DEP%' OR owner_name LIKE '%VOL. FIRE%' OR owner_name LIKE '%DRAINAGE%' OR owner_name LIKE '%WW DIST%' OR owner_name LIKE '%HWYS%' OR owner_name LIKE '%CEME%' OR owner_name LIKE '%PARISH LAW%' OR owner_name LIKE '%HOSP%' OR owner_name LIKE '%STATE OF LOUISIANA%' OR owner_name LIKE '%CITY OF NEW ORLEANS%' OR owner_name LIKE 'ST. CHARLES PARISH %')))",
+          "owner_field": "owner_name",
+          "residential_basis": "SCP publishes no building-use code. 'Likely dwelling' = a non-demolished footprint under 6,000 sq ft; industrial and commercial buildings above that size fall in 'other'. Tax-exempt public owners (parish government, school board, port, fire, drainage, highways, hospital, cemeteries) and the footprint's own owner are excluded; exempt housing authorities, churches (parsonages) and individuals stay in. Expect some sheds, garages and small commercial buildings in the likely-dwelling count.",
+          "private_fields": ["fulladdres", "owner_name"]
+        }
+      ],
+      "addresses": {
+        "url": "https://maps.scpgis.com/geoserver/rest/services/Public/GIS_Data/FeatureServer/0",
+        "authority": "parish",
+        "number_field": "addnum",
+        "full_field": "fulladdr"
+      }
+    },
+
+    "ascension": {
+      "name": "Ascension Parish",
+      "fips": "22005",
+      "status": "verified-partial",
+      "viewer": "https://apgov.us (parish GIS) and Beacon AppID 1188",
+      "assessor_link": "https://beacon.schneidercorp.com/Application.aspx?AppID=1188&LayerID=35843&PageTypeID=4&PageID=13571&KeyValue={pin}",
+      "assessor_note": "Schneider Beacon returns 403 to scripts (Cloudflare). Open the link in a real browser to confirm the current owner of the project parcel.",
+      "parcels": {
+        "url": "https://services3.arcgis.com/MPDCWPaA1jcduAb1/arcgis/rest/services/LiveParcelsView/FeatureServer/0",
+        "authority": "parish",
+        "max_records": 2000,
+        "field_map": {"pin": "PN_Join"},
+        "note": "Current parish parcel geometry. Carries the parcel number only; owner comes from an owner source below.",
+        "vintage_check": {"method": "layer_edit_date"}
+      },
+      "owner_sources": [
+        {
+          "url": "https://geo.apgov.us/apgarc/rest/services/Maps/AscensionGeneralDetails/MapServer/5",
+          "authority": "parish",
+          "match": "point",
+          "field_map": null,
+          "note": "Parish ArcGIS Server. Was returning 'Could not access any server machines' on 2026-10-16; tried first in case it is back. Field names unverified, so attributes are returned raw."
+        },
+        {
+          "url": "https://services.arcgis.com/FqQ2BQIKVGpUWqAa/arcgis/rest/services/Ascension_Parish_Tax_Parcels/FeatureServer/0",
+          "authority": "consultant-copy",
+          "match": "join",
+          "join": {"from": "PN_Join", "to": "PARCEL_NO", "to_type": "int"},
+          "field_map": {
+            "pin": "PARCEL_NO",
+            "owner": "OWNERNAME_",
+            "owner_mail": "OWNERMAILI",
+            "situs": ["LOCATION_S", "LOCATION_1", "LOCATION_C"],
+            "assessed": "ASSMT_TOTA",
+            "legal": "PROPERTYDE"
+          },
+          "stale": "Westwood consultant copy; LAST_REVIS max 2016-02. Owner may have changed since.",
+          "vintage_check": {"method": "max_date", "field": "LAST_REVIS"}
+        }
+      ],
+      "owner_other_copies": [
+        "https://services6.arcgis.com/1fGAZVgZnPx4zcNH/arcgis/rest/services/Ascension_Parish_Tax_Parcels/FeatureServer/0 (CSRS copy, same 2016 vintage)",
+        "Parish market-area extracts All_Parcels_5/7 and MA_8/9/10 (2018, partial coverage)"
+      ],
+      "zoning": [
+        {
+          "url": "https://services3.arcgis.com/MPDCWPaA1jcduAb1/arcgis/rest/services/AscensionGeneralLayers/FeatureServer/2",
+          "authority": "parish",
+          "label": "Ascension Parish zoning districts",
+          "code_field": "ZONECLASS",
+          "desc_field": "ZONEDESC",
+          "extra_fields": ["ORD_NO", "APP_DATE"],
+          "residential_codes": ["R", "RM", "MU2", "MHRV", "PUD / SPUD", "SPUD"],
+          "note": "'R' is Rural, which permits single-family homes; MU (mixed-use corridor) and A also permit dwellings but are not counted as residential here. CIT/CITY = incorporated territory (Gonzales, Donaldsonville, Sorrento), zoned by the municipality."
+        },
+        {
+          "url": "https://services3.arcgis.com/MPDCWPaA1jcduAb1/arcgis/rest/services/AscensionGeneralLayers/FeatureServer/0",
+          "authority": "parish",
+          "label": "West Bank Industrial Overlay",
+          "code_field": null,
+          "overlay": true
+        }
+      ],
+      "structures": [
+        {
+          "url": "https://services3.arcgis.com/MPDCWPaA1jcduAb1/arcgis/rest/services/AscensionGeneralBasic/FeatureServer/1",
+          "authority": "parish",
+          "label": "Ascension address points",
+          "geometry": "point",
+          "base_where": "1=1",
+          "residential_where": "USETYPE IN ('R','Residential House','Residential MF Condo','Residential Mobile Home','Residential MF TH','Trailer /RV Park')",
+          "residential_basis": "Address points with a residential USETYPE. About a quarter of points have no USETYPE; they are counted under 'other/unclassified', so the residential count is a floor.",
+          "private_fields": ["FULLADDR"]
+        }
+      ],
+      "addresses": {
+        "url": "https://services3.arcgis.com/MPDCWPaA1jcduAb1/arcgis/rest/services/AscensionGeneralBasic/FeatureServer/1",
+        "authority": "parish",
+        "number_field": "ADDRNUM",
+        "full_field": "FULLADDR"
+      }
+    },
+
+    "st-james": {
+      "name": "St. James Parish",
+      "fips": "22093",
+      "status": "verified",
+      "viewer": "https://gisviewer.stjamesla.com/stj/",
+      "assessor_link": null,
+      "assessor_note": "St. James Assessor data is published directly in the parish GIS (AssInfo).",
+      "parcels": {
+        "url": "https://gisviewer.stjamesla.com/arcgis/rest/services/AssInfo/MapServer/3",
+        "authority": "parish",
+        "max_records": 1000,
+        "field_map": {
+          "pin": "PIN",
+          "owner": ["TAXPAYER", "CONTACT"],
+          "owner_mail": ["Owner_Addr1", "Owner_Addr2", "Owner_City", "Owner_State"],
+          "situs": "Physical_Addr",
+          "assessed": "Assessed_Value",
+          "last_transfer": "TransferDate",
+          "legal": "Legal_desc",
+          "conveyance": ["Book", "Page", "Instrument_No", "Instrument_Type"]
+        },
+        "vintage_check": {"method": "recent_count", "field": "TransferDate", "days": 365}
+      },
+      "owner_fallback": {
+        "url": "https://gisviewer.stjamesla.com/arcgis/rest/services/TaxViewer/MapServer/4",
+        "authority": "parish",
+        "note": "Mirror of AssInfo/3 on the same server."
+      },
+      "zoning": [
+        {
+          "url": "https://services5.arcgis.com/NaE1rjvJf3JdTAkI/arcgis/rest/services/Gramercy_Zoning_view/FeatureServer/0",
+          "authority": "municipal",
+          "label": "Town of Gramercy zoning (SCPDC-hosted)",
+          "code_field": "Type",
+          "desc_field": null,
+          "residential_codes": ["R-1", "R-2"],
+          "note": "Covers Gramercy only."
+        },
+        {
+          "url": "https://services9.arcgis.com/cgb6W3Qqyxf54QST/arcgis/rest/services/St_James_Parish_Land_Use/FeatureServer/0",
+          "authority": "unofficial",
+          "label": "St. James land-use map (AGOL user josh_lld, no stated provenance)",
+          "code_field": "Name",
+          "desc_field": null,
+          "residential_codes": ["Residential Growth", "Existing Residential / Future Industrial", "Commercial / Residential Mixed"],
+          "note": "Appears to digitize the parish land-use plan. Not zoning, not adopted-ordinance text; cite the parish's own land-use plan instead."
+        }
+      ],
+      "zoning_gap": "St. James Parish publishes no parish zoning layer. Outside Gramercy, zoning cannot be read from GIS; ask the Planning Department or file a records request for the land-use ordinance map.",
+      "structures": [
+        {
+          "url": "https://gisviewer.stjamesla.com/arcgis/rest/services/AssInfo/MapServer/1",
+          "authority": "parish",
+          "label": "St. James assessor building footprints",
+          "geometry": "polygon",
+          "base_where": "Status IS NULL OR Status <> '3'",
+          "residential_where": "ClassCode IN ('4000','4010','4020','4030','4040','4060','4080','4090')",
+          "owner_field": "TAXPAYER",
+          "residential_basis": "Assessor ClassCode: 4000 single-family, 4010 manufactured, 4020 townhouse/duplex, 4030 row house, 4040 multi-family, 4060 cottage/cabin, 4080 camp, 4090 historic residence. Records with Status 3 (Delete) are dropped.",
+          "private_fields": ["TAXPAYER", "PIN"]
+        }
+      ],
+      "addresses": {
+        "url": "https://gisviewer.stjamesla.com/arcgis/rest/services/AssInfo/MapServer/0",
+        "authority": "parish",
+        "number_field": null,
+        "full_field": null
+      }
+    },
+
+    "st-john": {"name": "St. John the Baptist Parish", "fips": "22095", "status": "unprobed"},
+    "iberville": {"name": "Iberville Parish", "fips": "22047", "status": "unprobed"},
+    "east-baton-rouge": {"name": "East Baton Rouge Parish", "fips": "22033", "status": "unprobed",
+      "hint": "City-Parish open data (data.brla.gov) and maps.brla.gov publish tax parcels and zoning."},
+    "west-baton-rouge": {"name": "West Baton Rouge Parish", "fips": "22121", "status": "unprobed"},
+    "calcasieu": {"name": "Calcasieu Parish", "fips": "22019", "status": "unprobed"},
+    "plaquemines": {"name": "Plaquemines Parish", "fips": "22075", "status": "unprobed"},
+    "cameron": {"name": "Cameron Parish", "fips": "22023", "status": "unprobed"}
+  }
+}

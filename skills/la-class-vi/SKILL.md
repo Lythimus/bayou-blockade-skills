@@ -68,6 +68,11 @@ away) — cross-reference the two rather than treating either as sufficient alon
 - `bayou:epa-echo-search` — SDWA/UIC compliance history if the project also shows up in
   EPA's own tracking (less likely post-primacy, but worth checking for the transition
   period record).
+- `bayou:ldh-drinking-water` — public-supply wells near the site (CVI-008): `near --aor aor.geojson`
+  lists wells inside the AoR and wells whose SWAP default 1-mile protection area reaches it;
+  `near <lat> <lon>` on each injection well. Set each well against the lowermost USDW the
+  application names; LDH has no screen depth, so get it from the system's SWAP assessment or
+  DCE water-well records.
 - `bayou:federal-register-search` — search `conditions[term]=Class VI Louisiana` or the
   specific operator/project name, agencies `environmental-protection-agency`, to catch any
   federal notices (e.g. residual EPA actions from before primacy transferred, or
@@ -78,6 +83,19 @@ away) — cross-reference the two rather than treating either as sufficient alon
 Once a project of interest is identified from Steps 1-2, resolve its full document set
 via `bayou:sonris-operator-lookup` → `bayou:sonris-doc-search` (this does need a session)
 for the actual application/order/permit PDFs, not just the tracking-table summary.
+
+Parish action on a project (a moratorium, zoning for injection wells or high-impact uses, a
+pore-space or surface lease of parish land, a cooperative endeavor) is on council and P&Z agendas:
+`bayou:parish-council-agendas alerts <parish> --term "class vi|carbon (capture|sequestration)|injection well|pore space" --category custom`.
+It covers seven parishes, so a project elsewhere needs the parish's own site.
+
+Pore-space control on state land and water bottoms (question CVI-002) is in `bayou:la-state-lands`.
+`overlap <aor.geojson>` (or `--point <lat> <lon> --radius M`) gives the AoR or pressure-front
+acres in each CCS operating agreement, naming the operator and its SMEB resolution. It also gives
+the acres on state-claimed bottoms or state land outside every agreement, under state mineral
+leases, and in neither, where `parish-assessor-gis` finds the private owners. A new agreement for
+state acreage needs a two-thirds SMEB vote after a public hearing in each affected parish
+(R.S. 30:209(4)(e)). `la-state-lands smeb` shows whether one is on this month's agenda.
 
 ## Presenting results
 

@@ -230,6 +230,14 @@ Report to the user:
   - Times are **UTC** (convert to local for the narrative — Norco/CST is UTC−6, CDT UTC−5).
   - **Confidence encodings differ:** VIIRS uses `l`/`n`/`h` (low/nominal/high); MODIS uses a
     numeric 0–100.
+  - **Flare-specific product (not wired in):** VIIRS Nightfire (VNF) from the Earth Observation
+    Group (Colorado School of Mines, eogdata.mines.edu) is built for gas flares. It uses the
+    night-time shortwave-infrared bands, and for each detection it gives temperature (K), source
+    area and radiant heat, along with annual flare-volume estimates. It catches small, hot,
+    elevated flares that FIRMS can miss. Downloads need a free EOG account, so this is a manual
+    step for now. Have the user download the nightly VNF CSV for the date and area, and read it
+    alongside the FIRMS rows. Even then, a VNF detection is a pixel, not an identified stack.
+    For low-frequency noise from the same flaring, see `lf-acoustic-baselines`.
 
 ## Step 5: Empty / error handling
 
@@ -251,5 +259,9 @@ Report to the user:
   sources; **MODIS 1 km** (Terra/Aqua) extends coverage back to ~2000 for historical events.
 - Pair with `bayou:satellite-imagery` (optical true color / thermal-anomaly imagery) for the same
   location+date to combine a visual plume with the hot-pixel/FRP evidence.
+- For dates worth checking, `bayou:csb-nrc-hazmat nrc --county "<parish>" --company "<name>"` lists
+  the releases and flaring a facility reported to the National Response Center. A hot pixel over the
+  facility on a report's date corroborates it independently. A hot pixel with no report is a
+  question to ask, because many flaring events fall below reporting thresholds.
 
 $ARGUMENTS

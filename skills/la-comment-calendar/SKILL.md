@@ -92,6 +92,12 @@ for m in re.finditer(r'comment period|comments will be accepted|comments must be
 "
 ```
 
+FERC comment periods (scoping, draft EIS, interventions on a pipeline or LNG terminal application) are in neither source. Pull them with `bayou:ferc-elibrary notices <docket>` and read the date from the notice PDF; add them to the table with Source = FERC.
+
+Parish council and planning/zoning public hearings (rezonings, special and conditional uses, code amendments) are in neither source either. Run `bayou:parish-council-agendas alerts <parish>` (St. Charles, Ascension, St. James, East Baton Rouge, Plaquemines, St. Bernard, Assumption) and add the hearing dates with Source = Parish. These are hearings to attend, not written comment deadlines; say so in the table.
+
+State Mineral and Energy Board hearings on carbon dioxide storage agreements for state land or water bottoms are in neither source either. R.S. 30:209(4)(e) requires a public hearing in each affected parish before the Board's two-thirds vote, and the 2025 procurement guidelines place it after Conditional Approval. Run `bayou:la-state-lands smeb` for this month's agenda (watch for sequestration or Conditional Approval items), then check the DCE calendar and the Board page for the parish hearing notice. Add it with Source = SMEB.
+
 ---
 
 ## Presenting the results

@@ -131,7 +131,10 @@ for f in fields:
 
 When this fallback is used, state plainly that it is an **approximation** of EPA's exact buffer methodology (EPA's tools weight by the blocks inside the circle; this pulls whole intersecting block groups and population-weights them) — close enough for a fenceline-community argument, not exact enough to cite as an official EJScreen Standard Report figure.
 
-Even when Step 2 ran, use this query to list the **per-block-group values**, not just the weighted average. A whole-block-group buffer can mix a small, heavily burdened fenceline pocket with larger low-burden neighborhoods, and the average hides the pocket (see the worked example in Step 3).
+Even when Step 2 ran, use this query to list the **per-block-group values**, not just the weighted average. A whole-block-group buffer can mix a small, heavily burdened fenceline pocket with larger low-burden neighborhoods, and the average hides the pocket (see the worked example in Step 3). To size the pocket itself,
+`bayou:parish-assessor-gis receptors --footprint` counts occupied homes by distance band from
+the property line (St. Charles, Ascension, St. James). Use it next to the block-group figures,
+not instead of them.
 
 ## Step 3: Official-record corroboration via EPA ECHO
 
@@ -192,7 +195,7 @@ EJAM's block weighting lands close to ECHO's circle. Step 2b's whole block group
 
 Raw indicators (facility/area's actual values):
 - **Demographic**: `PEOPCOLORPCT` (people of color %), `LOWINCPCT` (low-income %), `LESSHSPCT` (less than HS education %), `LINGISOPCT` (linguistic isolation %), `UNEMPPCT`, `UNDER5PCT`, `OVER64PCT`, `DEMOGIDX_2` (average of people-of-color% + low-income%, EPA's core demographic index)
-- **Environmental**: `PM25` (µg/m³), `OZONE` (ppb), `DSLPM` (diesel PM, µg/m³), `PTRAF` (traffic proximity/volume score), `PNPL` (Superfund/NPL proximity score), `PRMP` (RMP facility proximity score), `PTSDF` (hazardous waste TSDF proximity score), `UST` (underground storage tank count/density), `PWDIS` (wastewater discharge indicator), `NO2` (ppb)
+- **Environmental**: `PM25` (µg/m³), `OZONE` (ppb), `DSLPM` (diesel PM, µg/m³), `PTRAF` (traffic proximity/volume score), `PNPL` (Superfund/NPL proximity score), `PRMP` (RMP facility proximity score; `bayou:epa-rmp-lookup near` names the facilities behind it), `PTSDF` (hazardous waste TSDF proximity score), `UST` (underground storage tank count/density), `PWDIS` (wastewater discharge indicator), `NO2` (ppb)
 
 National percentile fields — prefix `P_` on any of the above (e.g. `P_PM25`) — are the number that actually matters for an environmental-justice argument: "this block group is at the Nth percentile nationally," 0–100. `P_DEMOGIDX_2` above 80 is EPA's own rule-of-thumb screening threshold for an EJ area of potential concern.
 

@@ -1,0 +1,162 @@
+{
+  "base": "https://sonris-gis.dnr.la.gov/arcgis/rest/services/DNRSvc/",
+  "checked": "2026-10-17",
+  "layers": {
+    "leases": {
+      "path": "OMR/MapServer/0",
+      "title": "OMR Active Leases (SL mineral leases, A#### and CS### operating agreements, WL/WE)",
+      "fields": ["STATE_LEAS", "LEASE_NUM", "LEASE_CLASS_CODE_DESCR", "TRACT_KIND", "ORIGINAL_LESSEE", "BIDDER_NM",
+                 "APPLICANT_NM", "LEASED_ACREAGE", "RETAINED", "PRODUCT_DECIMAL_OIL", "PRODUCT_DECIMAL_GAS",
+                 "SALE_DATE", "PRICE_PER_ACRE", "PARISH_NM", "STATE_AGENCY_NM", "INSTRUMENT", "FLOATER",
+                 "YEAR_NUM", "MONTH_NUM", "CD_SOURCE", "LEGEND", "HYPERLINK", "DOC_ACCESS"],
+      "label": "STATE_LEAS",
+      "search": ["STATE_LEAS", "ORIGINAL_LESSEE", "BIDDER_NM", "APPLICANT_NM", "PUBLICATION_NM", "PARISH_NM"],
+      "health": true
+    },
+    "sal": {
+      "path": "OMR/MapServer/15",
+      "title": "OMR State Agency Leases (agency-owned land leased through the Board)",
+      "fields": ["STATE_LEAS", "LEASE_NUM", "STATE_AGENCY_NM", "ORIGINAL_LESSEE", "BIDDER_NM", "LEASED_ACREAGE",
+                 "SALE_DATE", "PARISH_NM", "INSTRUMENT", "YEAR_NUM", "MONTH_NUM", "HYPERLINK", "DOC_ACCESS"],
+      "label": "STATE_LEAS",
+      "search": ["STATE_LEAS", "ORIGINAL_LESSEE", "BIDDER_NM", "APPLICANT_NM", "STATE_AGENCY_NM", "PARISH_NM"],
+      "health": true
+    },
+    "blease": {
+      "path": "OMR/MapServer/16",
+      "title": "OMR B Leases (small unleased acreage inside units)",
+      "fields": ["LEASE_NUM", "ORIGINAL_LESSEE", "LEASED_ACRES", "RETAINED_ACRES", "LEASE_EFF_DATE",
+                 "LEASE_DESCRIPTION", "COMMENTS", "DOC_ACCESS"],
+      "label": "LEASE_NUM",
+      "search": ["LEASE_NUM", "ORIGINAL_LESSEE", "COMMENTS"],
+      "health": true
+    },
+    "legal": {
+      "path": "OMR/MapServer/7",
+      "title": "OMR Legal Areas (partial state interest, lawsuits, judgments, compromises)",
+      "fields": ["LABEL", "POLY_TYPE", "LAWSUIT", "RESOLVE", "REFERENCE", "COMMENTS"],
+      "label": "LABEL",
+      "search": ["LABEL", "POLY_TYPE", "LAWSUIT", "RESOLVE", "REFERENCE", "COMMENTS"],
+      "health": true
+    },
+    "tracts": {
+      "path": "OMR/MapServer/1",
+      "title": "OMR Tracts nominated for the coming lease sales",
+      "fields": ["TRACT_NUM", "NOM_NUM", "SALE_DATE", "APPLICANT_NM", "PUBLICATION_NM", "TRACT_KIND",
+                 "PARISH_NM", "TRACT_ACREAGE", "RECOMMENDATION"],
+      "label": "TRACT_NUM",
+      "search": ["TRACT_NUM", "NOM_NUM", "APPLICANT_NM", "PUBLICATION_NM", "PARISH_NM", "TRACT_KIND"],
+      "health": true
+    },
+    "archive": {
+      "path": "OMR/MapServer/2",
+      "title": "OMR Tract Archive (2001-present: nominations, bids, awards)",
+      "fields": ["TRACT_NUM", "NOM_NUM", "SALE_DATE", "APPLICANT_NM", "PUBLICATION_NM", "BIDDER_NM", "LEASE_NUM",
+                 "ORIGINAL_LESSEE", "TRACT_KIND", "PARISH_NM", "TRACT_ACREAGE", "LEASED_ACREAGE", "TRACT_BID_AMT",
+                 "PRICE_PER_ACRE"],
+      "label": "TRACT_NUM",
+      "search": ["TRACT_NUM", "NOM_NUM", "APPLICANT_NM", "PUBLICATION_NM", "BIDDER_NM", "ORIGINAL_LESSEE",
+                 "LEASE_NUM", "PARISH_NM"],
+      "health": false
+    },
+    "claimed": {
+      "path": "COMMON/MapServer/17",
+      "title": "State Land Office: State Claimed Water Bodies",
+      "fields": ["NAME", "WEB_STATUS", "STATECLAIM", "TITLE_ID", "PID"],
+      "label": "NAME",
+      "legend_field": "WEB_STATUS",
+      "search": ["NAME"],
+      "health": true
+    },
+    "waterbodies": {
+      "path": "COMMON/MapServer/20",
+      "title": "State Land Office: State Water Bodies (title-file index)",
+      "fields": ["NAME", "STATECLAIM", "PARISH", "TITLE", "FILENAME", "COURTCASE", "STATEEXTEN"],
+      "label": "NAME",
+      "legend_field": "STATECLAIM",
+      "search": ["NAME", "COURTCASE", "TITLE", "FILENAME"],
+      "health": true
+    },
+    "major": {
+      "path": "COMMON/MapServer/21",
+      "title": "Major Inland Water Bodies (outline only, no claim status)",
+      "fields": ["NAME", "AREA_AC"],
+      "label": "NAME",
+      "search": ["NAME"],
+      "health": false
+    },
+    "stateland": {
+      "path": "COMMON/MapServer/18",
+      "title": "State Owned/Leased Lands (SLABS surface inventory)",
+      "fields": ["FACILITY_N", "FACS_AGENC", "DEPARTMENT", "USE", "SURF_INT", "OWN_LEASE", "SITE_CODE", "PARISHST",
+                 "REPORT_DOC"],
+      "label": "FACILITY_N",
+      "legend_field": "USE",
+      "search": ["FACILITY_N", "FACS_AGENC", "DEPARTMENT", "SITE_CODE"],
+      "health": true
+    },
+    "wma": {
+      "path": "COMMON/MapServer/19",
+      "title": "Wildlife Management Areas",
+      "fields": ["NAME", "TYPE", "ACRES", "DATE_ESTAB", "LINK"],
+      "label": "NAME",
+      "search": ["NAME"],
+      "health": true
+    },
+    "refuge": {
+      "path": "COMMON/MapServer/24",
+      "title": "Wildlife Refuges",
+      "fields": ["NAME", "OWNER", "TYPE", "ACRES"],
+      "label": "NAME",
+      "search": ["NAME", "OWNER"],
+      "health": true
+    },
+    "landsale": {
+      "path": "COMMON/MapServer/29",
+      "title": "State Land Office land sales with minerals reserved to the state",
+      "note": "Layer 30 (Land Sale Minerals Data) holds the same 5,450 rows with tax-debtor and vendee names but returned ArcGIS error 400 on every spatial query when checked.",
+      "fields": ["SALENUM", "PATENT", "ACRES", "PARISH", "TOWNSHIP", "RANGE", "NOTES"],
+      "label": "SALENUM",
+      "search": ["SALENUM", "PATENT", "NOTES"],
+      "health": false
+    },
+    "parish": {
+      "path": "COMMON/MapServer/11",
+      "title": "Parishes",
+      "fields": ["PARISH", "STCOFIPS"],
+      "label": "PARISH",
+      "health": false
+    }
+  },
+  "legends": {
+    "WEB_STATUS": {
+      "Y": "State Claimed",
+      "DC": "Claimed by the State and Adjoining Land Owner (dual claimed)",
+      "JAC": "Judgment, Agreement or Compromise against State Ownership",
+      "PA": "Publicly Accessible (not a claim of ownership)"
+    },
+    "STATECLAIM": {
+      "Y": "state claims the bottom",
+      "N": "state does not claim",
+      "PARTIAL": "state claims part",
+      "UN": "coded UN; the service publishes no legend for it",
+      "NO TITLE FILE": "no title file reviewed; says nothing either way"
+    },
+    "USE": {
+      "DUAL_CLAIMED": "Dual Claimed (enter at your own risk)",
+      "RESTRICTED_ACCESS": "Restricted Access (no public access)",
+      "STATE AGENCY LAND": "State Agency Land (contact agency for access policy)"
+    },
+    "SURF_INT": {
+      "FULL_INTEREST": "state holds full surface interest",
+      "PART_INTEREST": "state holds part of the surface interest",
+      "NO_INTEREST": "state holds no surface interest",
+      "VACANT_LAND": "vacant land"
+    },
+    "LEGEND": {
+      "1": "located from legal description",
+      "2": "located from linen maps",
+      "3": "WLF agency administered"
+    }
+  }
+}
