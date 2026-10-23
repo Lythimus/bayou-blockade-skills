@@ -1,12 +1,12 @@
 ---
 name: la-species-cultural-review
-description: Check Louisiana rare/threatened/endangered species tracking lists, draft an LDWF Wildlife Diversity project-review request, list the federally listed species NMFS and FWS map at a point (Section 7 consultation areas, IPaC, critical habitat), find surveyed colonial waterbird nesting colonies near a coastal site with nest counts and aerial imagery (Gulfwide Avian Colony Monitoring), search the National Register of Historic Places near a project site, and list the tribes with a Section 106 consultation interest in the parish — the NEPA/ESA/Section 106 review bundle
+description: Check Louisiana rare/threatened/endangered species tracking lists, draft an LDWF Wildlife Diversity project-review request, list the federally listed species NMFS and FWS map at a point (Section 7 consultation areas, IPaC, critical habitat), find surveyed colonial waterbird nesting colonies near a coastal site with nest counts and aerial imagery (Gulfwide Avian Colony Monitoring), list the Essential Fish Habitat (species, life stage, fishery council) and National Wetlands Inventory wetlands (Cowardin codes, and the date of the imagery they were mapped from) at and around a point for Magnuson-Stevens EFH consultation and Section 404 or coastal use review, search the National Register of Historic Places near a project site, and list the tribes with a Section 106 consultation interest in the parish — the NEPA/ESA/Section 106 review bundle
 allowed-tools: Bash, AskUserQuestion
 ---
 
 # Louisiana Species & Cultural Resource Review
 
-Bundles the data sources typically needed for an ESA / NEPA / Section 106 review of a Louisiana project or facility: LDWF's statewide rare-species tracking lists, the LDWF Wildlife Diversity Program's formal project-review request process, the federal Services' own maps of listed species at a point (NMFS Section 7 consultation areas and FWS IPaC), surveyed colonial waterbird nesting colonies along the coast (Gulfwide Avian Colony Monitoring), the National Register of Historic Places (NRHP) via a live NPS spatial layer, and HUD's directory of tribes with a consultation interest in each parish.
+Bundles the data sources typically needed for an ESA / NEPA / Section 106 review of a Louisiana project or facility: LDWF's statewide rare-species tracking lists, the LDWF Wildlife Diversity Program's formal project-review request process, the federal Services' own maps of listed species at a point (NMFS Section 7 consultation areas and FWS IPaC), surveyed colonial waterbird nesting colonies along the coast (Gulfwide Avian Colony Monitoring), NOAA Essential Fish Habitat and the USFWS National Wetlands Inventory at a point, the National Register of Historic Places (NRHP) via a live NPS spatial layer, and HUD's directory of tribes with a consultation interest in each parish.
 
 **Correction to the original bookmark list**: the Louisiana Division of Historic Preservation's own historic-property database is unreachable (connection fails outright). Use the **NPS National Register of Historic Places ArcGIS layer** instead (Step 3 below) — it's the authoritative national dataset LDHP itself feeds into, live-verified, no key required. Also, LDWF's rare-species data is **not** organized as one PDF per parish as the bookmark description assumed — it's four statewide tracking-list PDFs (animals, plants, natural communities, combined) plus a formal data-request process for parcel-specific results.
 
@@ -230,6 +230,48 @@ gdal_translate -q -b 1 -b 2 -b 3 -of JPEG -projwin -91.8945 29.6215 -91.8930 29.
 - `gdal_translate` and `gdalinfo` come from Homebrew `gdal`. Frames are small enough to download whole (`curl -O` on the URL-encoded key); `magick <frame>.tif -resize 1600x preview.jpg` makes a viewable copy.
 - Before any bulk download (all frames for a colony can exceed 1 GB), give the total size from `--imagery` and confirm with the user.
 
+## Step 2d: Essential Fish Habitat and NWI wetlands
+
+A federal permit or funding for work in tidal or estuarine water (a Corps Section 10/404 permit,
+dredging, an outfall, a barge fleet, a pipeline crossing) triggers an EFH consultation with NMFS
+under the Magnuson-Stevens Act. Wetlands under or beside the footprint drive Section 404 and the
+coastal use permit. This step gives both at a point:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-species-cultural-review/wetlands_efh.py" --lat 29.9344 --lon -90.3561
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-species-cultural-review/wetlands_efh.py" --lat 29.9344 --lon -90.3561 --efh-radius-mi 2 --nwi-radius-mi 1 --json
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-species-cultural-review/wetlands_efh.py" --lat 29.9344 --lon -90.3561 --only nwi
+```
+
+- **EFH** comes from NOAA's EFH Mapper layer (`services2.arcgis.com/C8EMgrsFcRFL6LrL/.../EFH/FeatureServer/0`,
+  NOAA-owned). The script lists each fishery management plan or species with its life stage and council, at
+  the point and separately within the radius (default 1 mi). A facility point on the bank often falls just
+  landward of the near-shore EFH polygons it discharges or dredges into, so read both lists. At the IMTT and
+  GNOTS Luling site (river mile 120.5), EFH at the point is red drum, shrimp, reef fish and coastal migratory
+  pelagics, all Gulf Council plans.
+- **NWI** comes from the USFWS Wetlands MapServer (`fwspublicservices.wim.usgs.gov/wetlandsmapservice`). It
+  gives the polygon at the point, then every polygon touching the radius (default 0.5 mi), grouped by
+  Cowardin code. It also gives the mapping project, imagery date and scale from the NWI `Data_Source`
+  service.
+
+Limits, to repeat in any write-up:
+
+- **NWI is often decades old here.** Lake Cataouatche and Luling are mapped from November 1988 color-infrared
+  imagery at 1:65,000. On a coast that has lost this much land since then, a 1988 polygon is a historical
+  record, not today's shoreline. State the imagery year beside every NWI finding.
+- **NWI is not a jurisdictional determination.** Use it to test the applicant's delineation (permit-analysis
+  `WET-001`, `WET-002`), not to replace it. The `ACRES` figure is the whole polygon's area, not the part
+  inside the radius or the footprint.
+- **EFH extents are approximate.** NOAA's own caveat says the near-shore and upstream limits follow coastline
+  and habitat data and "may not reflect" where EFH applies (the source field is cut off mid-sentence). Inland
+  river points (Baton Rouge) return nothing, which is the layer's upstream limit, not an NMFS determination.
+  When the answer matters, ask the NMFS Habitat Conservation Division (Baton Rouge office) whether it treats
+  the site as EFH.
+- **HAPC is not checked.** The layer holds EFH extents only; Habitat Areas of Particular Concern are separate.
+- Exit 4 means a check was out of coverage: the point is outside U.S. waters, or no NWI mapping project covers it (offshore). Report that as "not mapped", never as "no wetlands".
+- Exit 2 means EFH or NWI failed and was not checked. A failed imagery-date lookup still prints the wetlands,
+  with the date marked failed.
+
 ## Step 3: National Register of Historic Places — live spatial search
 
 ```bash
@@ -303,11 +345,12 @@ Limits to state when presenting this:
 1. **Species check**: state plainly whether this was a tracking-list lookup (general listing status) or an actual site-specific LDWF review (Step 2, requires the formal request) — don't imply the tracking list alone confirms presence/absence at a site.
 2. **Federal ESA table** (Step 2b): Species | Status | Service (NMFS/FWS) | At the point, or nearest distance | Season / life stage | Critical habitat. State the coordinates queried, list proposed species separately, and never merge the two Services' results into one "none found".
 3. **Waterbird colony table** (Step 2c): Colony | Distance (mi) | Last year counted | Nests that year | Peak nests (species, year). State the radius and coordinates, name the nearest surveyed colony when none is inside the radius, and repeat the coverage limit (surveyed coastal colonies only). Embed or link a photo only when it supports a specific point.
-4. **NRHP table**: Property Name | Address/City | County | NRIS Ref # | Listed Date | Status | link
-5. If drafting the LDWF request letter: present it as ready-to-send text, and flag the $30/quad fee and the need for the user to actually send it (no auto-submission).
-6. **Tribal consultation list** (Step 4): Tribe | Section 106 contact | Email / phone | Contact last updated, followed by the three limits listed in that step.
-7. For a FERC-jurisdictional project (LNG terminal, interstate gas pipeline), FERC is the lead federal agency for ESA Section 7 and NHPA Section 106. Its EIS, biological assessment, the Services' opinions and the SHPO and tribal correspondence are in the FERC docket (`bayou:ferc-elibrary eis <docket>`; `search "Biological Opinion" --docket <docket>` and `search "Section 106" --docket <docket>` search descriptions). Compare them with what Steps 2b–4 find.
-8. State retrieval date for the LDWF PDF, the NMFS and IPaC queries, the avian colony tables, the NPS query, and the TDAT query.
+4. **EFH and wetlands** (Step 2d): EFH table: FMP or species | Life stage | Council | At the point or within N mi. NWI table: Cowardin code | Wetland type | Polygons | Whole-polygon acres. Under the tables give the imagery year, and say that NWI is not a delineation and that HAPC was not checked.
+5. **NRHP table**: Property Name | Address/City | County | NRIS Ref # | Listed Date | Status | link
+6. If drafting the LDWF request letter: present it as ready-to-send text, and flag the $30/quad fee and the need for the user to actually send it (no auto-submission).
+7. **Tribal consultation list** (Step 4): Tribe | Section 106 contact | Email / phone | Contact last updated, followed by the three limits listed in that step.
+8. For a FERC-jurisdictional project (LNG terminal, interstate gas pipeline), FERC is the lead federal agency for ESA Section 7 and NHPA Section 106. Its EIS, biological assessment, the Services' opinions and the SHPO and tribal correspondence are in the FERC docket (`bayou:ferc-elibrary eis <docket>`; `search "Biological Opinion" --docket <docket>` and `search "Section 106" --docket <docket>` search descriptions). Compare them with what Steps 2b–4 find.
+9. State retrieval date for the LDWF PDF, the NMFS and IPaC queries, the avian colony tables, the EFH and NWI queries, the NPS query, and the TDAT query.
 
 ### Citation format
 
@@ -318,6 +361,10 @@ Limits to state when presenting this:
 > **FWS IPaC**: pallid sturgeon (endangered), Gulf sturgeon and West Indian manatee (threatened) have ranges overlapping a 2-mile box centered on 29.9395, -90.3105; no critical habitat. Source: [USFWS IPaC](https://ipac.ecosphere.fws.gov/) location API (retrieved 2026-10-13). Range-based screen, not an official species list.
 >
 > **Gulfwide Avian Colony Monitoring**: Bayou Platte Island South, 27.6 mi from 29.58, -92.35, held 1,616 nests in 2013 (gull-billed tern 611, black skimmer 518, Forster's tern 355) and 49 in 2021, the last year counted. Source: The Water Institute and CPRA, colonial waterbird colony totals 2010–2021, [s3://twi-aviandata](https://twi-aviandata.s3.amazonaws.com/index.html) (retrieved 2026-10-16). Surveyed coastal colonies only.
+>
+> **NOAA Essential Fish Habitat**: red drum, shrimp, reef fish and coastal migratory pelagics (all life stages, Gulf of Mexico Fishery Management Council) are mapped at 29.9344, -90.3561. Source: [NOAA EFH Mapper data](https://www.habitat.noaa.gov/apps/efhmapper/) (retrieved 2026-10-23). Mapped extents are approximate; HAPC not checked.
+>
+> **USFWS National Wetlands Inventory**: the point lies in polygon R2UBH (riverine, lower perennial, permanently flooded), with four PFO1A forested wetlands within 0.5 mi; mapped from November 1988 color-infrared imagery at 1:65,000 (project "Luling"). Source: [USFWS Wetlands Mapper](https://www.fws.gov/program/national-wetlands-inventory/wetlands-mapper) (retrieved 2026-10-23). Not a jurisdictional determination.
 >
 > **LDWF Rare Species and Natural Communities Tracking List** (2022), source: [LDWF Wildlife Diversity](https://www.wlf.louisiana.gov/page/rare-species-and-natural-communities-by-parish) (retrieved 2026-07-21).
 

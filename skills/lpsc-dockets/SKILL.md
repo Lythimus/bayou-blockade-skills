@@ -8,7 +8,7 @@ allowed-tools: WebFetch, Bash, AskUserQuestion
 
 Search the Louisiana Public Service Commission (LPSC) public portal for dockets, orders, and filings. The LPSC regulates electric utilities (Entergy Louisiana, Cleco, SWEPCO), gas utilities, and telecommunications.
 
-Wholesale power, transmission and interconnection (ER/EL dockets), and interstate gas pipelines and LNG terminals (CP dockets), are FERC's jurisdiction, not the LPSC's. Search those with `bayou:ferc-elibrary`.
+Wholesale power, transmission and interconnection (ER/EL dockets), and interstate gas pipelines and LNG terminals (CP dockets), are FERC's jurisdiction, not the LPSC's. Search those with `bayou:ferc-elibrary`. For whether a plant in a certification docket holds a MISO interconnection queue position or an ERAS fast-track request, and what else is queued at its substation, use the `miso_queue.py` script in `bayou:ferc-elibrary`. The certification application itself usually says which MISO route the plant is taking (regular queue, ERAS, or the replacement-generator process), and that route decides where to look.
 
 ## Portal base URL
 

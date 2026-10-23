@@ -1,6 +1,6 @@
 ---
 name: household-exposure
-description: Household air-exposure assessment for one Louisiana home — past exposure to industrial air toxics from EPA RSEI modeled concentrations over each person's years at the address, plus what a proposed facility could add, from an AERMOD run on the applicant's own modeling files and permitted rates; reports screening cancer risk and hazard index by organ, with a shareable version that withholds the address. Outputs REPORT.md, exposure.csv, charts and a reproducibility manifest. Needs `uv`; the proposed-facility tier needs `gfortran`
+description: Household air-exposure assessment for one Louisiana home — past exposure to industrial air toxics from EPA RSEI modeled concentrations over each person's years at the address, plus what a proposed facility could add, from an AERMOD run on the applicant's own modeling files and permitted rates; reports screening cancer risk and hazard index by organ, with a shareable version that withholds the address. Outputs REPORT.md, exposure.csv, charts and a reproducibility manifest. Needs `uv`; the proposed-facility tier needs `gfortran`. Also checks whether a home or site is in a Clean Air Act nonattainment or maintenance area for each NAAQS, including the revoked 1-hour and 1997 8-hour ozone standards, with classification, design value and Federal Register citations (stdlib, no `uv`)
 allowed-tools: Bash, Read, Write, AskUserQuestion, Skill
 ---
 
@@ -156,6 +156,47 @@ and rounds to two significant digits. Before anything is shared:
   summary and charts without the data files avoids that.
 
 Social-size charts (`--formats print,social`) are for the public version only.
+
+## Area designation (nonattainment and maintenance)
+
+Whether the home or a proposed site sits in a Clean Air Act nonattainment or maintenance area. It
+governs NNSR review, major-source thresholds and offset ratios for a new source, and it tells a
+household whether the air shed already fails, or has recently failed, a federal standard. The
+script is stdlib-only and does not need `uv` or an `<OUT>` directory:
+
+```bash
+python3 $HX/nonattainment.py --lat 30.0951 --lon -90.9925              # every NAAQS layer, plus areas within 25 mi
+python3 $HX/nonattainment.py --lat 30.0951 --lon -90.9925 --radius-mi 0 --json
+```
+
+It queries EPA's Green Book map service (`gispub.epa.gov/.../OAR_OAQPS/NonattainmentAreas/MapServer`,
+12 layers) and reports, for each standard, the area name, status (Nonattainment, Maintenance, or
+the revoked-standard variants), classification, the designation and redesignation FR citations,
+and the layer's design value with its years. Exit 2 means a layer failed and was not checked; exit 4
+means the point is outside the U.S. coverage.
+
+- **Report the revoked layers, and label them.** Two of the three ozone standards that list Baton
+  Rouge are revoked: the 1979 1-hour standard (layer 10, "Nonattainment (NAAQS revoked)",
+  Severe-15) and the 1997 8-hour standard (layer 0, revoked by 80 FR 12264 effective 2015-04-06,
+  though the service still shows its status as plain "Maintenance"). Under the 2008 standard Baton
+  Rouge is a maintenance area; under the 2015 standard it is in neither kind of area. The revoked
+  1-hour classification is the likely basis for LDEQ's continued offset requirement there; confirm
+  that in LAC 33:III.504 (`bayou:lac33-search`) before citing it. Quoting "nonattainment area"
+  without naming the revoked-standard basis invites a correction.
+- **"Not in a nonattainment or maintenance area" is not "clean".** The layers map only
+  nonattainment and maintenance areas. Everywhere else is attainment or unclassifiable, and the
+  script does not say which.
+- **Never cite the map layer's design value.** It can be stale or wrong even when its year label
+  is current. For Baton Rouge 2023–2025, the layer gives 0.069 ppm under the 2008 standard, while
+  EPA's official table (`o3_designvalues_2023_2025_final_06_08_26.xlsx`, Tables 1b and 3b) gives
+  0.073. Its 1-hour value is still 2020–2022. Take the figure from
+  [EPA's design value tables](https://www.epa.gov/air-trends/air-quality-design-values), and
+  compare it with the standard it is measured against. The tables' "Other Violations" sheet
+  (Table 2 for ozone) lists monitors that violate a standard in areas never designated
+  nonattainment under it. The Carville monitor (Iberville, 22-047-0012), at 0.073 ppm for
+  2023–2025, violates the 2015 ozone standard of 0.070, though the 2015 layer shows no area there.
+- Offshore points and Outer Continental Shelf sources are not designated; OCS sources take the
+  designation of the corresponding onshore area (40 CFR Part 55).
 
 ## Presenting the results
 

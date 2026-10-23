@@ -180,5 +180,10 @@ A typical Section 408 permission includes:
    any state lease or CCS operating agreement there with `bayou:la-state-lands at <lat> <lon>
    --radius 100`. A CO2 injection well or pipeline in state waters also needs an SMEB storage
    agreement, which `la-state-lands ccs` lists.
+8. For Section 10 or 404 work, list the mapped wetlands and Essential Fish Habitat at the site
+   with `bayou:la-species-cultural-review` Step 2d (`wetlands_efh.py --lat --lon`). Work in tidal
+   water inside mapped EFH needs an NMFS EFH consultation, so check whether the public notice
+   includes an EFH assessment. Compare the NWI codes, and the date of the imagery behind them,
+   with the applicant's delineation.
 
 $ARGUMENTS

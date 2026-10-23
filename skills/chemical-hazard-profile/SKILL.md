@@ -1,6 +1,6 @@
 ---
 name: chemical-hazard-profile
-description: CAS number or chemical name → GHS hazard statements, signal word, pictograms and IARC cancer group from PubChem, plus EPA cancer calls and IRIS reference values from CompTox when a key is set. Takes a single chemical, a list, or a TRI data file
+description: CAS number or chemical name → GHS hazard statements, signal word, pictograms and IARC cancer group from PubChem, plus EPA cancer calls and IRIS reference values from CompTox when a key is set. Takes a single chemical, a list, or a TRI data file. Also lists what a site reported manufacturing or importing under TSCA Chemical Data Reporting (2024 cycle: production volumes for 2020–2023, uses, workers exposed), by FRS ID, name, CAS number or radius, with confidential (CBI) volumes kept apart from zeros
 allowed-tools: Bash, Read, AskUserQuestion
 ---
 
@@ -66,6 +66,46 @@ Quirks of the API's output, which the script normalizes:
 - A cancer call with exposure route `-` means the source did not tie the call to a route; it prints as "route not specified".
 - A chemical can carry several calls from one source. Benzene has both an older-scheme IRIS "A (Human carcinogen)" and a "Known/likely human carcinogen" call. Cite the one that matches the assessment you quote.
 
+## Step 3: What the site makes — TSCA Chemical Data Reporting
+
+TRI covers what a facility releases. CDR covers what it manufactures or imports, including
+intermediates and products that never appear in TRI, such as Union Carbide's ethylene oxide,
+acrolein and ethyleneamines at Taft. The 2024 cycle gives production volume for 2020–2023, the
+number of workers reasonably likely to be exposed, maximum concentration, physical form, and
+the 2023 industrial and consumer uses.
+
+```bash
+C="python3 ${CLAUDE_PLUGIN_ROOT}/skills/chemical-hazard-profile/cdr.py"
+$C --frs 110018861793                    # FRS ID from bayou:epa-frs-crosswalk
+$C --site "union carbide" --state LA
+$C --near 29.98 -90.45 --radius-mi 2     # every reporting site around a home or fenceline
+$C --cas 75-21-8 --state LA              # which Louisiana sites make ethylene oxide
+$C --frs 110000602465 --uses             # add industrial and consumer/commercial use rows
+```
+
+The first run downloads EPA's public CSV release (`2024-cdr-public-csv-data.zip`, 14.4 MB,
+April 2026, from [Access CDR Data](https://www.epa.gov/chemical-data-reporting/access-cdr-data))
+into `~/.cache/bayou/tsca-cdr/`. The script reads it from the zip without extracting it. If a
+future release is over 100 MB the script stops with exit 3 and prints the size and free space:
+confirm with the user, then rerun with `--yes`. Exit 2 means the release could not be read.
+
+- **Three states, never two.** Each volume is a number of pounds, "CBI" (the company claimed it
+  confidential), or "not reported" (blank). CBI and blank are not zeros and are never added into
+  a total. All 35 of Union Carbide St. Charles's 2023 volumes are CBI; say that, and quote the
+  national aggregate range EPA does publish beside each chemical.
+- **The list is a floor.** About 7,000 rows hide the site's identity entirely and are missing from
+  site and radius searches (`--cas` reports how many there are for that chemical). Volumes under the
+  reporting threshold are not reported at all: 25,000 lb per site per year in general, and 2,500 lb
+  for chemicals subject to certain TSCA actions (40 CFR 711.8). "Not in CDR" does not mean "not on site".
+- **"Never at site: Yes"** means the chemical was imported or made under contract and never physically
+  present. Blank means the submitter did not answer it; it is not a "No".
+- **Use rows join on the TSCA program ID, not the FRS ID.** The FRS IDs in EPA's two use files were
+  saved in scientific notation (`1.10065E+11`) and no longer match. The script handles this; any
+  other join on those files has to as well.
+- **Ranges come from the code columns.** The release's text columns lost "≥" in encoding ("? 90%"),
+  so the script labels workers, concentration and byproduct share from the `W`/`M`/`B` codes.
+- Then profile each chemical's hazards with Step 1: `$C --frs <id> --json` gives the CAS numbers.
+
 ## Reading the output
 
 - **GHS sources disagree, and the script shows one by default.** A PubChem record carries classifications from several bodies. The script lists the EU harmonised classification (Regulation (EC) No 1272/2008) first, because it is a regulator's decision; the ECHA entry beneath it is a tally of what companies notified, with the percentage of notifiers in parentheses. Japan's NITE entries often differ: for chloroprene the EU assigns H350 ("may cause cancer") while one NITE entry assigns H351 ("suspected of causing cancer"). The summary line under each chemical reports the spread of cancer statements across all sources. Run `--all-sources` and name the source before quoting a statement.
@@ -96,9 +136,13 @@ For one or two chemicals, give the script's output with the source named. For a 
 
 Sort carcinogens first. "Serious" means the H340s (genetic defects), H350s (cancer), H360s (fertility, unborn child) and H370s (organ damage). Leave flammability and aquatic toxicity out of a health summary unless the user asks. State the retrieval date, and state whether the EPA section ran.
 
+For CDR results (Step 3), list: Chemical | CAS | Activity | 2023 volume (lb, or CBI, or not reported) | National 2023 range | Workers exposed | Never at site. Under the table, give the counts with a volume, CBI and not reported, and say that the list is a floor.
+
 ### Citation format
 
 > **PubChem**, Compound Summary for CID 31369 (Chloroprene, CAS 126-99-8), GHS Classification, harmonised classification under Regulation (EC) No 1272/2008: H350 "May cause cancer", source: [PubChem](https://pubchem.ncbi.nlm.nih.gov/compound/31369#section=GHS-Classification) (retrieved 2026-10-11).
+>
+> **EPA TSCA Chemical Data Reporting, 2024 cycle**, Union Carbide Corp – St. Charles Operations, Hahnville, LA (FRS 110018861793): ethylene oxide (CAS 75-21-8) manufactured on site; 2020–2023 site volumes claimed confidential (CBI); national 2023 production 7.0 to under 8.5 billion lb; 50–<100 workers reasonably likely to be exposed. Source: [2024 CDR public CSV data](https://www.epa.gov/chemical-data-reporting/access-cdr-data) (released April 2026, retrieved 2026-10-23).
 >
 > **IARC Monographs**, Chloroprene, Group 2B (possibly carcinogenic to humans), as reported in PubChem CID 31369 (retrieved 2026-10-11).
 

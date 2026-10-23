@@ -1,6 +1,6 @@
 ---
 name: ejscreen-report
-description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset or a block-weighted EJAM buffer report (state and national percentiles, EJ indexes, RSEI), and corroborate a facility's demographics against EPA ECHO's official ACS profile
+description: Pull EPA EJScreen environmental-justice indicators (demographics, pollution burden, proximity scores) for a point or radius, from a live community-hosted mirror of the official dataset or a block-weighted EJAM buffer report (state and national percentiles, EJ indexes, RSEI), and corroborate a facility's demographics against EPA ECHO's official ACS profile; add CDC/ATSDR's Social Vulnerability Index 2022 for the tract (overall and four themes, national percentile ranks) as a second, federally hosted vulnerability index
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -191,6 +191,35 @@ Worked example: Shell Norco, at ECHO's center point 29.99435, −90.40726, check
 
 EJAM's block weighting lands close to ECHO's circle. Step 2b's whole block groups reach well past the radius. One of those block groups, 220890627001, is 67% people of color and at the 83rd national demographic percentile. ECHO's circle captures little of it, and Step 2b's weighted average dilutes it to 39th. Neither number is wrong. Each answers a different question, which is why the per-block-group listing from Step 2 matters.
 
+## Step 4: CDC/ATSDR Social Vulnerability Index (tract)
+
+EJScreen is served from a third-party mirror. CDC's SVI is a second index that CDC itself still
+hosts, built from ACS 2018–2022: 16 variables in four themes (socioeconomic status, household
+characteristics, racial and ethnic minority status, housing type and transportation). Use it to
+corroborate the EJScreen picture, or to stand in for it when the mirror is down:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/ejscreen-report/svi.py" --lat 30.00 --lon -90.79
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/ejscreen-report/svi.py" --lat 30.00 --lon -90.79 --radius-mi 1 --json
+```
+
+It queries `services3.arcgis.com/ZvidGQkLaDJxRSJ2/.../CDC_ATSDR_Social_Vulnerability_Index_2022_USA/FeatureServer`
+(layer 2 tracts, layer 1 counties; no key). It prints the overall and theme percentile ranks, the
+count of flags (variables at or above the 90th percentile), and the estimated percentages behind
+them, for the tract at the point and for its parish. `--radius-mi` also lists every tract touching
+the radius, most vulnerable first. Exit 2 means the service failed; exit 4 means no tract at the
+point.
+
+- **Ranks are national.** CDC also publishes state-ranked SVI files, and those give different
+  numbers. This service is the U.S.-ranked edition; say so. Tract ranks are among U.S. tracts and
+  parish ranks among U.S. counties.
+- **-999 is "not computed", not a rank.** The script prints it as n/a.
+- **SVI is tract-level; EJScreen is block-group-level.** A fenceline block group can be far above
+  its tract's average (St. James tract 405: overall 0.80 and minority-status theme 0.94, while
+  the parish as a whole is 0.27). Give both, each labeled with its geography.
+- Don't confuse it with the social vulnerability rating inside FEMA's National Risk Index
+  (`bayou:fema-flood` `nri.py`), which comes from a different index.
+
 ## Field reference
 
 Raw indicators (facility/area's actual values):
@@ -216,13 +245,17 @@ Other prefixes present on the service, not requested by default above: `D2_`/`D5
 7. **Splitting citations for a filed comment.** Cite demographic facts (population, people of color, low-income) to ECHO first, because ECHO is the EPA-hosted record. Cite percentile rankings, the ≥80th-percentile threshold, and environmental indicators to EJScreen, since ECHO has no equivalent. Both sources are cited openly. Never word an ECHO figure as though it confirms an EJScreen percentile.
 8. Cross-link: `bayou:epa-echo-search` for compliance history of specific facilities identified nearby, as well as the DFR demographics in Step 3. Use `bayou:epa-tri-search` for their actual reported releases (the `PNPL`/`PTSDF`/`PTRAF` proximity scores are generic distance-based scores, not facility-specific release data).
 
-9. If the user needs a page or dataset EPA has taken down (the old EJScreen site, a removed technical document), the `internet-archive` MCP server listed under "External skills and MCP servers" in `${CLAUDE_PLUGIN_ROOT}/README.md` finds earlier captures. Check whether it is installed before suggesting it.
+9. If Step 4 ran, give the SVI tract's overall and theme ranks in their own table, labeled "CDC/ATSDR SVI 2022, national ranks, census tract [FIPS]". Never merge them into the EJScreen block-group table.
+
+10. If the user needs a page or dataset EPA has taken down (the old EJScreen site, a removed technical document), the `internet-archive` MCP server listed under "External skills and MCP servers" in `${CLAUDE_PLUGIN_ROOT}/README.md` finds earlier captures. Check whether it is installed before suggesting it.
 
 ### Citation format
 
 > **EJScreen v2.32 (2023 vintage) via ArcGIS mirror of EPA Public Environmental Data Portal**, block group [ID], [County], LA, source: [services2.arcgis.com FeatureServer](https://services2.arcgis.com/w4yiQqB14ZaAGzJq/arcgis/rest/services/EJScreen_US_Percentiles_Block_Group_gdb_V_2.32_(Parent)_view/FeatureServer/0) (retrieved 2026-07-21) — not EPA's official `ejscreen.epa.gov` (offline). PM2.5: [X] µg/m³ ([Y]th percentile nationally). Demographic Index: [Z]th percentile.
 
 > **EPA EJAM site report**, [N]-mile radius around [lat], [lon], EJScreen v2.32 indicators, run on EDGI's public EJAM instance (ejamapi-84652557241.us-central1.run.app; PDF report via api.ejanalysis.com), retrieved [date]. Not an EPA-hosted URL. Population [N]; diesel PM [X]th percentile nationally ([Y]th in state).
+
+> **CDC/ATSDR Social Vulnerability Index 2022** (U.S. ranks), census tract 22093040500, St. James Parish, LA: overall 0.80; racial and ethnic minority status theme 0.94; 4 flags. Source: [CDC/ATSDR SVI 2022 FeatureServer](https://services3.arcgis.com/ZvidGQkLaDJxRSJ2/arcgis/rest/services/CDC_ATSDR_Social_Vulnerability_Index_2022_USA/FeatureServer) (retrieved 2026-10-23).
 
 > **EPA ECHO Detailed Facility Report**, [Facility Name] (FRS [RegistryID]), ACS demographic profile, 1-mile radius, [ACS block label, e.g. ACS2024], source: [echo.epa.gov](https://echo.epa.gov/detailed-facility-report?fid=[RegistryID]) (retrieved [date]). Population [N]; people of color [X]%; below low-income level [Y]%.
 

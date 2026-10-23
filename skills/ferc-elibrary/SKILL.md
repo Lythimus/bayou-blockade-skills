@@ -1,6 +1,6 @@
 ---
 name: ferc-elibrary
-description: FERC eLibrary docket research. Covers interstate gas pipeline and compressor-station certificates (CP), LNG terminal authorizations (CP, NGA §3/§7), NEPA pre-filing (PF), gas and electric rate cases (RP, ER) and hydro projects (P-). It lists filings on a docket, the draft/final EIS and EA documents, Commission and delegated orders (certificate, rehearing, stay, construction clearances), notices that open scoping, comment or intervention periods, and who moved to intervene. It also finds a docket from a project or company name and downloads public PDFs. Use when a facility is FERC-jurisdictional (an interstate pipeline flagged by phmsa-npms-search, an LNG export terminal), when someone asks about a FERC docket, EIS, motion to intervene, intervenors, rehearing, or a petition for review of a FERC order, or to find CEII or privileged filings and the route to request them.
+description: FERC eLibrary docket research. Covers interstate gas pipeline and compressor-station certificates (CP), LNG terminal authorizations (CP, NGA §3/§7), NEPA pre-filing (PF), gas and electric rate cases (RP, ER) and hydro projects (P-). It lists filings on a docket, the draft/final EIS and EA documents, Commission and delegated orders (certificate, rehearing, stay, construction clearances), notices that open scoping, comment or intervention periods, and who moved to intervene. It also finds a docket from a project or company name and downloads public PDFs. Use when a facility is FERC-jurisdictional (an interstate pipeline flagged by phmsa-npms-search, an LNG export terminal), when someone asks about a FERC docket, EIS, motion to intervene, intervenors, rehearing, or a petition for review of a FERC order, or to find CEII or privileged filings and the route to request them. Also searches the MISO generator interconnection queue and the ERAS fast-track request list (miso_queue.py) by state, parish, substation, fuel, status or project number, to see what generation is queued at a plant's substation, test a utility's need claim, or find an applicant's withdrawn requests.
 argument-hint: docket <CP22-21[-001]> [--all] | eis|orders|notices|movants <docket> | search "<project or company>" | files|get <accession>
 allowed-tools: Bash, Read, WebFetch, WebSearch
 ---
@@ -108,6 +108,58 @@ Party status matters downstream. Under Natural Gas Act §19, only a party can se
 - **Ordering.** Docket listings are newest first. `search` and `docket --text` rank by relevance and show the top N.
 - **Omnibus filings.** Service-list updates and rulemaking comments are filed under dozens of dockets. They inflate co-listed docket counts; read the description.
 
+## MISO interconnection queue
+
+A generator that connects to the MISO grid (all of Louisiana's Entergy and Cleco territory) needs a
+queue position. MISO publishes the whole queue as JSON (`https://www.misoenergy.org/api/giqueue/getprojects`,
+about 2.3 MB, no key), and the Expedited Resource Addition Study (ERAS) fast-track requests as a
+separate workbook (about 45 KB xlsx) linked from its
+[Generator Interconnection](https://www.misoenergy.org/planning/resource-utilization/generator-interconnection/)
+page. `miso_queue.py` caches both for a day and filters both the same way:
+
+```bash
+M="python3 ${CLAUDE_PLUGIN_ROOT}/skills/ferc-elibrary/miso_queue.py"
+$M --poi waterford                         # every request at the Waterford substations
+$M --state LA --parish "St. Charles"       # by parish, plus unlocated requests (below)
+$M --state LA --fuel gas --status active
+$M --project J3871 --json
+$M --project E0029                          # an ERAS request (E-number)
+```
+
+Each request shows its project number, status, fuel and facility type, summer MW, parish, point of
+interconnection (POI), transmission owner, study cycle and phase, and its queue, in-service,
+withdrawn and done dates. ERAS requests print in their own block with the interconnection customer,
+GIA status, requested NRIS MW, the MW range of the need, and MISO's non-confidential summary of
+that need. `--owner` matches the customer as well as the transmission owner there. Exit 2 means
+the queue could not be read and no cached copy exists. An unreadable ERAS workbook prints "ERAS NOT
+CHECKED" and leaves the exit status alone; read that as unknown, not as no ERAS request.
+
+- **New requests have no location.** MISO leaves the state and county blank for recent cycles
+  (DPP-2026: 211 of 320 blank-location requests in October 2026). With `--state` or `--parish`, the
+  script also lists blank-location requests whose transmission owner serves that area, marked
+  "location not published". In October 2026 that meant eight Entergy Louisiana requests: six of 720
+  to 1,540 MW, and two 0 MW R-numbered records (4,500 MW active in all). Treat them as candidates, not matches.
+- **The POI is the strongest key for one plant.** Parish names are spelled inconsistently ("St.
+  Charles", "St. Charles Parish"; the script normalizes both), and a plant can connect at a
+  substation in the next parish. `--poi waterford` finds the requests in St. John the Baptist that
+  connect at Waterford 230 kV.
+- **Withdrawn is not cancelled.** A plant can leave the queue by three routes, and only two show
+  up in the script's output. Waterford shows all three:
+  - **A new number in the queue.** Check the new cycle's unlocated requests.
+  - **ERAS.** Waterford 5 is ERAS request E0029, with a GIA executed and filed. MISO's summary
+    says the need "is being driven by a hyperscale data center."
+  - **The replacement-generator process.** A utility reuses a retiring unit's interconnection
+    rights at the same point of interconnection. Neither list shows this. Waterford 6's tie-lines
+    run across the river to the Little Gypsy substation to use the rights of Little Gypsy 2 and 3
+    (ELL application, LPSC U-37853, 2026-02-11, pp. 10–11).
+
+  J3871 (735 MW, Waterford 500 kV) and J3796 (735 MW, Nelson 230 kV) were withdrawn the same day,
+  2025-09-24. Westlake, the Nelson plant, is now ERAS request E0045. Read the utility's
+  certification application (`bayou:lpsc-dockets`) for the interconnection route before calling a
+  project dead or new.
+- The generator interconnection agreement for a request that reaches GIA is filed at FERC as an ER
+  docket. Search for it here with `search "<project number or plant name>"`.
+
 ## Related skills
 
 - `phmsa-npms-search`: pipeline location and operator. An interstate gas line there has a CP certificate here.
@@ -117,4 +169,4 @@ Party status matters downstream. Under Natural Gas Act §19, only a party can se
 - `la-coastal-use-permits`, `usace-408-permits`: the state coastal-use and Corps permits that the same pipeline or terminal needs.
 - `document-ocr`: scanned PDFs only.
 - `pacer-case-search`: petitions for review of FERC orders (D.C. Circuit, 5th Circuit).
-- `lpsc-dockets`: Louisiana utility dockets, for state-jurisdictional matters.
+- `lpsc-dockets`: Louisiana utility dockets, for state-jurisdictional matters, including the certification of a new plant whose MISO queue position is listed above.

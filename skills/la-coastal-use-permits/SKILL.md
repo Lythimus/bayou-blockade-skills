@@ -121,6 +121,9 @@ construction permits for terminals, LNG and pipelines.
    candidate, not a match.
 5. For a resolved CUP that fills, dredges or builds near open water, run the surveyed
    waterbird-colony screen at its `LOCATION:` (`bayou:la-species-cultural-review` Step 2c).
+   Run Step 2d (`wetlands_efh.py`) at the same point for the NWI wetland types and the Essential
+   Fish Habitat the work would touch. Coastal NWI is often mapped from 1980s imagery, so give
+   the imagery year.
 6. When the applicant is an LNG terminal or an interstate gas pipeline, the federal record
    (EIS, certificate order, intervenors) is in its FERC docket: `bayou:ferc-elibrary search
    "<applicant>"`. CP2 LNG holds both a CUP (P20211131) and FERC docket CP22-21.

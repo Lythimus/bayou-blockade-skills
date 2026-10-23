@@ -1,6 +1,6 @@
 ---
 name: fema-flood
-description: Query FEMA openFEMA API for NFIP flood insurance claims, policies, and disaster declarations
+description: Query FEMA openFEMA API for NFIP flood insurance claims, policies, and disaster declarations; look up the NFHL flood zone and FIRM panel at a point; and pull FEMA's National Risk Index for the census tract and parish at a point (composite risk, expected annual loss by hazard, social vulnerability, community resilience), to check an applicant's "highest risk" or hazard-rating claim
 allowed-tools: Bash, AskUserQuestion
 ---
 
@@ -166,6 +166,56 @@ Note also that the `ratedFloodZone` field in openFEMA's NFIP claims data (above)
 
 ---
 
+## National Risk Index — tract and parish risk at a point
+
+FEMA's National Risk Index (NRI) rates 18 natural hazards for every census tract and county.
+Applicants quote it ("FEMA's National Risk Index identifies coastal flooding as the highest
+risk"), so check the claim against the same index at both levels:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/fema-flood/nri.py" --lat 29.8446 --lon -90.2805
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/fema-flood/nri.py" --lat 29.8446 --lon -90.2805 --top 18 --json
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/fema-flood/nri.py" --lat 29.8446 --lon -90.2805 --release march-2023
+```
+
+It queries FEMA's hosted NRI layers (`services.arcgis.com/XG15cJAlne2vxtgt/.../National_Risk_Index_Census_Tracts`
+and `.../National_Risk_Index_Counties`, no key) and prints the NRI version, the composite risk,
+expected annual loss (EAL), social vulnerability and community resilience ratings, and the hazards
+ranked by EAL in dollars per year. Exit 2 means a layer failed; exit 4 means no tract at the point
+(offshore).
+
+**"Highest risk" depends on the measure and the level.** A hazard's risk score and rating are
+national percentiles *within that hazard*. They compare this place with other places for that
+hazard, not one hazard here with another. At the Spoonbill well site (St. Charles, December 2025
+NRI):
+
+| Level | Highest-rated hazard | Largest by expected annual loss |
+|---|---|---|
+| Parish | Coastal flooding (Very High; hurricane is Relatively High) | Hurricane, $28.6M/yr against $13.1M for coastal flooding |
+| Tract 22089063200 | Hurricane (Very High; coastal flooding is Relatively High) | Hurricane, $2.4M/yr against $0.6M |
+
+**Check the release the applicant used.** Run `--release march-2023` to read FEMA's archived
+v1.19.0 layers (`National_Risk_Index_Census_Tracts_(March_2023)`, `..._Counties_(March_2023)`).
+Most applications filed in 2023–2025 cite that release, often as "Zuzak et al., 2023", or show a
+screenshot whose county score identifies it. The Spoonbill application (EDMS 15211674, Fig. 1-77,
+county score 90.33) matches March 2023 on every figure. In that release:
+- the parish is "Relatively Moderate", with coastal and riverine flooding tied at "Relatively High";
+- the project-site tract is **"Relatively High"** (score 93.2), with five hazards tied at "Relatively High".
+
+So "rates St. Charles Parish and the project site as 'Moderate risk'" was wrong for the site even
+in the release it cited. Applicants often quote the parish rating for a site. Always pull the
+tract as well.
+
+When you quote the NRI, name the measure (rating or EAL), the level (tract or parish) and the
+release. FEMA republishes the index, and ratings and even hazard names change between releases:
+riverine flooding (RFLD) became inland flooding (IFLD), and St. Charles's social vulnerability
+went from Relatively Low to Relatively Moderate.
+
+The NRI's social vulnerability rating comes from a different index than CDC's SVI. For tract-level
+vulnerability use `bayou:ejscreen-report` (`svi.py`).
+
+---
+
 ## Pagination
 
 Default returns up to 1000 records. For large datasets:
@@ -181,6 +231,7 @@ Check `metadata.count` in the response to see total records available.
 - Aggregate stats where useful: total payout, distribution by flood zone, peak loss year
 - For disaster declarations: chronological list with declaration dates and affected areas
 - Flag anything in Zone A or AE (high-risk Special Flood Hazard Areas)
-- Note Louisiana parish FIPS codes: St. Charles = 071, St. John = 095, St. James = 093, Orleans = 071
+- For NRI results, give the version, the level (tract or parish) and the measure (rating or EAL) beside every "highest risk" statement
+- Note Louisiana parish FIPS codes: St. Charles = 089, St. John = 095, St. James = 093, Orleans = 071
 
 $ARGUMENTS
