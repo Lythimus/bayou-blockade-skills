@@ -65,6 +65,25 @@ fact wrong hands the company a reason to dismiss everything else.
   it gives the company a legitimate complaint.
 - National partisan framing (party names, national politicians). Keep it local.
 
+## Photos
+
+A photo in a template slot is a factual claim, the same as a number. A reader takes it to
+be what the caption says it is.
+
+- **It shows what the caption says it shows:** the actual facility, site or place, from
+  the time the caption implies. No stand-in refinery, no stock smokestack, no photo of a
+  different plant "for illustration". A meme exposed as using the wrong plant discredits
+  every true thing next to it, and Nextdoor counts it as manipulated media.
+- **Don't alter it** beyond cropping and resizing. No added smoke, no recoloring, no
+  pasted-in objects.
+- **Nobody recognizable.** The off-limits list above covers photos as well as names:
+  residents, workers, children, hearing speakers. Officials only as part of a sourced
+  public act, and even then a photo of the facility usually makes the point better.
+- **No company or agency logos**, cropped or whole. That's the doctored-logo and
+  impersonation problem again.
+- **Write down where it came from** (`Overlay_Source`): who took it, when, and the license
+  or public-domain basis. If you can't say, don't use it.
+
 ## Nextdoor rules that bear on memes
 
 Nextdoor's Community Guidelines have five headings: **be respectful to your neighbors, do

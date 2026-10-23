@@ -1,6 +1,6 @@
 ---
 name: document-ocr
-description: OCR a folder (or single) scanned/image PDF into searchable .txt with per-line evidence (confidence, cross-reader agreement, table/checkbox structure), for any document source (LDEQ EDMS, USACE, FAA, or elsewhere). Use between downloading raw permit PDFs and running /bayou:permit-analysis, which requires machine-readable text.
+description: OCR a folder (or single) scanned/image PDF into searchable .txt with per-line evidence (confidence, cross-reader agreement, table/checkbox structure), for any document source (LDEQ EDMS, USACE, FAA, or elsewhere). Flags the pages that look like tables and offers Azure Document Intelligence on just those pages (or the whole document), producing a readable <stem>.azure.txt with real table rows. Use between downloading raw permit PDFs and running /bayou:permit-analysis, which requires machine-readable text.
 argument-hint: <input-dir-or-pdf> <output-txt-dir> [work-dir] [--backend <name>] [--azure] [--rerender]
 allowed-tools: Bash, Read, AskUserQuestion
 ---
@@ -27,6 +27,8 @@ one instead of assuming agreement that never happened.
 $WORK/results/<stem>/results.json    # raw Surya -- single-witness geometry/confidence
 $WORK/canonical/<stem>.json          # merged, per-line, with agreement + provenance
 $OUT_TXT/<stem>.txt                  # rendered from canonical, with page markers
+$WORK/tables/<stem>.json             # which pages look like tables (detect-table-pages.py)
+$OUT_TXT/<stem>.azure.txt            # only after an Azure run: Azure's reading, tables as rows
 ```
 
 `results.json` stays a **single witness** even though the pipeline now merges multiple readers:
@@ -53,7 +55,7 @@ diverged once each backend's actual output turned out to be several files, not o
 | `remote` *(default, via `auto`)* | Surya on `holos` | olmOCR 2 + Chandra 2 | 2 | box probes clean |
 | `local` | Surya | MinerU 2.5 | 1 | no box; laptop; single doc |
 | `surya-only` | Surya | none | 0 | degenerate — no MinerU installed |
-| `--azure` | *(additive at any tier — see below)* | Document Intelligence | +1 | opt-in, costs money |
+| `--azure` | *(additive at any tier — see below)* | Document Intelligence | +1 on pages it analyzed | offered for table pages; costs money |
 
 `surya-only` is a genuine degradation, not a peer tier: with `m = 0` there is no agreement signal
 at all, and every contested value falls back to Surya confidence plus a rendered crop
@@ -90,9 +92,10 @@ Run the script directly under `run_in_background: true`. **Don't wrap it in `noh
 inside that call.** The Bash call then returns as soon as the wrapper backgrounds itself, and the
 pipeline was observed dying after its first file.
 
-Attach a `Monitor` to the background job's output, watching for `[OCR] done|FAIL|ALL DONE` and
-`Traceback|Error` — each is one stdout line, so Monitor surfaces progress and crashes without
-polling.
+Attach a `Monitor` to the background job's output, watching for `[OCR] done|FAIL|ALL DONE`,
+`[tables]` and `Traceback|Error` — each is one stdout line, so Monitor surfaces progress and
+crashes without polling. Each done stem is followed by a `[tables]` line (see "Tables" below);
+collect those and act on them once the batch finishes, not one at a time.
 
 **Stopping a run.** `ocr-pipeline.sh` `exec`s into `lib/backend-local.sh` (or `lib/backend-remote.sh`), so
 after startup the running process has the backend's name, not `ocr-pipeline.sh`. Send
@@ -126,7 +129,8 @@ pdftoppm -r 170 -png in.pdf page && for p in page-*.png; do tesseract "$p" "${p%
 On the two OCM coastal-use status reports where it was compared with Surya, it found the same
 entries. `--psm 6` keeps each table row on one line. Surya's output puts every table cell on
 its own line, which makes it hard to `rg` a row. This path produces no `canonical.json`, so its
-output is not an input to `permit-analysis` citations.
+output is not an input to `permit-analysis` citations. When the table values themselves matter
+(a number you will cite), use the Azure table path below instead.
 
 **Resumable by design**: local skips a stem when `.txt` is non-empty *and* `canonical/<stem>.json`
 parses (not just `.txt` existing — a half-finished merge must not look done). If a run is
@@ -206,13 +210,15 @@ at high DPI only when the evidence doesn't already agree. Use `bayou:ocr-validat
 candidates worth checking in the first place (unit-conversion mismatches, subtotal errors,
 implausible values) before spending a verification pass on them one at a time.
 
-## `--azure` (opt-in, additive at any tier, costs money)
+## Tables → Azure Document Intelligence (`--azure`, additive at any tier, costs money)
 
-Document Intelligence `prebuilt-layout` is the only real checkbox source in this stack
+Surya reads a table one cell per line and orders lines by position, so on a table page a value
+can land beside the wrong row label in `<stem>.txt`. A column of `0.00` totals interleaved one row
+off from their labels is the typical failure. Document Intelligence `prebuilt-layout` returns
+real rows and columns. It is also the only real checkbox source in this stack
 (`selectionMarks[].state` + confidence — Surya collapses every checkbox glyph to the same bracket
 by construction) and the only per-word confidence source. It's additive: run it **after** the base
-OCR pass above has already produced `canonical/<stem>.json` for the documents you want it on, not
-instead of that pass.
+OCR pass, never instead of it.
 
 **This skill always uses direct REST (`azure-layout.py`), never an MCP connector**, even if one is
 present. A third-party Azure MCP server (`asklokesh/azure-mcp-server` was evaluated) means
@@ -221,27 +227,67 @@ merge — and its tool surface can't be verified up front. This is a deliberate 
 house pattern elsewhere in this plugin (e.g. `kit-dissemination`, which does prefer its connector
 when available): here, schema control wins over connector convenience.
 
+### Which pages: the `[tables]` lines
+
+Every tier runs `detect-table-pages.py` on each stem as it finishes and prints:
+
+```
+[tables] <stem>: <k>/<n> pages look tabular (<spec>) -> azure: whole|pages|none
+```
+
+It also writes `$WORK/tables/<stem>.json` (per-page features, `selected_pages`, `pages_spec`,
+`recommendation`). The detector reads only Surya's `results.json` geometry: visual rows of
+side-by-side narrow cells whose left edges line up into columns, plus short-table header rows.
+It makes no model call, so it costs nothing and returns the same answer every run. Measured against
+Azure's own table detection on ~400 pages of scanned regulatory filings, it found 94% of table
+pages at 92% precision. Most of its "false positives" are aligned label/value forms, which Azure
+also reads better. The thresholds were tuned on those same pages, so expect somewhat lower numbers
+on very different layouts. Most misses are continuation pages that hold the last few rows of a
+table from the page before. `--neighbors` adds the pages on either side of each hit to catch
+them, but on a table-heavy document that selects nearly every page.
+
+- `pages`: fewer than half the pages look tabular, so send just those (`--pages <spec>`).
+- `whole`: half or more do, so send the whole document. That is simpler, and the extra pages
+  cost little.
+- `none`: nothing tabular was found. Don't offer Azure unless the user asks, or the document has
+  checkboxes that matter.
+
+For a work dir OCRed before this check existed, run it standalone:
+`python3 ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/detect-table-pages.py <WORK_DIR> [--stem <stem> ...]`.
+
+**Offer Azure whenever a batch has `pages` or `whole` stems.** Don't wait to be asked. Surya's
+reading of a table is the part of its output most likely to be wrong, and the fix costs about a
+cent a page. Make the offer once, at the end of the batch, covering every flagged stem. Default
+to the detector's recommendation for each stem. If the user has already said in this conversation
+to run Azure on anything that looks like a table, that is the confirmation. Still state the page
+count and cost as you start.
+
+### Cost and confirmation
+
 **Cost: ~$10/1000 pages (~$2 for a 200-page permit).** This is a per-run sanity prompt, not a hard
 ceiling — do the following for the whole batch you're about to submit, once, not per document:
 
 **Hard caps — not a pricing concern, a submission concern:** `prebuilt-layout` refuses any request
-over **500 MB or 2,000 pages**, whichever hits first. A document over either limit cannot be
-submitted whole no matter what it costs — it must be extracted down to a qualifying page range
-first (see "Submitting a document over the caps" below). Check both the PDF's file size and its
-page count against these caps before estimating cost; a page count under 2,000 doesn't guarantee
-the file is under 500 MB.
+over **500 MB or 2,000 pages**, whichever hits first. The 500 MB cap applies to the uploaded file
+even with `--pages`, since the whole PDF is still sent. A file over 500 MB, or a run that needs
+more than 2,000 pages analyzed, needs the extract route in "Submitting a document over the caps"
+below. Check both the file size and the page count before estimating cost.
 
-1. For each target stem, `Read` `$WORK/canonical/<stem>.json` and take `len(pages)` as its page
-   count (or `grep -c '^=== PAGE ' <stem>.txt` if canonical is somehow absent — same number). Skip
-   and say so for any stem with no canonical.json yet; `--azure` can't run ahead of the base pass.
-2. Sum page counts across the batch; multiply by ~$0.01/page for the estimate. Show the per-document
-   breakdown and the total.
-3. **`AskUserQuestion`, once, before submitting anything** — page count and estimated cost for the
-   whole batch — the `pacer-case-search` house pattern. Nothing is submitted until this confirms.
+1. For each target stem, take the page count from `$WORK/tables/<stem>.json`: `len(selected_pages)`
+   for a page-subset run, `n_pages` for a whole-document run.
+2. Sum across the batch, multiply by ~$0.01/page, and show the per-document breakdown and total,
+   both for table pages only and for whole documents.
+3. **Unless the user has already approved Azure for table pages**, ask with `AskUserQuestion`,
+   once, before submitting anything: table pages only (recommended, with its page count and cost),
+   whole documents (with its count and cost), or skip. This is the `pacer-case-search` house
+   pattern. Nothing is submitted until it is confirmed.
 4. `Read` `~/.claude/bayou-credentials.md` for `AZURE_DOCINTEL_ENDPOINT` / `AZURE_DOCINTEL_KEY`
    (unless already exported). Missing either: fail clearly, point at
    `bayou-credentials.example.md`'s `## Azure Document Intelligence` section — do not prompt the
-   user for key material through chat.
+   user for key material through chat. Load them into the environment of the command that needs
+   them without echoing the key.
+
+### Submitting
 
 For each confirmed stem, locate its source PDF (same ad hoc search `bayou:ocr-verify` uses — near
 `WORK_DIR` and the output `.txt` directory, since `$WORK` retains no source-PDF pointer of its own
@@ -249,23 +295,34 @@ For each confirmed stem, locate its source PDF (same ad hoc search `bayou:ocr-ve
 
 ```bash
 mkdir -p "$WORK/azure"
+# whole document
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/azure-layout.py <source.pdf> "$WORK/azure/<stem>.layout.json"
+# table pages only -- <spec> is pages_spec from $WORK/tables/<stem>.json, e.g. 3,7-9,14
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/azure-layout.py <source.pdf> "$WORK/azure/<stem>.layout.json" --pages <spec>
 ```
+
+`--pages` is the service's own `pages` parameter. Only those pages are analyzed and billed, and
+the result keeps the **source document's page numbers** (verified: `--pages 9,12` returns pages
+`[9, 12]`). So no extract and no renumbering are needed, and the result merges directly.
 
 **`azure-layout.py` bills Azure at submission**, not at poll completion. It persists the
 `Operation-Location` it gets back from that submission to `<out>.layout.json.operation` before it
 starts polling, and on startup checks for that file first — so a timeout (default 3600s, `--timeout`
 to raise it further) or an interrupted run **resumes and retrieves the already-paid-for result
 instead of re-submitting**. Re-running the same command after a timeout is therefore safe and is
-the right move, not a re-bill; only delete the `.operation` file if you specifically want a fresh
-submission.
+the right move, not a re-bill. The `.operation` file also records the `--pages` spec. Resuming
+with a different spec is refused, because it would return the old run's pages. To analyze more
+pages of a stem that already has a result, either write to a new output path or delete the
+`.operation` file, which means a fresh, billed submission.
 
 ### Submitting a document over the caps
 
-A document over 500 MB or 2,000 pages (see the hard caps above) can't go to `azure-layout.py`
-directly — it must be extracted to a qualifying page range first, submitted, then **renumbered**
-back to source page numbers before merging, because Azure numbers pages 1..N in whatever PDF it
-was actually handed:
+Under 500 MB, `--pages` handles any page subset without an extract. This route is only for a file
+over 500 MB, which can't be uploaded at all, or for a run that needs more than 2,000 pages
+analyzed. The target pages are extracted into a smaller PDF, submitted, then **renumbered** back
+to source page numbers before rendering or merging, because Azure numbers pages 1..N in whatever
+PDF it was actually handed. `selected_pages` from `$WORK/tables/<stem>.json` is a ready-made page
+map:
 
 1. Pick the target pages and extract them: `qpdf --empty --pages <source.pdf> <ranges> --
    <extract.pdf>`, where `<ranges>` is comma-separated and each piece is a single page or a
@@ -285,19 +342,46 @@ was actually handed:
    ```
    This writes a **new** file — it never edits in place — and refuses outright if the page-map
    length doesn't match the layout's page count, rather than guess at the correspondence. Use
-   `<out>.renumbered.layout.json` (not the raw `<out>.layout.json`) as the `--azure` argument in
-   the re-merge step below; skipping the renumber attaches the extract's page-1-relative tables and
-   selection marks to the wrong canonical pages silently.
+   `<out>.renumbered.layout.json` (not the raw `<out>.layout.json`) for `azure-to-text.py` and as
+   the `--azure` argument in the merge below. Skipping the renumber silently attaches the
+   extract's page-1-relative tables and selection marks to the wrong pages.
 
-Then **re-merge** `canonical/<stem>.json` with the Azure result folded in. This is the step most
-likely to go wrong, because `merge-canonical.py` **rebuilds canonical from scratch on every
+### Readable tables: `<stem>.azure.txt`
+
+Always render the result to text. This is the step that makes the tables readable:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/azure-to-text.py "$WORK/azure/<stem>.layout.json" "$OUT_TXT/<stem>.azure.txt"
+```
+
+Each table comes out as `[table N]` … `[/table]` with one `| a | b | c |` line per row, so a value
+stays on the same line as its row label and `rg` finds whole rows. Merged cells are filled with
+`^` (continues the cell above) and `<` (continues the cell to the left), so a blank always means an
+empty cell. Prose comes out in Azure's paragraph order. The `=== PAGE n ===` markers are source
+page numbers, matching `<stem>.txt`. A page-subset run only has markers for the pages it covered.
+
+`<stem>.azure.txt` is a **second, independent reading** (Azure's OCR, not Surya's), with its own
+line numbers. Cite it as its own file. Don't copy its lines into `<stem>.txt`. When the two
+readings disagree on a value, that value is contested: resolve it with `bayou:ocr-verify` against
+the page image, not by preferring one file.
+
+### Merging into canonical.json (for `ocr-verify` / `ocr-validate`)
+
+This step is optional. It adds Azure's cells, checkboxes and vote to the per-line evidence that
+`bayou:ocr-verify` reads. It does not change `<stem>.txt`, because Azure never contributes text or
+reading order to the merge. The `surya-only` tier writes no `canonical/<stem>.json`, so for those
+stems the merge below creates it (`--backend surya-only`, no `--reader` arguments).
+
+This is the step most likely to go wrong, because `merge-canonical.py` **rebuilds canonical from scratch on every
 invocation — it never reads an existing canonical.json as a base.** Omitting the original
 `--reader` arguments here doesn't fail loudly; it silently produces a canonical file with
 `agreement.m` dropped back to 0, every `agreed`/`dissent` array empty, and `ocr-verify` treating a
 two-reader document as if it were `surya-only`.
 
 1. Before re-merging, `Read` the **existing** `$WORK/canonical/<stem>.json` and note its
-   `"backend"` and `"readers"` fields — these name what must reappear in the re-merge.
+   `"backend"` and `"readers"` fields — these name what must reappear in the re-merge. No
+   canonical file means a `surya-only` stem: backend `surya-only`, no readers, and step 3 has
+   nothing to save.
 2. Reconstruct each reader's raw-artifact path (mirrors the lookup already done internally by
    `lib/backend-remote.sh`'s `land_stem()` and `lib/backend-local.sh` — this is now a third copy of
    that logic, so if those scripts' output layout ever changes, this recipe has to change with
@@ -326,22 +410,24 @@ two-reader document as if it were `surya-only`.
 5. **Verify the re-merge actually stayed additive** before trusting it, then render to a temp path
    rather than `$OUT_TXT` directly — for the same reason as step 3, `render-txt.py` also writes in
    place, so the live `.txt` has to survive long enough to compare against:
-   - `agreement.m` on the same sampled non-trivial line must have increased by **exactly 1**
-     between `<stem>.json.pre-azure` and the new `<stem>.json` — Azure votes (`merge-canonical.py`
-     appends it to the reader set used for the verdict), so `m` going e.g. 1 → 2 is the correct,
-     expected outcome, not a sign anything broke. The top-level `readers` field itself should stay
-     **unchanged** — Azure is tracked separately via the top-level `azure: true` flag, not added to
-     `readers`.
+   - On a page Azure analyzed (listed in the new top-level `azure_pages`), `agreement.m` on a
+     sampled non-trivial line must be **exactly 1 higher** than in `<stem>.json.pre-azure` (or than
+     0, for a surya-only stem). On any other page it must be unchanged. Azure votes only on pages it
+     saw, so after a `--pages` run most pages keep their old `m`. The top-level `readers` field
+     must also stay **unchanged**. Azure is tracked through `azure: true` and `azure_pages`, not
+     added to `readers`.
    - ```bash
      python3 ${CLAUDE_PLUGIN_ROOT}/skills/document-ocr/render-txt.py \
-       "$WORK/results/<stem>/results.json" /tmp/<stem>.post-azure.txt "$WORK/canonical/<stem>.json"
-     cmp "$OUT_TXT/<stem>.txt" /tmp/<stem>.post-azure.txt
+       "$WORK/results/<stem>/results.json" <scratch>/<stem>.post-azure.txt "$WORK/canonical/<stem>.json"
+     cmp "$OUT_TXT/<stem>.txt" <scratch>/<stem>.post-azure.txt
      ```
      must report no difference — Azure only ever contributes `cell`/`selection_mark`/`tables`/
      `selection_marks`, never text or reading order, so nothing about the rendered text should
-     change. If `cmp` reports a difference, the readers were dropped or reading order shifted;
-     **stop and investigate rather than copying `/tmp/<stem>.post-azure.txt` over the live `.txt`.**
-   - Only once both checks pass: copy `/tmp/<stem>.post-azure.txt` over `$OUT_TXT/<stem>.txt` (a
+     change. (`merge-canonical.py` keeps Azure out of its reading-order priority list for this
+     reason: on a surya-only stem it would otherwise be the only reader and reorder every page.)
+     If `cmp` reports a difference, the readers were dropped or reading order shifted;
+     **stop and investigate rather than copying `<scratch>/<stem>.post-azure.txt` over the live `.txt`.**
+   - Only once both checks pass: copy `<scratch>/<stem>.post-azure.txt` over `$OUT_TXT/<stem>.txt` (a
      no-op given the `cmp` above, but keeps `canonical.json` and `.txt` from ever silently
      diverging) and remove `<stem>.json.pre-azure` and the temp `.txt`.
 
@@ -354,7 +440,9 @@ candidates with Azure's `selection_mark`, it doesn't settle them outright.
 
 On `[OCR] ALL DONE (<n> files) -> <OUT_TXT>`, list the produced `.txt` files. If the summary line
 reports any degraded stems, or the run's console output has `[coverage]` warnings, treat those
-documents as suspect before analysis starts — see below. The natural next steps:
+documents as suspect before analysis starts — see below. If any `[tables]` line said `pages` or
+`whole`, offer Azure for those stems now, per "Tables → Azure Document Intelligence" above, before
+anyone quotes a number from a table page of `<stem>.txt`. The natural next steps:
 `/bayou:ocr-validate <work-dir>` to flag arithmetic/plausibility candidates cheaply, then
 `/bayou:permit-analysis <file1.txt> [file2.txt ...] [--project-info <path>]` — using
 `bayou:ocr-verify` during its verify pass whenever a citation needs resolving with evidence rather

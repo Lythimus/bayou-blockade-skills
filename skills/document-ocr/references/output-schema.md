@@ -62,6 +62,9 @@ File: `$WORK/canonical/<stem>.json`
 - `readers` — which reader(s) actually ran and contributed lines: `[]`, `["mineru"]`, or
   `["olmocr", "chandra"]`. `azure` is tracked separately since it's additive at any tier.
 - `azure` — `true` if `$WORK/azure/<stem>.layout.json` exists and was merged in.
+- `azure_pages` — present when `azure` is true: the source page numbers Azure actually analyzed.
+  A `--pages` run covers only some pages (usually the ones `detect-table-pages.py` flagged), and
+  Azure counts toward `m` only on these.
 - `match_method` — `"rapidfuzz.partial_ratio"`, `"difflib"`, or `"none"` (no readers ran, so no
   fuzzy matching happened). Same value as the per-line `agreement.method` field, but hoisted to the
   top level so a mixed-`match_method` batch (e.g. one document merged before `rapidfuzz` was
@@ -151,8 +154,9 @@ File: `$WORK/canonical/<stem>.json`
 }
 ```
 
-- `m` — how many independent readers **ran** for this document (0 for `surya-only`, 1 for `local`,
-  2 for `remote`, +1 more if `--azure`). Constant across every line in the file. Lets a consumer
+- `m` — how many independent readers **ran** on this line's page (0 for `surya-only`, 1 for `local`,
+  2 for `remote`, +1 more on pages listed in `azure_pages`). Constant across a page, and across the
+  whole file unless Azure covered only some pages. Lets a consumer
   tell a strong signal (`m=2`, everyone agreed) from a weak one (`m=0`, no signal exists at all) —
   never treat `n == m` at `m=0` as agreement.
 - `n` — how many of those `m` readers **agreed** with this Surya line (fuzzy match ≥ 90, see Phase
@@ -251,8 +255,8 @@ the previous bullet.
   is present in the reader's raw output and the rendered `.txt` (confirmed on this fixture — doc 01
   pages 50/64/68 flag at 90%+ absent with nothing actually missing). Treat a `coverage[]` entry with
   no matching `elision[]` entry on the same page as "worth a look," not "confirmed broken."
-  Deliberately excludes `azure` from this math — Azure is additive/page-scoped, and a page outside
-  its submitted range legitimately shows every line absent for it, which isn't a reader failure.
+  Deliberately excludes `azure` from this math — Azure is additive and often page-scoped, so its
+  coverage is defined by `azure_pages`, not by how many lines it matched.
 - `elision[]` — pages where a reader's raw output matched an omission-placeholder pattern (e.g.
   `<!-- Table rows follow -->`). Narrower than `coverage[]` (only fires when the reader announces
   its own omission) but close to zero-false-positive when it does — the stronger of the two

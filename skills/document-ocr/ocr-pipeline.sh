@@ -30,12 +30,16 @@
 #   [OCR] skip <stem>
 #   [OCR] done <stem> (<i>/<total>)
 #   [OCR] FAIL <stem>: <stage>
+#   [tables] <stem>: <k>/<n> pages look tabular (<spec>) -> azure: whole|pages|none
 #   [OCR] ALL DONE (<total> files) -> <OUT_TXT>
+# The [tables] line follows each done stem (all tiers); it only recommends -- nothing is sent to
+# Azure without the cost confirmation in SKILL.md.
 
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RENDERTXT="${RENDERTXT:-$SCRIPT_DIR/render-txt.py}"
+DETECT_TABLES="$SCRIPT_DIR/detect-table-pages.py"
 # shellcheck source=lib/proc.sh
 . "$SCRIPT_DIR/lib/proc.sh"
 
@@ -232,6 +236,7 @@ while IFS= read -r -d '' pdf; do
   fi
 
   echo "[OCR] done $stem ($i/$TOTAL)"
+  python3 "$DETECT_TABLES" "$WORK" --stem "$stem" || true
 done < "$FILELIST"
 
 echo "[OCR] ALL DONE ($TOTAL files) -> $OUT_TXT"

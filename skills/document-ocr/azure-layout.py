@@ -10,7 +10,12 @@ Pinned to api-version=2024-11-30 (GA). Do not bump without re-checking the respo
 adapt_azure() in merge-canonical.py, which this script's output feeds directly and unmodified --
 this script does no reshaping of its own.
 
-Usage: azure-layout.py <pdf> <out.json> [--endpoint URL] [--key KEY]
+Usage: azure-layout.py <pdf> <out.json> [--pages SPEC] [--endpoint URL] [--key KEY]
+
+--pages analyzes (and bills) only the listed pages, e.g. `3,7-9,14` -- the service's own `pages`
+query parameter, so the whole PDF is still uploaded (the 500 MB cap still applies) but the result
+keeps the source document's page numbers and needs no renumbering. `detect-table-pages.py` prints
+a ready-made spec.
 
 --endpoint/--key default to the AZURE_DOCINTEL_ENDPOINT / AZURE_DOCINTEL_KEY environment
 variables (read from ~/.claude/bayou-credentials.md by the caller, same idiom as
@@ -36,6 +41,7 @@ actually intended.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -46,12 +52,14 @@ POLL_INTERVAL_SECONDS = 10
 POLL_TIMEOUT_SECONDS = 3600
 
 
-def submit(endpoint, key, pdf_bytes):
+def submit(endpoint, key, pdf_bytes, pages=None):
     endpoint = endpoint.rstrip("/")
     url = (
         f"{endpoint}/documentintelligence/documentModels/prebuilt-layout:analyze"
         f"?api-version={API_VERSION}"
     )
+    if pages:
+        url += f"&pages={pages}"
     print(f"[OCR] azure submitting {len(pdf_bytes)/1e6:.1f} MB ...", file=sys.stderr, flush=True)
     req = urllib.request.Request(
         url,
@@ -103,6 +111,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("pdf")
     parser.add_argument("out_json")
+    parser.add_argument("--pages", default=None, help="page spec, e.g. 3,7-9 (default: all pages)")
     parser.add_argument("--endpoint", default=os.environ.get("AZURE_DOCINTEL_ENDPOINT"))
     parser.add_argument("--key", default=os.environ.get("AZURE_DOCINTEL_KEY"))
     parser.add_argument(
@@ -122,17 +131,33 @@ def main():
         )
         sys.exit(1)
 
+    if args.pages and not re.fullmatch(r"\d+(-\d+)?(,\d+(-\d+)?)*", args.pages):
+        raise SystemExit(f"[OCR] --pages must look like 3,7-9,14; got {args.pages!r}")
+
+    # Line 1 of the .operation file is the operation URL; an optional `pages=` line 2 records the
+    # spec it was submitted with. Resuming under a different spec would hand back a result for
+    # other pages than the caller asked for, so a mismatch stops rather than resumes.
     op_path = args.out_json + ".operation"
     if os.path.exists(op_path):
-        operation_location = open(op_path, encoding="utf-8").read().strip()
+        saved = open(op_path, encoding="utf-8").read().split("\n")
+        operation_location = saved[0].strip()
+        saved_pages = next((x[6:].strip() for x in saved[1:] if x.startswith("pages=")), None)
+        if (saved_pages or None) != (args.pages or None):
+            raise SystemExit(
+                f"[OCR] {op_path} was submitted with pages={saved_pages or 'all'}, but this run "
+                f"asks for pages={args.pages or 'all'}. Use a different output path, or delete the "
+                f".operation file if a fresh (billed) submission is intended."
+            )
         print("[OCR] azure resuming saved operation (no re-submit, no re-bill)", file=sys.stderr)
     else:
         with open(args.pdf, "rb") as f:
             pdf_bytes = f.read()
-        operation_location = submit(args.endpoint, args.key, pdf_bytes)
+        operation_location = submit(args.endpoint, args.key, pdf_bytes, args.pages)
         os.makedirs(os.path.dirname(op_path) or ".", exist_ok=True)
         with open(op_path, "w", encoding="utf-8") as f:
             f.write(operation_location)
+            if args.pages:
+                f.write(f"\npages={args.pages}")
         print(f"[OCR] azure billed; operation saved -> {op_path}", file=sys.stderr, flush=True)
 
     result = poll(operation_location, args.key, args.timeout)

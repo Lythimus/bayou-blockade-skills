@@ -26,6 +26,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOC_OCR_DIR="$(dirname "$SCRIPT_DIR")"
 RENDERTXT="${RENDERTXT:-$DOC_OCR_DIR/render-txt.py}"
 MERGE="$DOC_OCR_DIR/merge-canonical.py"
+DETECT_TABLES="$DOC_OCR_DIR/detect-table-pages.py"
 # shellcheck source=proc.sh
 . "$SCRIPT_DIR/proc.sh"
 
@@ -172,6 +173,7 @@ while IFS= read -r -d '' pdf; do
   fi
 
   echo "[OCR] done $stem ($i/$TOTAL)"
+  python3 "$DETECT_TABLES" "$WORK" --stem "$stem" || true
 done <"$FILELIST"
 
 echo "[OCR] ALL DONE ($TOTAL files) -> $OUT_TXT"

@@ -27,7 +27,8 @@ Bundled in this skill's directory (`S=${CLAUDE_PLUGIN_ROOT}/skills/ej-meme`):
   Nextdoor rules, calibration examples
 - `scripts/templates.py`: search memegen (~200) + imgflip top 100; show/verify templates
 - `scripts/lint.py`: pre-render checks
-- `scripts/render.py`: CSV → PNGs + `manifest.json` (memegen by default, imgflip optional)
+- `scripts/render.py`: CSV → PNGs + `manifest.json` (memegen by default, imgflip optional;
+  photo overlays via memegen or composited locally)
 - `scripts/qa.py`: legibility QA via tesseract at phone-feed width
 
 Requirements: `python3` with Pillow; `tesseract` for QA (`brew install tesseract`). memegen
@@ -90,15 +91,56 @@ sensory detail, and make the set varied: not five memes about the same number.
 
 Name the move first (shrugs off harm, false choice, plan undermines itself, greenwash,
 bum deal…), then pick from `references/templates.md`. **Don't stop at the curated list.**
-Once per set, browse the whole catalog (`templates.py search ''`, ~300 lines: memegen
-plus imgflip's current top 100) and judge from what each format looks like; keyword
-search is thin because memegen's keywords are sparse. Use a new template only if it passes that file's five checks
-(recognizable to an older audience, picture matches the move, box positions known, phone
-test, punching up). Don't use the same template twice in one set unless the user asks.
+Past sets leaned on the same dozen classics until they stopped landing, so before picking:
+
+1. **See what's been used.** `templates.py recent --history <portfolio root>` counts the
+   templates in every past set (rendered folders and old campaign CSVs). `search`,
+   `imgflip` and `kym` take the same `--history` and mark each template "used in N past
+   sets". **Give each move a template not used in the last few sets** whenever one fits
+   as well; reuse a heavy favorite only when it's clearly the best picture for the move.
+2. **Widen the pool once per set.** Browse the whole local catalog (`templates.py search
+   ''`, ~300 lines: memegen plus imgflip's current top 100), then run `templates.py kym
+   --new`: Know Your Meme's exploitable formats sorted by views (old enough that an older
+   audience has seen them), each matched to a renderable imgflip template and filtered of
+   KYM-flagged and known-offensive entries. The filter is a list, not judgment: read every
+   name and skip anything you'd have to look up to be sure of. For a picture you already
+   have in mind, `templates.py imgflip <words>` searches imgflip's whole catalog, not just
+   its top 100.
+3. **Judge by the picture, not the name.** `show <id>` gives the blank image. A template
+   outside the top 100 has no known box count: render it once with `BOX 1`, `BOX 2` …
+   (lint will complain about those test captions; render anyway) and look before writing.
+
+Use a new template only if it passes `templates.md`'s five checks (recognizable to an
+older audience, picture matches the move, box positions known, phone test, punching up).
+Don't use the same template twice in one set unless the user asks. Name-matching between
+KYM and imgflip can pick a re-upload; prefer an id already in the catalogs when both
+exist.
+
+**Look up each chosen template's meme language before captioning.** The box roles in
+`templates.md` say where text goes, not what joke the picture already tells. For each
+template in the set, search Know Your Meme (`"<template name>" site:knowyourmeme.com`,
+then a news explainer if KYM is missing, blocked, or files it under another name, e.g.
+Waiting Skeleton is KYM's "Waiting for OP"). Note in a scratch line:
+- **Crux:** the joke the picture tells on its own (Roll Safe: confident bad logic).
+- **Script:** the sentence shape people expect ("Can't X if you Y"; "Me waiting for X";
+  Padmé's "…right?" with a silent third panel).
+- **Voices:** who speaks. If characters talk, captions are their lines in their own
+  voice, not stage directions (the cat in Woman Yelling at a Cat answers back; it
+  doesn't narrate "does X anyway").
+- **Origin,** only if sources agree; say "unclear" otherwise. Flag any origin that makes
+  a picture a poor stand-in (e.g. a real person's distressing moment).
+
+Captions that break the script lose readers who know the format and gain nothing with
+those who don't. At Step 6, include the crux and script per meme so the user can judge
+the joke without knowing the format.
 
 ```bash
 S=${CLAUDE_PLUGIN_ROOT}/skills/ej-meme
-python3 $S/scripts/templates.py search smug money
+python3 $S/scripts/templates.py recent --history <portfolio root>
+python3 $S/scripts/templates.py search smug money --history <portfolio root>
+python3 $S/scripts/templates.py kym --new --history <portfolio root>   # ~1 min first run, then cached
+python3 $S/scripts/templates.py imgflip crying cat
+python3 $S/scripts/templates.py search --photo look     # templates with photo slots
 python3 $S/scripts/templates.py show <slug-or-imgflip-id>
 ```
 
@@ -123,6 +165,45 @@ Two_Buttons_Fine,ds,Pay the $90K fine,Fix the safety violations,,,"Findings §3.
 - `Source`: required whenever a caption has a digit. Use doc + page/section.
 - `Point`: the one-line bum deal from Step 2.
 - `Footer` (optional, standalone): overrides `--footer` for that row.
+- `Overlay`, `Overlay_Source` (optional): photos, see below.
+
+### Photos in the picture (optional)
+
+Some memegen templates have photo slots: the thing the "Is this a pigeon?" guy points at,
+Drake's panels, the Bongo Cat table. `templates.py search --photo <words>` lists them
+("+1 photo"), and `show <slug>` gives each slot's position. A real photo of the actual
+place can land harder than words: the plant's aerial view where the butterfly goes. Use
+one only when you have a photo that fits. **Finding the photo is the hard part.** Never
+substitute a lookalike.
+
+Where photos come from:
+- **Aerial or satellite view of the site:** `bayou:satellite-imagery`. NASA and USGS
+  imagery is public domain. Copernicus/Sentinel and EOX require attribution, and some EOX
+  years are non-commercial share-alike, so check the source's terms. Crop tight to the
+  facility; a whole parish at slot size is just green.
+- **Site plans and drawings from the permit file:** `bayou:permit-drawing-sheet-finder`
+  plus the OCR'd permit PDFs, rendered to PNG. These are public records.
+- **The campaign's own photos:** a flare, smoke over the levee, standing water, the
+  fenceline. Ask who took it and when, and record that.
+- **Federal agency photos** (EPA, USGS, NOAA) are public domain. **Wikimedia Commons**
+  only with the license written down.
+
+In the CSV, `Overlay` lists one photo per slot, separated by `|` in slot order. Each is a
+local path (relative to the CSV's folder) or an `https://` URL. `Overlay_Source` says who
+took it, when, and the license or public-domain basis. Lint requires it. **Campaign photos
+go in as local paths, never uploaded somewhere to get a URL.** A URL goes to memegen, which
+caches the finished image at a public link. A local path is composited on this machine and
+never leaves it. URLs with a query string are downloaded and composited locally too.
+memegen doesn't enlarge a photo smaller than its slot, and the local path does, so the
+same small image comes out smaller by URL. Use a local path for small images.
+
+When a license requires attribution, put the credit in the `Footer` (standalone) or the
+post text (in-post). `Overlay_Source` is only the record; a reshared image doesn't carry it.
+
+Rules for photos are in `references/tone-and-boundaries.md` ("Photos"). Short version: the
+photo shows exactly what the caption says it shows, nobody in it is recognizable, and no
+logos. At Step 8, look at every photo meme at 400px wide: a pigeon-sized slot is about a
+quarter of the image width.
 
 `skills/toxic-truth-teller-style` is **not** applied by default; captions are too short to
 need a voice. Invoke it by name only if the user asks.
@@ -155,7 +236,8 @@ memes / cancel. Re-read `memes.csv` after confirmation; the user may have edited
 python3 $S/scripts/render.py memes/<slug>/memes.csv --out memes/<slug> --mode <mode> [--footer "..."]
 ```
 
-`manifest.json` records each meme's captions, template, backend, source, point and URL. If
+`manifest.json` records each meme's captions, template, backend, source, point and URL
+(none for a locally composited photo meme, since that image exists only on disk). If
 a row fails because an imgflip-only template has no credentials, say so, and offer a
 memegen alternative from the same move or ask the user to add credentials. Don't silently
 swap templates.

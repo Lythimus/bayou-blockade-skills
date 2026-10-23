@@ -178,7 +178,8 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 | `sonris-doc-search` | Search and bulk-download SONRIS documents (permits, orders, applications) by operator/well/parish/doctype |
 | `la-class-vi` | Louisiana Class VI/CCS program tracker — application status, issued permits, no CAPTCHA session needed |
 | `la-public-records-request` | Draft (never send) a Louisiana Public Records Act request to LDEQ, a parish, or another custodian, with deadlines and fee language quoted from the current statute |
-| `la-power-map` | Who lobbies for and gives money on behalf of an applicant — Louisiana Ethics lobbyist registrations and campaign contributions; OpenCorporates first pass on ownership, then the manual path for Secretary of State filings |
+| `la-power-map` | Who lobbies for and gives money on behalf of an applicant — Louisiana Ethics lobbyist registrations and campaign contributions; OpenCorporates first pass on ownership, GLEIF and SEC Exhibit 21 parent/subsidiary resolution, then the manual path for Secretary of State filings; writes a sourced per-case `ENTITIES.md` ownership map |
+| `web-history` | What a company or project website said, and when — every distinct Wayback Machine version of a page or site section, text extraction, diffs between versions, and a phrase or number (jobs, emissions, owner name) tracked across years. Read-only |
 | `la-coastal-use-permits` | Coastal use permits by parish/applicant from OCM status reports, current OCM notices, and St. Charles LCP legals; CUP number → site via SONRIS |
 
 **Federal environmental & enforcement**
@@ -270,7 +271,7 @@ and gives an install command Claude Code can run.
 | Tool | Use it when |
 |---|---|
 | `web-archiving` skill | Saving many cited web pages to the Wayback Machine and Archive.today before filing or publishing. `public-comment` handles the single-page case itself |
-| `internet-archive` MCP | An agency page or dataset was removed and an earlier capture is needed (read-only: finds and fetches snapshots, does not save new ones) |
+| `internet-archive` MCP | An agency page or dataset was removed and an earlier capture is needed (read-only: finds and fetches snapshots, does not save new ones). Optional: `web-history` lists, extracts and diffs archived versions without it |
 | `foia-requests` skill | Drafting a *federal* FOIA request (EPA, the Corps, PHMSA), tracking it, or appealing a denial. Its template is written for a reporter: replace the outlet and "representative of the news media" language unless the requester is one, and keep the public-interest fee waiver. Louisiana requests use `la-public-records-request` |
 | `pubchem` MCP | Chemical properties and identifiers beyond the hazard statements `chemical-hazard-profile` returns |
 | `comptox` MCP | Exploring EPA toxicity values, exposure and bioactivity data in depth. `chemical-hazard-profile` covers the cancer call and IRIS values |

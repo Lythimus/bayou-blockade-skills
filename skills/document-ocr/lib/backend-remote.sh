@@ -18,6 +18,7 @@ MERGE="$DOC_OCR_DIR/merge-canonical.py"
 VALIDATE="$DOC_OCR_DIR/validate-surya-json.py"
 RENDERTXT="$DOC_OCR_DIR/render-txt.py"
 COVERAGE="$DOC_OCR_DIR/check-reader-coverage.py"
+DETECT_TABLES="$DOC_OCR_DIR/detect-table-pages.py"
 
 IN="${1:?Usage: backend-remote.sh <IN_DIR_OR_PDF> <OUT_TXT> <WORK>}"
 OUT_TXT="${2:?Usage: backend-remote.sh <IN_DIR_OR_PDF> <OUT_TXT> <WORK>}"
@@ -214,6 +215,7 @@ land_stem() {
   local reader_list
   reader_list="$(IFS=,; echo "${landed_readers[*]}")"
   echo "[OCR] done $stem ($DONE_COUNT/$TOTAL) [readers: $reader_list]"
+  python3 "$DETECT_TABLES" "$WORK" --stem "$stem" || true
 
   if [ "${#landed_readers[@]}" -lt "${#EXPECTED_READERS[@]}" ]; then
     local missing=()

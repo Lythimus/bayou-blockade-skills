@@ -129,6 +129,9 @@ def azure_words_for_line(azure_path, page_num, line_bbox_norm):
     carries content+confidence, not geometry, since that's all the merge needs) -- reusing
     merge_canonical.polygon_to_bbox_norm so the normalization is identical to the one already
     used, and verified, for selection marks and table cells.
+
+    Returns None when Azure never analyzed this page (a `--pages` subset run), as distinct from
+    [] -- analyzed, but no word overlaps the line.
     """
     with open(azure_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -145,7 +148,7 @@ def azure_words_for_line(azure_path, page_num, line_bbox_norm):
             if bbox_norm_overlaps(word_bbox, line_bbox_norm):
                 matched.append((word.get("content", ""), word.get("confidence")))
         return matched
-    return []
+    return None
 
 
 def build_line_record(line, page_num, azure_path, has_azure):
@@ -164,7 +167,10 @@ def build_line_record(line, page_num, azure_path, has_azure):
     }
     if has_azure and azure_path and line.get("bbox_norm"):
         words = azure_words_for_line(azure_path, page_num, line["bbox_norm"])
-        if words:
+        if words is None:
+            record["azure_words"] = None
+            record["azure_page_analyzed"] = False  # outside a --pages subset: no opinion exists
+        elif words:
             record["azure_words"] = {
                 "text": " ".join(w[0] for w in words),
                 "confidences": [w[1] for w in words if w[1] is not None],

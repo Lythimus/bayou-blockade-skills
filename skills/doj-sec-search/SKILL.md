@@ -226,6 +226,8 @@ T().feed(sys.stdin.read())
 | **10-Q** (quarterly) | Updated contingency disclosures, changes in legal proceedings |
 | **DEF 14A** (proxy) | Executive comp tied to compliance; litigation risk language |
 
+To find which public parent lists an LLC as a subsidiary (Exhibit 21), use `entity_search.py ex21` in `bayou:la-power-map` instead of reading 10-Ks by hand.
+
 **Red flags that contradict permit applications:**
 - Dollar amounts under "environmental contingencies" or "contingent liabilities"
 - Disclosure of NRC, EPA, or DOJ investigations not mentioned in permit filings

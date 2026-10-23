@@ -29,13 +29,19 @@ medium only when the picture explains itself without knowing the meme.
 ```bash
 scripts/templates.py search fire smoke       # curated + memegen (~200) + imgflip top 100
 scripts/templates.py search ''               # browse everything
+scripts/templates.py imgflip grim reaper     # imgflip's whole catalog, beyond the top 100
+scripts/templates.py kym --new               # Know Your Meme exploitables by views, not yet in the catalogs
+scripts/templates.py recent --history ..     # what past sets already used
 scripts/templates.py move bum-deal           # curated entries for one move
 scripts/templates.py show 309868304          # box count, roles, blank image
 ```
 
 imgflip's list is its current top 100 by usage, which is a decent proxy for what people
-recognize this year. memegen's keywords are sparse, so search by the picture ("dog",
-"button", "bus") as well as the feeling.
+recognize this year, but it is mostly the same classics. memegen's keywords are sparse,
+so search by the picture ("dog", "button", "bus") as well as the feeling. Know Your
+Meme's exploitables sorted by views are the widest pool of formats an older audience may
+have seen; sorted by newest they are mostly niche, crude or political, so the script
+never uses that sort. Its block list catches known-bad entries only, so read each name.
 
 **Before using a template that isn't below:**
 1. **Recognizable?** Would a neighbor in their 60s have seen it? If you have to explain the

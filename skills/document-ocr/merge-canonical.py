@@ -195,8 +195,11 @@ def adapt_azure(path):
     pages[] index is already 1-based (pageNumber); pages[].unit distinguishes inch (PDF input)
     from pixel (image input) -- read at runtime, never hardcoded, per output-schema.md.
 
-    Returns (word_pages, selection_marks, tables_by_page). tables_by_page is keyed by page number
-    (a table can span pages; confirmed against a real run that each cell carries its own
+    Returns (word_pages, selection_marks, tables_by_page, covered_pages). covered_pages is every
+    pageNumber Azure analyzed -- a page-subset run (`azure-layout.py --pages`) covers only some of
+    the document, and Azure must not count as a voter on pages it never saw.
+
+    tables_by_page is keyed by page number (a table can span pages; confirmed against a real run that each cell carries its own
     boundingRegions[0].pageNumber, so a spanning table is split into one entry per page it
     actually has cells on, sharing a stable table_id). Each table entry carries a table-level
     bbox_norm (the union of its own cells' bbox_norm on that page) plus per-cell bbox_norm --
@@ -270,7 +273,7 @@ def adapt_azure(path):
                 }
             )
 
-    return word_pages, selection_marks, tables_by_page
+    return word_pages, selection_marks, tables_by_page, set(page_dims)
 
 
 # --- Matching -------------------------------------------------------------------------------
@@ -371,9 +374,13 @@ def match_reader_to_page(surya_lines, reader_units, max_window=12):
 # specifically (incl. rotated/landscape tables); Chandra is next-best on tables; MinerU's
 # reading order comes from its own layout detection, generally solid but not singled out in the
 # plan the way the other two are; Azure's words[] array is reliable but untested here for
-# reading order specifically, so it's last. Not specified by the plan -- a documented judgment
-# call, easy to reorder if a real run shows a different reader deserves priority.
-READER_PRIORITY = ["olmocr", "chandra", "mineru", "azure"]
+# reading order specifically. Not specified by the plan -- a documented judgment call, easy to
+# reorder if a real run shows a different reader deserves priority.
+#
+# Azure is deliberately absent: its contract is additive (cells, selection marks, a vote), never
+# text order. On a surya-only stem it would otherwise be the only reader present and silently
+# reorder the rendered .txt, moving every line number a citation already points at.
+READER_PRIORITY = ["olmocr", "chandra", "mineru"]
 
 
 def assign_reading_order(lines, primary_matches):
@@ -448,16 +455,17 @@ def build_canonical(results_json_path, backend, readers, azure_path):
         reader_names.append(name)
 
     azure_word_pages, azure_selection_marks, azure_tables_by_page = {}, {}, {}
+    azure_pages = set()
     if azure_path:
-        azure_word_pages, azure_selection_marks, azure_tables_by_page = adapt_azure(azure_path)
-
-    all_reader_names = list(reader_names)
-    if azure_path:
-        all_reader_names.append("azure")
-    m = len(all_reader_names)
+        (azure_word_pages, azure_selection_marks, azure_tables_by_page,
+         azure_pages) = adapt_azure(azure_path)
 
     for page in canonical["pages"]:
         page_num = page["page"]
+        all_reader_names = list(reader_names)
+        if page_num in azure_pages:
+            all_reader_names.append("azure")
+        m = len(all_reader_names)
         lines = page["lines"]
         surya_texts = [line["text"] for line in lines]
 
@@ -479,7 +487,7 @@ def build_canonical(results_json_path, backend, readers, azure_path):
         for name in reader_names:
             units = list(reader_page_units.get(name, {}).get(page_num, []))
             per_reader_verdicts[name] = match_reader_to_page(surya_texts, units)
-        if azure_path:
+        if page_num in azure_pages:
             units = [w[0] for w in azure_word_pages.get(page_num, [])]
             per_reader_verdicts["azure"] = match_reader_to_page(surya_texts, units)
 
@@ -553,8 +561,10 @@ def build_canonical(results_json_path, backend, readers, azure_path):
     canonical["backend"] = backend
     canonical["readers"] = reader_names
     canonical["azure"] = bool(azure_path)
+    if azure_path:
+        canonical["azure_pages"] = sorted(azure_pages)
     canonical["stem"] = Path(results_json_path).parent.name
-    canonical["match_method"] = MATCH_METHOD if m > 0 else "none"
+    canonical["match_method"] = MATCH_METHOD if (reader_names or azure_pages) else "none"
 
     return canonical
 

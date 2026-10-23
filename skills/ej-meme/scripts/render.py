@@ -3,6 +3,12 @@
 
 CSV schema (same as the old petro-meme-gen sheets, so they render unchanged):
     Meme_Title, Template_ID, Caption1 .. CaptionN [, Backend] [, Source] [, Point] [, Footer]
+    [, Overlay] [, Overlay_Source]
+
+Overlay puts photos in a memegen template's photo slots, "|"-separated in slot order. A plain
+https URL goes to memegen's style parameter; a local path (relative to the CSV's folder or
+the cwd), or a URL with a query string, is composited locally with Pillow under the
+captions, so private photos never leave the machine.
 
 Template_ID routing, per row:
     memegen slug (e.g. "drake")           -> memegen.link /images
@@ -27,12 +33,16 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import templates as tpls  # noqa: E402
+
 TEMPLATES_JSON = os.path.join(HERE, "..", "references", "templates.json")
 CREDS = os.path.expanduser("~/.claude/bayou-credentials.md")
 UA = {"User-Agent": "bayou-ej-meme/1.0"}
@@ -93,17 +103,71 @@ def download(url, path, headers=None):
 
 
 def memegen_text(captions):
-    # memegen treats an empty line as "use template default"; "_" is its explicit blank.
-    return [c if c.strip() else "_" for c in captions]
+    # The POST API escapes text into the image path itself: "" becomes the path's blank
+    # ("_"), while a literal "_" becomes "__", which memegen draws as an underscore.
+    return [c if c.strip() else "" for c in captions]
 
 
-def render_memegen(slug, captions, path, creds):
+def render_memegen(slug, captions, path, creds, style=None):
     headers = {"X-API-KEY": creds["MEMEGEN_API_KEY"]} if creds.get("MEMEGEN_API_KEY") else {}
-    res = http_json("https://api.memegen.link/images",
-                    {"template_id": slug, "text": memegen_text(captions), "extension": "png"},
-                    headers)
+    body = {"template_id": slug, "text": memegen_text(captions), "extension": "png"}
+    if style:
+        body["style"] = style
+    res = http_json("https://api.memegen.link/images", body, headers)
     download(res["url"], path, headers)
     return res["url"]
+
+
+def render_with_photos(slug, captions, photos, path, creds, csv_dir):
+    """Photo overlays on a memegen template. Plain https URLs go to memegen as-is; anything
+    else (a local file, or a URL memegen would truncate) is composited here so the photo
+    never has to be put online."""
+    if all(tpls.style_safe(p) for p in photos):
+        return render_memegen(slug, captions, path, creds, style=photos), "memegen+photo"
+    try:
+        from PIL import Image, ImageChops, ImageOps
+    except ImportError:
+        raise RuntimeError("local photo overlays need Pillow (pip install Pillow)")
+    slots = tpls.overlay_geometry(slug)
+    if len(photos) > len(slots):
+        raise ValueError(f"{len(photos)} photos, {slug} has {len(slots)} photo slot(s)")
+    with tempfile.TemporaryDirectory() as tmp:
+        files = []
+        for i, p in enumerate(photos):
+            if tpls.is_url(p):
+                local = os.path.join(tmp, f"photo{i}")
+                download(p, local)
+            else:
+                local = tpls.resolve_local(p, csv_dir)
+                if not os.path.exists(local):
+                    raise ValueError(f"photo not found: {p}")
+            files.append(local)
+        blank_path = os.path.join(tmp, "blank.png")
+        render_memegen(slug, captions, path, creds)
+        render_memegen(slug, [""] * max(1, len(captions)), blank_path, creds)
+        text = Image.open(path).convert("RGB")
+        blank = Image.open(blank_path).convert("RGB")
+        if text.size != blank.size:
+            raise RuntimeError("memegen returned different sizes for the text and blank renders")
+        W, H = blank.size
+        out = blank.copy()
+        for f, s in zip(files, slots):
+            # Same placement as memegen's own overlay: fit inside a square whose side is
+            # scale × the shorter image side, centered on (center_x, center_y).
+            side = min(int(W * s["scale"]), int(H * s["scale"]))
+            chip = ImageOps.contain(ImageOps.exif_transpose(Image.open(f)).convert("RGBA"), (side, side))
+            if s["angle"]:
+                chip = chip.rotate(s["angle"], expand=True)
+            out.paste(chip, (int(W * s["center_x"] - chip.width / 2), int(H * s["center_y"] - chip.height / 2)), chip)
+        # memegen draws captions over the photo. The two renders are identical except where
+        # captions are, so those pixels go back on top. Any difference counts: a white outline
+        # on an off-white panel differs by only a few levels. A caption fill that exactly
+        # matches the background under a photo can't be told apart and lets the photo show
+        # through the letters; the visual QA step catches that.
+        out.paste(text, mask=ImageChops.difference(text, blank).convert("L").point(lambda v: 255 if v else 0))
+        out.save(path)
+    # The memegen link shows the captions without the photo, so there's no URL for the result.
+    return None, "memegen+photo-local"
 
 
 def render_memegen_custom(background, captions, path, creds):
@@ -205,10 +269,26 @@ def main():
         backend = (args.backend or (row.get("Backend") or "").strip().lower()
                    or ("imgflip" if tid.isdigit() else "memegen"))
         tpl = find_template(tid, catalog)
+        photos = tpls.overlay_items(row)
         try:
             if not tid or not re.fullmatch(r"[A-Za-z0-9_-]+", tid):
                 raise ValueError(f"unusable Template_ID {tid!r}")
-            if backend == "memegen" and tid.isdigit():
+            if photos:
+                # Only memegen places photos. Routing a photo row anywhere else would render
+                # the captions and silently drop the picture.
+                slug = tpls.memegen_slug(tid)
+                if args.backend == "imgflip" or (row.get("Backend") or "").strip().lower() == "imgflip":
+                    raise ValueError("photo overlays render only through memegen; drop the imgflip backend")
+                if not slug or (tid.isdigit() and not twin_ok(tpl, caps)):
+                    raise ValueError(f"{tid} has no memegen version with matching boxes; photos need a memegen template")
+                slots = tpls.overlay_slots(slug)
+                if len(photos) > slots:
+                    raise ValueError(f"{len(photos)} photos, {slug} has {slots} photo slot(s)")
+                url, entry["backend"] = render_with_photos(slug, caps, photos, path, creds,
+                                                           os.path.dirname(os.path.abspath(args.csv)))
+                entry["overlays"] = photos
+                entry["overlay_source"] = (row.get("Overlay_Source") or "").strip()
+            elif backend == "memegen" and tid.isdigit():
                 # An imgflip id routed to memegen: use the memegen twin if one exists,
                 # otherwise the imgflip blank as a custom background.
                 if twin_ok(tpl, caps):
@@ -244,7 +324,7 @@ def main():
                 entry["footer"] = footer
             entry.update({"file": os.path.basename(path), "url": url})
             print(f"ok    {title}  [{entry['backend']}]")
-        except (urllib.error.HTTPError, urllib.error.URLError, ValueError, RuntimeError, KeyError) as e:
+        except (OSError, ValueError, RuntimeError, KeyError) as e:
             detail = e.read().decode(errors="replace")[:200] if isinstance(e, urllib.error.HTTPError) else ""
             entry["error"] = f"{e} {detail}".strip()
             failures += 1

@@ -8,6 +8,8 @@ Errors (exit 1):
   - a box over its hard word cap, or the meme over its total cap
   - an acronym not in the allowlist (plain-language.md) or --allow
   - digits in a caption with an empty Source column (unless --legacy)
+  - Overlay photos: no Overlay_Source, a template with no (or too few) photo slots or no
+    memegen version, a missing local file, or a non-https URL
 Warnings:
   - fewer boxes than the template's minimum, more than its curated roles
   - a box over the target length (6 words)
@@ -145,7 +147,37 @@ def lint_row(row, caps, args, allow, defaults):
 
     if any(re.search(r"\d", c) for c in caps) and not (row.get("Source") or "").strip():
         (warns if args.legacy else errs).append("caption has a number but Source is empty")
+
+    photos = tpl.overlay_items(row)
+    if photos:
+        errs.extend(lint_photos(row, tid, cur, n, photos, args))
     return errs, warns
+
+
+def lint_photos(row, tid, cur, n_caps, photos, args):
+    """Mirrors render.py's photo routing, so a row lint passes doesn't render without its photo."""
+    errs = []
+    if not (row.get("Overlay_Source") or "").strip():
+        errs.append("Overlay set but Overlay_Source is empty (who took the photo, and its license)")
+    slug = tpl.memegen_slug(tid)
+    twin_lines = (cur or {}).get("memegen_lines") or (cur or {}).get("boxes", 0)
+    if (row.get("Backend") or "").strip().lower() == "imgflip":
+        errs.append("photo overlays render only through memegen; drop the imgflip Backend")
+    elif not slug or (tid.isdigit() and n_caps > twin_lines):
+        errs.append(f"{tid} has no memegen version with matching boxes; photos need a memegen template")
+    else:
+        slots = tpl.overlay_slots(slug)
+        if len(photos) > slots:
+            errs.append(f"{len(photos)} photos, {slug} has {slots} photo slot(s)"
+                        + ("" if slots else "; templates.py search --photo lists ones that do"))
+    base = os.path.dirname(os.path.abspath(args.csv))
+    for p in photos:
+        if tpl.is_url(p):
+            if not p.startswith("https://"):
+                errs.append(f"photo URL must be https: {p}")
+        elif not os.path.exists(tpl.resolve_local(p, base)):
+            errs.append(f"photo not found: {p}")
+    return errs
 
 
 def main():
