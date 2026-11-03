@@ -15,13 +15,16 @@ date: "<Date the comment is filed>"
      lines. Same reasoning applies to the signature block at the end. -->
 
 <!-- The identifier lines vary by posture: use the set named in the posture
-     file's "Identifiers" section, and delete the other two. Examples:
+     file's "Identifiers" section, and delete the others. Examples:
 
      permit:      **AI Number <n> · Permit Number <n> · Activity Number <PER…>**\
                   <Permit type as stated in the notice>
      rulemaking:  **Docket No. <…> · Notice No. <…> · RIN <…>**\
                   **Rulemaking:** *<Rule title>*, <vol> Fed. Reg. <page> (<date>)\
                   **Comments due:** <date>
+     land use:    **Planning case <n> · Ordinance <n> · Agenda item <n>**\
+                  **Hearing:** <body and date>\
+                  <Applicant and property exactly as noticed; current and requested district>
      financing:   use a dated letter addressed to the issuer's President/CEO
                   by name instead of this block (see postures/financing.md);
                   the RE line names the bond series exactly as noticed, the
@@ -47,7 +50,7 @@ I oppose <issuance of the permit / finalizing the rule> as drafted. I ask that <
 **<conditions / rule-text / disclosure relief>**. **I request <a public hearing, where
 available> and written notification of the final decision at the address below.**
 
-## II. Commenter and standing <"and interest" under rulemaking; "Who I am" under financing>
+## II. Commenter and standing <"and interest" under rulemaking; "Who I am" under financing; "Who I am and my interest" under land use>
 
 <Use the heading and test in the posture file. Where standing is a gate (permit), what follows
 applies in full. Where interest is the test, concede distance first, then tie the interest to
@@ -107,7 +110,8 @@ record edit; or a disclosure or Bond Counsel statement required before the vote.
 ## <n>. Health effects of the pollutants this permit authorizes
 
 <Permit posture, or a rule that itself governs exposure. Delete this section under the
-financing posture; see the posture file.
+financing posture, and under land use unless the local code makes health or emissions a
+criterion; see the posture file.
 
 One bounded section, only where the permit's pollutants bear on the household.
 
@@ -127,7 +131,7 @@ short-averaging-period limit, a health risk assessment.>
 
 ## <n>. Requested action
 
-<The list below is the permit-posture order. For rulemaking or financing, use the relief
+<The list below is the permit-posture order. For rulemaking, financing or land use, use the relief
 order and authority line in the posture file. For financing, the enumerated requests already
 opened the letter, so this section becomes the closing: transmittal to the next venue, the
 clock, and the request for notice.>

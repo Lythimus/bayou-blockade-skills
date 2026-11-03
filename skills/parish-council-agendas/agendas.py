@@ -13,7 +13,7 @@ Cache: ~/.cache/bayou/parish-council-agendas/.
   agendas.py items <parish> <meeting-id> [--minutes]   agenda lines (or minutes, scanned parishes)
   agendas.py alerts [parish ...] [--since D] [--until D] [--category C ...] [--term REGEX ...] [--all-bodies] [--yes]
   agendas.py track <parish> <text> [--since D] [--yes]     follow a case, applicant, place or matter file across meetings
-  agendas.py get <parish> <meeting-id> [--what agenda|packet|minutes] [--out DIR] [--yes]
+  agendas.py get <parish> <meeting-id> [--what agenda|packet|minutes|notice|sign-in] [--out DIR] [--yes]
 
 A keyword hit is a lead to read, not a finding: titles name streets and lots, and many matches are routine.
 Exit codes: 2 bad arguments or a download over the size limit without --yes; 3 parish unprobed, meeting or
@@ -265,9 +265,33 @@ class Legistar:
         flt = f"MatterIntroDate ge datetime'{since}' and substringof('{esc}',MatterTitle)"
         return self.get("matters", {"$filter": flt, "$orderby": "MatterIntroDate", "$top": 1000})
 
+    def meeting_attachments(self, m):
+        """Files attached to the meeting itself. The API has no field for them; only the public meeting
+        page lists them. St. Charles Planning & Zoning files its staff reports in one named '<date> Agenda'."""
+        if not m["url"]:
+            return {}
+        try:
+            page = fetch(m["url"])
+        except (Upstream, NotFound) as e:
+            print(f"could not read the meeting page, so its attachments were not checked: {e}", file=sys.stderr)
+            return {}
+        block = re.search(r'ucAttachments_lblAttachments"[^>]*>(.*?)</span>', page, re.S)
+        if not block:
+            print(f"the meeting page has no attachment list, so its format may have changed: {m['url']}", file=sys.stderr)
+            return {}
+        kinds = {"packet": r"\bagenda\s*$", "notice": r"\bnotice\s*$", "sign-in": r"\bsign[- ]?in\b", "minutes": r"\bminutes\s*$"}
+        out = {}
+        for href, name in re.findall(r'<a href="([^"]+)"[^>]*>([^<]+)</a>', block.group(1)):
+            for kind, rx in kinds.items():
+                if re.search(rx, html.unescape(name), re.I):
+                    out.setdefault(kind, urllib.parse.urljoin(m["url"], html.unescape(href)))
+        return out
+
     def files(self, mid):
         m = self.meeting(mid)
-        return {k: m[k] for k in ("agenda", "minutes") if m[k]}
+        have = self.meeting_attachments(m)
+        have.update({k: m[k] for k in ("agenda", "minutes") if m[k]})
+        return have
 
 
 # ---------------------------------------------------------------- CivicClerk (Ascension)
@@ -1031,7 +1055,7 @@ def main():
     p = sub.add_parser("track", parents=[common]); p.add_argument("parish"); p.add_argument("text"); p.add_argument("--since")
     p.add_argument("--yes", action="store_true", help="download even if the agenda PDFs total over 25 MB")
     p = sub.add_parser("get", parents=[common]); p.add_argument("parish"); p.add_argument("meeting")
-    p.add_argument("--what", action="append", choices=["agenda", "packet", "minutes", "notice"])
+    p.add_argument("--what", action="append", choices=["agenda", "packet", "minutes", "notice", "sign-in"])
     p.add_argument("--out", default="."); p.add_argument("--yes", action="store_true")
     a = ap.parse_args()
     REFRESH, JSON_OUT = a.refresh, a.json

@@ -4,11 +4,6 @@ An agency deciding whether to issue, modify, or renew a specific permit or licen
 specific facility or activity: LDEQ air/water/solid-waste permits, USACE Section 404/10,
 LADENR/OCM Coastal Use Permits, LADENR Class VI, LDOTD, an FAA site or operator license.
 
-Worked examples in `~/Documents/personal/petro/`:
-- `hyundai-posco/PUBLIC-COMMENT.md` (LDEQ Part 70/PSD, tiered)
-- `exxonmobil-pipeline-flare/PUBLIC-COMMENT-v3.md` (LDEQ statewide flaring, standing on the
-  covered-parish list)
-
 ---
 
 ## Audience

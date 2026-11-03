@@ -4,10 +4,6 @@ An agency proposing a rule of general applicability: a federal NPRM under the AP
 Register notice of intent, or a waiver or exemption adopted by regulation. The action governs
 every future case, not one facility.
 
-Worked example in `~/Documents/personal/petro/`: `starbase-la/faa-waiver/PUBLIC-COMMENT.md`
-(FAA-2026-8614, a general waiver of 13 environmental statutes for commercial space licensing),
-with its research memo `context-and-precedent.md`.
-
 ---
 
 ## Audience

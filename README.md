@@ -87,8 +87,8 @@ Some skills need per-machine setup that is **deliberately not in this repo**:
   there and fill it in. `public-comment` uses it to establish standing or interest. For a
   permit it is a **standing gate**: family presence inside the permit's covered parishes is
   what makes the commenter an "aggrieved person" under La. R.S. 30:2050.21, and therefore what
-  preserves the right to appeal. For a rulemaking or a bond hearing, it supplies an interest
-  statement instead, and the LDEQ appeal statute is never cited.
+  preserves the right to appeal. For a rulemaking, a bond hearing or a local land-use decision,
+  it supplies an interest statement instead, and the LDEQ appeal statute is never cited.
 - **Watchlist** for `exec-travel-monitor` lives at
   `~/.claude/bayou-exec-travel-watchlist.json` — same reasoning again, since a real
   watchlist is per-investigation data (real companies, tail numbers, research notes).
@@ -159,6 +159,7 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 | `lac33-search` | Louisiana Administrative Code Title 33 by section or keyword |
 | `la-rs-search` | Louisiana Revised Statutes by R.S. number or keyword |
 | `lpsc-dockets` | Louisiana Public Service Commission dockets and orders |
+| `la-legislative-auditor` | Louisiana Legislative Auditor reports by entity, parish or words in the report name: title, date, type, entity, period and link, including the audits local bodies file. No browser or key |
 | `itep-lookup` | LED incentives (ITEP, Quality Jobs, Enterprise Zone, Restoration Tax Abatement) from the FastLane public report and Board of Commerce & Industry agendas and transcripts; promised against reported jobs, payroll and investment; compliance and board votes |
 | `la-bond-dockets` | State Bond Commission agenda dockets (docket, item, issuer, par, Volume Cap) and minutes outcomes; LPFA TEFRA notices and board agendas; Port of South Louisiana, Port NOLA, Port of Greater Baton Rouge, and Ascension Parish IDB agendas |
 | `la-court-opinions` | Louisiana Supreme Court and Court of Appeal opinions (First Circuit index for LDEQ permit appeals, CourtListener for the rest): search, decision date/disposition/rehearing actions from the PDF, pin-page lookup, citation verification with writ history and stated coverage gaps; DAL hearing docket (DEQ/DCE/DENR) and Ethics decisions |
@@ -236,7 +237,7 @@ install them, is under [External skills and MCP servers](#external-skills-and-mc
 |---|---|
 | `permit-analysis` | The pipeline above |
 | [`environmental-data-audit`](skills/environmental-data-audit/SKILL.md) | Assess whether existing environmental data support a claim; cited limitations, defensible wording, targeted next steps, and proportional evidence retention. Runs on request or when a material limitation could change a finding; not a mandatory lookup or pipeline stage |
-| `public-comment` | Findings report or research memo + profile → a filed-ready public comment. Covers three postures: a permit or license, a rulemaking, and a public financing approval such as a TEFRA bond hearing. Includes standing/interest, numbered requests, a candor section, and an optional styled PDF. *Renamed from `permit-comment` in 1.9.0: use `/bayou:public-comment`.* |
+| `public-comment` | Findings report or research memo + profile → a filed-ready public comment. Covers four postures: a permit or license, a rulemaking, a public financing approval such as a TEFRA bond hearing, and a local land-use decision (rezoning, plat, variance or ordinance, in any parish). Includes standing/interest, numbered requests, a candor section, and an optional styled PDF. *Renamed from `permit-comment` in 1.9.0: use `/bayou:public-comment`.* |
 | `hearing-prep` | In-person engagements. Three modes: questions grouped by the staffer likely to field them, a 2–3 minute oral version of a filed comment, and a debrief of a meeting transcript against the written record |
 | `document-ocr` | Multi-backend OCR (Surya geometry + olmOCR/Chandra/MinerU readers, optional Azure) for a folder or single scanned PDF, with per-line confidence and cross-reader agreement |
 | `ocr-verify` | Resolve one OCR-contested value with evidence — every backend's opinion, a cross-package tally, a rendered crop when needed |

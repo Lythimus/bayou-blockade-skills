@@ -18,9 +18,9 @@ import court_common as cc
 API = "https://www.courtlistener.com/api/rest/v4/search/"
 SITE = "https://www.courtlistener.com"
 STORAGE = "https://storage.courtlistener.com/"
-# Anonymous access allows 5 requests a minute and 50 an hour; a token raises that to thousands an hour.
-ANON_GAP = 13
-TOKEN_GAP = 1
+# A free account's token allows 5 requests a minute, 50 an hour and 125 a day, so calls keep this spacing
+# even with a token. Calls without one got a 401 when last checked.
+CALL_GAP = 13
 # Waiting out the per-minute limit is worth it; waiting out the hourly one (up to 60 min) is not.
 MAX_WAIT = 90
 RESULT_TTL_DAYS = 1
@@ -63,7 +63,7 @@ def _throttle(cache, gap):
 def search(params, cache=cc.DEFAULT_CACHE, max_results=20):
     """Run one v4 search (type=o) and return (count, [normalized records]).
 
-    Responses are cached for a day: the anonymous hourly budget is small, and reruns of the same
+    Responses are cached for a day: the hourly and daily budgets are small, and reruns of the same
     verify-cite should not spend it.
     """
     tok = token()
@@ -84,7 +84,7 @@ def search(params, cache=cc.DEFAULT_CACHE, max_results=20):
 def _get(url, tok, cache):
     headers = {"Authorization": "Token " + tok} if tok else {}
     for attempt in range(4):
-        _throttle(cache, TOKEN_GAP if tok else ANON_GAP)
+        _throttle(cache, CALL_GAP)
         try:
             return json.loads(cc.fetch(url, headers=headers, timeout=60))
         except urllib.error.HTTPError as e:
@@ -95,8 +95,8 @@ def _get(url, tok, cache):
             wait = int(m.group(1)) + 1 if m else 60
             if wait > MAX_WAIT:
                 raise RateLimited("CourtListener rate limit reached (%s); available again in %d min. Results so far are "
-                                  "cached. Set COURTLISTENER_TOKEN or add 'CourtListener token: <token>' to "
-                                  "~/.claude/bayou-credentials.md to lift it." % (
+                                  "cached. A Free Law Project membership can raise the limit: "
+                                  "https://free.law/membership/" % (
                                       re.search(r"exceeded: ([^.]+)", body).group(1) if "exceeded:" in body else "429",
                                       wait // 60 + 1))
             print("courtlistener: 429, retrying in %ds" % wait, file=sys.stderr)

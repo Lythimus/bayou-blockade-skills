@@ -55,7 +55,7 @@ window._fmt = d => [d.recordedDate.slice(0, 10), d.registryNumber, d.docType, nm
 3. Query, keep the rows in a page variable, and return only formatted strings:
 
 ```js
-const j = await window._ec('ESPERANZA LAND', '2024-01-01', '2026-11-01',
+const j = await window._ec('EXAMPLE LAND', '2024-01-01', '2026-11-01',
   [{property: 'Facet_DocumentSet', value: ['1']}, {property: 'Facet_ParticipantId', value: ['45']}]);
 window._r = j.documents;
 j.totalRows + '\n' + j.documents.slice(0, 8).map(window._fmt).join('\n')

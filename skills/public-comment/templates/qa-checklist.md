@@ -13,7 +13,7 @@ and why.
 - [ ] **Deadline confirmed from the public notice itself**, not from memory or a secondary
       summary. Date, time, and time zone.
 - [ ] **The posture is right, and the letter stays inside it.** The posture was named or
-      inferred and confirmed, and its file was read. Under rulemaking or financing, grep for
+      inferred and confirmed, and its file was read. Under rulemaking, financing or land use, grep for
       `2050.21`, `aggrieved`, `permit writer`, `Response Summary`, and `PER`. Each hit is either
       deliberate (quoting the underlying permit record) or a leak from the permit posture that
       costs credibility with this reader.
@@ -28,7 +28,8 @@ and why.
 - [ ] **Contact details match the profile** — address and email — and match prior filings.
 - [ ] **Every identifier the posture file lists appears in the RE block**, verbatim from the
       notice. Permit: applicant, AI, permit, activity/PER. Rulemaking: docket, RIN, Fed. Reg.
-      cite. Financing: bond series as noticed, hearing date, SBC docket.
+      cite. Financing: bond series as noticed, hearing date, SBC docket. Land use: case and ordinance
+      numbers, agenda item, hearing date, property as noticed.
 - [ ] **No fabricated citations.** Every case, statute, regulation, study, and document number
       either traces to a source that was actually read, or is removed.
 - [ ] **No citation points to a pipeline artifact.** Grep the draft for `` `:[0-9]+` `` or
@@ -53,8 +54,8 @@ and why.
 
 - [ ] **Every criticism ends in the posture's endpoint.** Scan each numbered comment. Could
       the decision-maker's drafter implement it as written? That means a permit condition, a
-      rule-text/scope/record edit, or a disclosure required before the vote. If not, rewrite
-      it.
+      rule-text/scope/record edit, a disclosure required before the vote, or a corrected step,
+      stated finding or plat outcome. If not, rewrite it.
 - [ ] **Comments are numbered**, numbering is continuous, and no number is reused.
 - [ ] **Itemized response is requested** in the relief section. Where the posture owes no
       response, transmittal to the next venue is requested instead.

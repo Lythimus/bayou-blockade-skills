@@ -1,7 +1,7 @@
 ---
 name: public-comment
-description: Turn research findings plus the private Bayou Blockade profile into a filed-ready public comment for any decision-maker — a permit or license (LDEQ, USACE, LADENR/OCM, LDOTD, FAA), a rulemaking (federal NPRM, Louisiana Register), or a public financing approval (LPFA/TEFRA bond hearing, State Bond Commission). Selects a posture that sets standing, what each numbered request ends in, the leverage tiers, and the terminal clock; produces a standing/interest statement, numbered requests, an enumerated relief list, and a candor section — then optionally renders a styled PDF. Use after /bayou:permit-analysis, or after any research memo, when it is time to write the actual comment.
-argument-hint: <findings-or-memo-path> [more paths...] [--posture <permit|rulemaking|financing>] [--agency <ldeq|usace|ladenr|faa|lpfa|other>] [--revise <existing-draft>] [--deadline <date>] [--slug <name>] [--render] [--no-profile]
+description: Turn research findings plus the private Bayou Blockade profile into a filed-ready public comment for any decision-maker — a permit or license (LDEQ, USACE, LADENR/OCM, LDOTD, FAA), a rulemaking (federal NPRM, Louisiana Register), a public financing approval (LPFA/TEFRA bond hearing, State Bond Commission), or a local land-use decision (parish or municipal rezoning, plat, variance, or land-use ordinance). Selects a posture that sets standing, what each numbered request ends in, the leverage tiers, and the terminal clock; produces a standing/interest statement, numbered requests, an enumerated relief list, and a candor section — then optionally renders a styled PDF. Use after /bayou:permit-analysis, or after any research memo, when it is time to write the actual comment.
+argument-hint: <findings-or-memo-path> [more paths...] [--posture <permit|rulemaking|financing|land-use>] [--agency <ldeq|usace|ladenr|faa|lpfa|parish|other>] [--revise <existing-draft>] [--deadline <date>] [--slug <name>] [--render] [--no-profile]
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Skill, WebSearch, WebFetch
 ---
 
@@ -27,6 +27,8 @@ Bundled in this skill's directory:
   - `postures/rulemaking.md` — rules of general applicability (APA NPRM, La. Register).
   - `postures/financing.md` — public financing approvals (TEFRA hearing, conduit issuer, State
     Bond Commission).
+  - `postures/land-use.md` — parish or municipal rezonings, plats, variances, and land-use
+    ordinances, in any parish.
 - `references/leverage.md` — **what actually changes a decision**: the principle, the shared
   Tier 4 cut list, and the structural multipliers. The posture file carries Tiers 1–3.
 - `references/louisiana-hooks.md` — Louisiana authorities with current status and the trap
@@ -38,14 +40,8 @@ Bundled in this skill's directory:
 - `templates/comment.md` — the letter skeleton.
 - `templates/qa-checklist.md` — the pre-filing pass.
 
-Real comments in this style, all filed (paths under `~/Documents/personal/petro/`): Waterford 5
-& 6 (Entergy, Part 70/PSD/Acid Rain), River Birch Avondale (solid waste major mod), Air
-Products Clean Ammonia / LCEC (Part 70 + PSD), ExxonMobil Pipeline statewide flaring (minor
-source), Hyundai-POSCO (LDEQ Part 70/PSD), FAA-2026-8614 (rulemaking), and the LPFA TEFRA
-hearing for Hyundai-POSCO (financing). Waterford supplies the structure; River Birch supplies
-the opening move; Air Products supplies the health-mechanism section and also the three
-phrasings this skill refuses to reproduce; FAA shows interest-without-standing; LPFA shows the
-translation into underwriter terms. Each posture file names its own worked example.
+These instructions were developed from real filed comments, which aren't part of this plugin. If the
+user keeps filed comments locally and wants one used as a model, ask them for the path.
 
 When using privately supplied community information, personal experiences, sensitive
 locations, or claims to represent a community position, read the shared
@@ -59,8 +55,7 @@ Positional arguments are paths to the evidence. Any of these is acceptable:
 - **A findings report.** Normally `verification/FINDINGS-FOR-REPORT.md`, optionally with
   `RESEARCH-TODO.md` (which feeds the candor section) and any section files worth reading in
   full.
-- **A research memo.** For example, `context-and-precedent.md` from the FAA campaign, or a
-  verification report like `LPFA-TEFRA-COMMENT-VERIFICATION-….md`.
+- **A research memo.** For example, a precedent memo or a pre-filing verification report.
 - **The noticed document itself.** For example, the NPRM, or the bond hearing notice.
 
 If nothing is passed, look for `verification/FINDINGS-FOR-REPORT.md`, then for any `*.md` memo
@@ -68,11 +63,13 @@ next to the notice, and ask before proceeding.
 
 Flags:
 
-- `--posture <permit|rulemaking|financing>` — the kind of decision. **If absent, infer it from
+- `--posture <permit|rulemaking|financing|land-use>` — the kind of decision. **If absent, infer it from
   the notice:**
   - a docket number, RIN, "proposed rule," or a La. Register notice of intent → `rulemaking`;
   - TEFRA, "public hearing" on bonds, a conduit issuer, or a State Bond Commission docket →
     `financing`;
+  - a planning commission, zoning commission, board of adjustment, or parish or city council
+    considering a rezoning, plat, variance, or land-use ordinance → `land-use`;
   - otherwise → `permit`.
 
   State the inference to the user in one line. **Ask if it is ambiguous.** A permit and a
@@ -83,7 +80,7 @@ Flags:
   drafting from findings alone discards synthesis work the findings file does not contain.
 - `--deadline <date>` — the comment deadline. If absent, look for it in the findings doc or
   the project `CLAUDE.md`; if still absent, **stop and ask.** Never guess a deadline.
-- `--agency <ldeq|usace|ladenr|faa|lpfa|other>` — who receives the comment. It selects only the
+- `--agency <ldeq|usace|ladenr|faa|lpfa|parish|other>` — who receives the comment. It selects only the
   submission-mechanics block in `references/agencies.md`. Defaults to `ldeq` under the permit
   posture. Under any other posture there is no default: take it from the notice.
 - `--slug <name>` — output basename. Defaults to `PUBLIC-COMMENT`.
@@ -146,7 +143,7 @@ interest" section governs what the comparison must show and what the section is 
   answered without reaching the merits, and it leaves nothing to appeal. If the profile shows
   **no** connection to the covered area, say so plainly to the user and ask how they want to
   proceed. Do not invent proximity, and do not quietly file without standing.
-- **Where the posture makes interest the test, not a gate** (rulemaking, financing), do not
+- **Where the posture makes interest the test, not a gate** (rulemaking, financing, land use), do not
   stop for lack of proximity. Concede distance plainly, then tie the interest to what the
   action actually does. The FAA letter is the model: "I don't live in Vermilion Parish…" and
   then the coastal-zone and general-conformity provisions that reach the commenter's own
@@ -218,7 +215,8 @@ Follow `templates/comment.md`. The order is deliberate:
 
 1. **Letterhead.** Date, RE line, and every identifier the posture file lists: AI, permit,
    and activity numbers for a permit; docket, RIN, and Fed. Reg. cite for a rule; bond series,
-   hearing date, and SBC docket for a financing.
+   hearing date, and SBC docket for a financing; case and ordinance numbers, agenda item, and
+   hearing date for a land-use matter.
 2. **Statement of comment and relief requested.** What you want, in the first 150 words.
    Decision-makers triage by this paragraph. Under the financing posture this becomes a
    numbered "Requested relief" block at the top, each item pointing to its section.
@@ -329,6 +327,8 @@ Rules that are not negotiable:
   - **Financing:** a record disclosure or Bond Counsel statement before the vote. "Require the
     Company to disclose the percentage of Melt Shop throughput that will be scrap rather than
     DRI from virgin ore."
+  - **Land use:** a corrected step, a record item, or a stated finding. "Re-publish the notice:
+    the first publication ran 8 days before the hearing, and R.S. 33:4780.43 requires 15."
 
   What does not count: "this permit is inadequate," "this rule is bad policy," "this project
   is not in the public interest." A request the decision-maker's own drafter can implement is a
@@ -417,7 +417,8 @@ than leaving the clinical version in place.
 the pollutants bear on the household. Rulemaking: only when the rule itself governs exposure;
 otherwise health is the reason the commenter tracks a provision, stated in the interest
 section. Financing: never as a section; health enters only through its translation into
-financed-asset or reputational risk.
+financed-asset or reputational risk. Land use: no section unless the local code makes health or
+emissions a criterion.
 
 Where the section applies and the pollutants bear on the household, include one bounded section that states
 **what the pollutant does inside a body**, then names who is standing in front of it. Mechanism
@@ -503,6 +504,7 @@ Examples of `\filingid` by posture, all taken verbatim from the notice:
 - **Permit:** `AI 12345 · Permit 2560-00123-V0 · PER20260001`
 - **Rulemaking:** `Docket FAA-2026-8614 · RIN 2120-AM51`
 - **Financing:** `LPFA $900,000,000 Exempt Facility Revenue Bonds (… Project) · SBC S26-027`
+- **Land use:** `Planning case <n> · Ordinance <n> · Hearing <date>`
 
 `\filingid` prints in the footer of **every** page. That is deliberate: agencies scan filings
 into document-management systems where pages get separated from their cover, and an unlabelled

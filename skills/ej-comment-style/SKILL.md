@@ -538,8 +538,9 @@ preservation language in footnotes so the body stays readable.
 
 `bayou:public-comment` produces a filed letter with its own output spec: a standing or interest
 statement, numbered comments each ending in the posture's endpoint (a draftable permit condition,
-a rule-text edit, or a record disclosure), an enumerated relief request, and a candor section.
-This style's corpus is permit-posture work. Under the rulemaking or financing posture, take the
+a rule-text edit, a record disclosure, or a corrected local procedural step), an enumerated relief
+request, and a candor section.
+This style's corpus is permit-posture work. Under the rulemaking, financing or land-use posture, take the
 moves that transfer, such as holding the agency to its own words and incompleteness as a ground,
 and leave the permit-specific ones. This style is compatible with that spec and does not replace it.
 

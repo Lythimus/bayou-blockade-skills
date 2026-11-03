@@ -14,7 +14,7 @@ way through a different channel. A precise, checkable question in the record is 
 counsel has to answer before proceeding.
 
 **The tier tables live in the posture file** (`postures/permit.md`, `postures/rulemaking.md`,
-`postures/financing.md`). The pattern is the same in every posture:
+`postures/financing.md`, `postures/land-use.md`). The pattern is the same in every posture:
 - **Tier 1** creates legal exposure for the decision-maker itself, so fixing it is cheaper than
   defending it. It leads the letter.
 - **Tier 2** builds the record and preserves issues for the next venue or an appeal.

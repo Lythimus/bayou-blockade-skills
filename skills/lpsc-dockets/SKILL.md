@@ -125,7 +125,7 @@ https://lpscpubvalence.lpsc.louisiana.gov/portal/PSC/DocketDetails?docketId=DOCK
 > It returns `{"Data":[{DocumentId, DocumentType, DateFiled:"/Date(ms)/", FiledBy, Description, Files:[{FileId, FileName, FileSize}]}], "Total": n}`. The parameter is `docketId`; `id` returns the "Value cannot be null" error page. The script wraps this:
 >
 > ```bash
-> S="/Users/josephcoco/.claude/plugins/bayou/skills/lpsc-dockets/lpsc_docket.py"
+> S="${CLAUDE_PLUGIN_ROOT}/skills/lpsc-dockets/lpsc_docket.py"
 > python3 -I "$S" info 32689                                   # docket number, dates, synopsis, parties
 > python3 -I "$S" docs 32689 --grep "brief|testimony" --public  # filings and their files, sealed files dropped
 > python3 -I "$S" download 32689 --out DIR --match "Pre-Hearing Brief" --public

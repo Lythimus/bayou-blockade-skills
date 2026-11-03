@@ -8,14 +8,8 @@ A conduit issuer or public body approving public financing for a private project
 
 The body is not a regulator, and nothing it decides is a permit.
 
-Worked examples in `~/Documents/personal/petro/`:
-- `hyundai-posco/loans/LPFA-TEFRA-COMMENT-2026-09-14.md` (the letter)
-- `…/LPFA-TEFRA-TALKING-POINTS-2026-09-14.md` (oral version)
-- `…/LPFA-TEFRA-COMMENT-VERIFICATION-2026-09-11.md` (the verification pass, which caught a
-  wrong clock and statute before filing)
-- `hyundai-posco/LPFA-BAYOU-SKILL-UPDATE-NOTES.md` (what broke when this skill was LDEQ-only)
-- `LPFA Bond Approval Analysis.md` (research report on how LPFA decides; it contains errors, see
-  the warnings below)
+Run a verification pass before filing: one caught a wrong clock and statute. Don't trust a research
+report on how a board decides without the primary text; see the warnings below.
 
 ---
 
@@ -107,7 +101,8 @@ The posture-neutral principle and the Tier 4 cut list are in `references/leverag
   the affiliate's renewal and compliance record (NC/NCL codes, the board's non-compliance actions).
   Do not assert that the project fails a test (see the *Gonzales* trap in
   `references/louisiana-hooks.md`).
-- **Historical findings about the issuer**, such as the Legislative Auditor's 2000 LPFA audit.
+- **Historical findings about the issuer**, such as the Legislative Auditor's 2000 LPFA audit
+  (`bayou:la-legislative-auditor`).
   **Always frame these as a question about current practice**, never as a claim that the
   deficiency is current.
 - **Comparable in-state failure precedent**, with the delivered-vs-promised numbers taken from a
@@ -124,14 +119,14 @@ The posture-neutral principle and the Tier 4 cut list are in `references/leverag
 ### Tier 4 for this posture (cut, in addition to the shared list)
 
 - **Fee-income conflict-of-interest arguments** (implying the issuer approves bonds for its own
-  fees). They harden the board. The fee figures in the research report were also wrong for a
+  fees). They harden the board. The fee figures in one research report were also wrong for a
   post-2023 bond.
 - LDEQ-style standing, appeal, or "permit condition" language.
 - Anything that reads as an environmental complaint filed in the wrong forum.
-- **Trap in the research report: Bond Validation Act clock.** It gives La. R.S. 13:5121 and "30
+- **Trap seen in a research report: Bond Validation Act clock.** It gives La. R.S. 13:5121 and "30
   days from the authorizing resolution" as the clock. Both are wrong. The clock is 9:2347(G),
   running from the notice of sale.
-- **Trap in the research report: volume caps.** It says exempt-facility bonds "bypass" volume
+- **Trap seen in a research report: volume caps.** It says exempt-facility bonds "bypass" volume
   caps. That is wrong for § 142(a)(6).
 
 ## Health-mechanism section

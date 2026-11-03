@@ -1,6 +1,6 @@
 ---
 name: chemical-hazard-profile
-description: CAS number or chemical name → GHS hazard statements, signal word, pictograms and IARC cancer group from PubChem, plus EPA cancer calls and IRIS reference values from CompTox when a key is set. Takes a single chemical, a list, or a TRI data file. Also lists what a site reported manufacturing or importing under TSCA Chemical Data Reporting (2024 cycle: production volumes for 2020–2023, uses, workers exposed), by FRS ID, name, CAS number or radius, with confidential (CBI) volumes kept apart from zeros
+description: "CAS number or chemical name → GHS hazard statements, signal word, pictograms and IARC cancer group from PubChem, plus EPA cancer calls and IRIS reference values from CompTox when a key is set. Takes a single chemical, a list, or a TRI data file. Also lists what a site reported manufacturing or importing under TSCA Chemical Data Reporting (2024 cycle: production volumes for 2020–2023, uses, workers exposed), by FRS ID, name, CAS number or radius, with confidential (CBI) volumes kept apart from zeros"
 allowed-tools: Bash, Read, AskUserQuestion
 ---
 

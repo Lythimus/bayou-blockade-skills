@@ -274,6 +274,21 @@ ECLERKS_PASSWORD: <password>
 
 ---
 
+## CourtListener (courtlistener.com)
+
+Used by `bayou:la-court-opinions`. Free account. Search and citation lookups return a 401 without a
+token (found 2026-11-03). The API token is on the account's profile page,
+https://www.courtlistener.com/profile/api/ . The skill reads the token line below, or the
+`COURTLISTENER_TOKEN` environment variable. It does not use the login. The default limit is 5 requests
+a minute, 50 an hour and 125 a day.
+
+Registration email: <email>
+Password: <password>
+
+CourtListener token: <token>
+
+---
+
 ## Notes
 
 - Keep the real file private and outside version control.

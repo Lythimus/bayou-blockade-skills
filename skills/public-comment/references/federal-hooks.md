@@ -37,7 +37,7 @@ person the right to petition for the issuance, amendment, or repeal of a rule."
 in the report to the user, not in the letter.
 
 ### 51 U.S.C. 50905(b)(2)(C): commercial space waiver authority
-**Status: quoted from the statute in FAA-2026-8614 comment, 2026-08.** The Secretary may
+**Status: quoted from the statute, 2026-08.** The Secretary may
 prescribe that a requirement of law is not a requirement for a license or permit "if the
 Secretary, after consulting with the head of the appropriate executive agency, decides the
 requirement is not necessary to protect the public health and safety, safety of property, and
@@ -52,8 +52,7 @@ argument.
 
 ## Tax-exempt bond law (`postures/financing.md`)
 
-All entries below were verified against full text pulled to
-`petro/hyundai-posco/loans/sources/` on 2026-09-11. Re-verify if the provision has been amended
+All entries below were verified against full text on 2026-09-11. Re-verify if the provision has been amended
 since.
 
 ### 26 U.S.C. 147(f): TEFRA public approval

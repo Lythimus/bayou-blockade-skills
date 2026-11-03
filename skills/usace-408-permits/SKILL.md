@@ -157,7 +157,7 @@ record). A tract's JD is often in the AJD list even when its permit has no publi
    viewer's download button did not save anything when driven from the Chrome tools, so
    ask the user for the file.
 4. The other tabs search the same way. **Final IP** and **Pending IP** have an Applicant column,
-   so search them by owner or project name ("Esperanza"), then by parish. A DA number needs its
+   so search them by owner or project name, then by parish. A DA number needs its
    zero-padded form (`01106`, not `1106`), and search the number without the district prefix.
    Letters of permission appear under Final IP. **214/Other** lists Section 214 and funded
    reviews only. The **AJD** and **Section 408** tabs are separate lists: a search typed after

@@ -142,8 +142,7 @@ Conditional Approval, and the operator may answer comments within 10 days of it.
 (`overlap`), and reads this month's agenda (`smeb`).
 
 **Submission**: oral or written comment at the parish hearing, and written comment to OSTR
-under the docket number in the hearing notice (e.g. `OMR 23-01` for High West, St. Charles and
-Jefferson). The notice gives the comment deadline. Comments "may have a material bearing on
+under the docket number in the hearing notice (e.g. `OMR 23-01`). The notice gives the comment deadline. Comments "may have a material bearing on
 the final terms" (Guidelines §10.03): ask for specific conditions, not just denial.
 
 ---
@@ -184,6 +183,31 @@ requires none. Ask for:
 **Terminal clock:** La. R.S. 9:2347(G). The bonds become incontestable 30 days after
 publication of the **notice of sale**, which comes after SBC approval and at least 7 days before
 the sale. See `louisiana-hooks.md`.
+
+---
+
+## Parish and municipal land-use bodies (`postures/land-use.md`)
+
+Covers planning and zoning commissions, boards of adjustment, and parish and city councils. Local
+practice varies by parish. No statewide filing system was found, so the notice, the body's rules and
+the clerk or planning office are the sources.
+
+**Submission**
+- Written comment to the clerk or planning department named in the notice, asking that it be entered in
+  the record of the case. Send it **before** the meeting, to **each** body that will act.
+- Speak as well if you can. R.S. 42:14(D) requires a comment period before a vote, and the body may set
+  reasonable rules, such as time limits or sign-up. `bayou:hearing-prep --oral` prepares remarks.
+- No portal or tracking number should be assumed. Keep proof of delivery.
+
+**Put in the RE line** the case number, ordinance number, agenda item and hearing date. These often differ
+between commission and council.
+
+**What the body produces:** no response to comments was found to be required. Look for the staff report,
+the commission's report to the council (R.S. 33:4780.45), the minutes, and for a plat disapproval, the
+stated ground (R.S. 33:113). Ask for written notice of the decision.
+
+**Next venue:** usually commission to council, or board of adjustment to district court. Which applies,
+and any local appeal step, depends on the local code. See the posture file's clock table.
 
 ---
 

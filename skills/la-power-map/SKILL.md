@@ -20,7 +20,7 @@ This skill retrieves records. It does not conclude that a contribution bought a 
 
 - **Company name** (required). Ask for the exact legal name on the permit application and any known parent, subsidiary, or former name. Run each as its own search: the applicant on an LDEQ permit is often an LLC whose name differs from the parent that hires the lobbyists (the registered client for Denka's LaPlace plant is "Denka Performance Elastomer (DPE)"). If the user has no former names to offer, run the Step 3 first pass before Steps 1 and 2: its `Previous Names` and `Branch` fields supply them (Luling Exchange LLC is now IMTT Luling LLC), and each one is another search term for lobbyists and contributions. The land itself is often held by a further entity. `bayou:parish-assessor-gis` (`at` on the site, or `owner` near it) gives the owner of record of the site parcels; search that name too. A tax agent printed "C/O" is not the owner.
 - **Date range** (optional) for contributions, as `MM/DD/YYYY`.
-- **Officials of interest** (optional): legislators, parish council members, or statewide officials whose filings should be picked out of the contribution results.
+- **Officials of interest** (optional): legislators, parish council members, or statewide officials whose filings should be picked out of the contribution results. For St. Charles, Step 2 can check against a roster if the separate `scp-civics` plugin is installed. Without it, take names from the user.
 
 ## Step 1: Registered lobbyists
 
@@ -31,7 +31,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-power-map/ethics_search.py" lobbyists "
 
 Returns CSV: `company, paid, branch, lobbyist, dates_represented`. The match is a substring of the company name as the lobbyist typed it on the registration. `--past` adds representations that have ended. `branch` says where the lobbyist is registered to work: Legislative, Executive (state agencies, which includes LDEQ and the Department of Conservation and Energy), or Local.
 
-**Always run with `--past` before saying a company has no lobbyists.** Without it, only current registrations come back. A local developer that lobbied for one session and then let the registration end shows nothing. Esperanza Land, LLC, a St. Charles landowner, is an example: four lobbyists, 9/2024–6/23/2025, invisible without `--past`.
+**Always run with `--past` before saying a company has no lobbyists.** Without it, only current registrations come back. A local developer that lobbied for one session and then let the registration end shows nothing. One had four lobbyists over about nine months, all invisible without `--past`.
 
 Then list every client of each lobbyist found:
 
@@ -43,7 +43,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-power-map/ethics_search.py" lobbyists -
 - The match is on last name, so drop rows for other lobbyists who share it (a Picard search also returns Jeffery J. Picard).
 - Filter the CSV for the applicant's industry, the utility, the likely end user, and economic-development bodies.
 
-A lobbyist shared with the utility, a likely end user, a trade association or another applicant in the same parish is often the more useful finding. Esperanza Land's lobbyists (The Picard Group) also represent Entergy Louisiana, and represented Microsoft until two months before Esperanza hired them. Large firms carry a hundred or more clients, so report the count with any overlap. Shared representation is not evidence of coordination.
+A lobbyist shared with the utility, a likely end user, a trade association or another applicant in the same parish is often the more useful finding. One developer's lobbying firm also represented the local utility, and had represented a likely end user until two months before the developer hired it. Large firms carry a hundred or more clients, so report the count with any overlap. Shared representation is not evidence of coordination.
 
 What the registration does not show: how much the company pays the lobbyist, or which bill or permit was discussed. Lobbyist expenditure reports (`SearchByFinancialDisclosure.aspx`) list spending *on officials* such as meals and events, not fees received.
 
@@ -62,6 +62,18 @@ Read the results before reporting them:
 - **Executives give in their own names.** Search officers found in Step 3 individually, and match on address or employer before attributing a gift to the company. A common surname alone is not a match.
 - **Zero rows is not zero giving.** Only electronically filed reports are searchable. Older and some local filings exist only as scanned PDFs (`SearchScanned.aspx`).
 - `ContributionType` values other than `CONTRIB` (for example `OTHER`, a utility refund to a campaign) are not political gifts. Drop them or label them.
+
+**Optional: check recipients against St. Charles officials.** This needs the `scp-civics` plugin's roster. Nothing else in this skill does.
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-power-map/ethics_search.py" officials --contributions contributions.csv --section "Parish Council|Planning"
+```
+
+It prints the roster's date, then CSV rows: `match, official, section, filer, report, contributor, date, amount`. Without `--contributions` it lists the roster. Exit 3 means no roster was found: say the check wasn't run, and go on with names from the user. Treat a match as a lead:
+
+- `last name only` may be a relative, a nickname (Mike for Michael) or a stranger. Confirm it and `first and last` from the filer's own report, since the same name can belong to someone else.
+- The roster lists current officials of one parish, as of its date. No match says nothing about former officials, other parishes or legislators.
+- Many listed board members are appointees and may never file. A gift to an official isn't evidence of any official act.
 
 To see every contribution a specific official received, use the browser form at `https://www.ethics.la.gov/CampaignFinanceSearch/SearchEfilingContributors.aspx` and pick the filer.
 
@@ -117,7 +129,7 @@ Limits, stated in any write-up that relies on these:
 - **GLEIF covers only entities that obtained an LEI**, which is required mainly for financial-market activity. IMTT-Geismar has one; the Luling entity was not found. Zero hits proves nothing about ownership.
 - **Exhibit 21 exists only for SEC-registered parents.** A private-equity owner (Riverstone), a family-held company, or a foreign parent that files no 20-F appears in neither source. Fall back to the parent's or the buyer's press releases with WebSearch, and cite them as press, not as a registry.
 - **Exhibit 21 may omit insignificant subsidiaries** (SEC rules allow it), so a missing name in one year is not proof of a sale.
-- **GLEIF fulltext also matches other names and addresses.** "Esperanza Investments" returns D&M Capital Investments, LLC of Oklahoma; the script flags any hit whose legal name does not contain the search term. Discard those unless the record ties back to the applicant.
+- **GLEIF fulltext also matches other names and addresses.** A search for one Louisiana LLC returned an unrelated Oklahoma company; the script flags any hit whose legal name does not contain the search term. Discard those unless the record ties back to the applicant.
 - **The EDGAR match is on the quoted phrase.** A short name like "IMTT" also matches unrelated filers; read the filer column before attributing.
 
 ### Secretary of State (manual)
@@ -160,7 +172,7 @@ Other routes to the parent, all scriptable or already in this plugin:
 2. **Contributions**: Recipient | Contributor as written | Date | Amount | Report number, with a total per recipient. State the search terms, the date range, and how many returned rows were excluded as non-matches.
 3. **Ownership**: the OpenCorporates fields, labeled as a mirror of the state registry, and separately what the user retrieved from the Secretary of State, or a statement that the state record was not retrieved. Say which fields were confirmed against the state record and which rest on the mirror alone.
 4. Retrieval date for each source.
-5. **`ENTITIES.md`** in the case folder (for example `esperanza/datacenter/ENTITIES.md`), described below.
+5. **`ENTITIES.md`** in the case folder (for example `<case>/ENTITIES.md`), described below.
 
 ### ENTITIES.md: the case's ownership map
 

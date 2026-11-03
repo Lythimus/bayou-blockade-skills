@@ -200,13 +200,105 @@ borrower may not involve public funds at all. Check that before invoking art. VI
 
 ### Louisiana Legislative Auditor, *Louisiana Public Facilities Authority* performance audit (March 2000)
 **Status: a real document, read in full for the LPFA letter, and 26 years old.** No more recent
-performance audit repeating its findings has been found. Its findings:
+performance audit repeating its findings has been found. Find it and any later report with
+`bayou:la-legislative-auditor`; its entry there shows a 2005 posting date, not March 2000. Its findings:
 - LPFA "does not require borrowers to demonstrate that the bond issue benefits the State."
 - 60% of reviewed project-bond borrowers would or probably would have done the project anyway.
 - The out-of-state-borrower benefit observation.
 
 **Always frame these as a question about current practice**, e.g. "What does the Authority
 require today?" Never assert that the deficiency is current.
+
+---
+
+## Local land use (`postures/land-use.md`)
+
+⚠️ **R.S. 30:2050.21 and R.S. 49:964 do not apply to a local land-use decision.** The first is LDEQ's
+permit appeal; the second is state-agency review.
+
+Statutes below were read at legis.la.gov on 2026-11-03. On the same date, each case below other than
+*Alexander* was found by reporter cite with `verify-cite`, and its quoted language was checked against
+CourtListener's opinion text. Reporter pin pages weren't checked. `verify-cite` lists only LASC opinions
+naming the parties, which misses one-line writ denials, so read the writ history before citing an
+appellate case as final.
+
+### *Alexander v. St. James Parish*, 2025-C-00866 c/w 2025-C-00868 (La. 3/6/26) — ⚠️ **READ THIS BEFORE CITING**
+**Status: read in full from lasc.org (`www.lasc.org/opinions/2026/25-0866.C.OPN.pdf`), 2026-11-03. Rehearing
+history and reporter cite not checked. Adverse to challengers.** The court of appeal had reversed a parish's
+land-use approval (24-557, La. App. 5 Cir. 5/14/25, 415 So.3d 437). The Supreme Court **vacated that ruling and
+reinstated the district court's**. Guidry, J., dissented.
+
+**Do not cite the Fifth Circuit opinion as a win.**
+
+Holds (slip op. 16–20): the arbitrary-and-capricious standard governs all local land-use decisions, whether
+reviewing a regulation or its application; "[t]here should be no de novo review"; the parish's interpretation of
+its own plan gets deference; "should" in that plan was permissive. Fn. 13: an ambiguous land-use ordinance is
+construed for the least restricted use (*City of New Orleans v. Elms*).
+
+**The trap:** "the parish failed to follow its own ordinance" lost here, because the court treated it as a
+disagreement over interpretation. The only opinion saying that a parish "acts outside of the confines of its
+power when it fails to follow its own ordinance" is the dissent.
+
+**How to use it:** cite it for the standard you must meet. Keep Tier 1 to steps that were or weren't taken and to
+counts of days, which call for no interpretation. Whether *Alexander* changes the "de novo proceeding" practice
+of hearing new evidence in a rezoning challenge is not addressed.
+
+### *Palermo Land Co. v. Planning Comm'n of Calcasieu Parish*, 561 So.2d 482 (La. 1990); *King v. Caddo Parish Comm'n*, 97-1873 (La. 10/20/98), 719 So.2d 410; *Toups v. City of Shreveport*, 10-1559 (La. 3/15/11), 60 So.3d 1215
+**Status: found by `verify-cite`; quoted language confirmed in CourtListener's text, 2026-11-03.** Zoning is legislative;
+"Courts will not and cannot substitute their judgment" (*Palermo*); "room for two opinions" (*King*). *Toups* applies the
+standard to a council's denial of a special exception use. **The trap:** all three call a challenge "a de novo proceeding", and
+*Alexander* says that doesn't mean de novo review.
+
+### R.S. 33:4780.40–.50 — parish zoning
+Excludes Rapides, Jefferson, Sabine and Webster (.40). Review grounds (.40). In accordance with a comprehensive plan (.42,
+.43). Council hearing: weekly in three different weeks, 15 days, certified mail if ten parcels or fewer (.43). Protest:
+majority of the members, **not two-thirds** (.44). Commission hearing and final report before council action (.45). Board
+of adjustment (.46). Petition within 30 days of filing in the board's office; "any opponent before the board" is a party
+(.47). Local bodies can't override state environmental regulation or permitted activity (.49). **The trap:** .50(C) on home
+rule parishes. Check the charter before quoting a count.
+
+### R.S. 33:4721–4729 — municipal zoning
+Differs from the parish rules: regular mail (4724(C)); protest vote is a majority "present and voting" (4725); board majority
+present and voting (4727(D)(2)). Do not cite it for parish land outside a municipality (*Coogan*).
+
+### R.S. 33:101.1 — plat approval is legislative; review confined to the record
+**Amended by Acts 2025, No. 277, eff. June 11, 2025.** Review "shall be confined to the record established before the governing
+authority, the planning commission, or planning administrator whose decision is being appealed." **The trap:** the digest of the
+bill as introduced is not the enacted text; the record language is confirmed from the current statute page. Sets no deadline, and
+doesn't say who may sue.
+
+### R.S. 33:109, 33:112, 33:113 — plan and plats
+§ 109(A): mandatory referral of public ways and utilities, two-thirds override. § 109(B): "shall consider" an adopted plan. **The
+trap:** that is a duty to consider, and a note points to Acts 2004, No. 859, § 2 on applicability, which hasn't been read. § 113:
+60 days or deemed approved; a hearing before action; ground of disapproval on the record; five-day notices.
+
+### R.S. 42:13, 42:14(D), 42:19, 42:24–.26 — Open Meetings
+Planning and zoning commissions are public bodies (42:13(A)(3)). Comment before a vote (42:14(D)). 24-hour agenda, reasonable
+specificity, unanimous vote to add an item (42:19(A)(1)(b)). Voidable, suit within 60 days (42:24). Any person may sue (42:25(C));
+fees to a prevailing plaintiff (42:26(C)).
+
+### *Tassin v. City of Marksville*, 411 So.2d 1240 (La. App. 3 Cir. 1982)
+"Failure to give the required notice is fatal to the rezoning ordinance despite the fact that some property owners had actual notice."
+The notice was posted signs required by the local ordinance. Earlier non-compliance was no waiver. **The trap:** it predates *Alexander*.
+Use it for a step not taken, not for a disputed reading.
+
+### *Coogan v. Parish of Jefferson*, 390 So.2d 515 (La. 1980)
+Per curiam: the 30-day period in R.S. 33:4727 didn't apply to a suit over a parish council's refusal to rezone, with no municipality or
+board of adjustment involved. **The trap:** "reasonable time" and "[s]ix months is beyond a reasonable time" are from Justice Lemmon's
+**dissent**. It predates the parish subpart (Acts 1993, No. 201). It doesn't set a deadline for rezoning challenges.
+
+### *Cupit v. City of New Orleans*, 120 So.3d 862 (La. App. 4 Cir. 2013)
+Neighboring owners are "aggrieved persons" under R.S. 33:4727(E)(1) for a board of zoning adjustments appeal. Municipal statute and board
+appeal only.
+
+### *1900 Highway 190, L.L.C. v. City of Slidell*, 196 So.3d 693 (La. App. 1 Cir. 2016)
+**The traps:** the challenge to the ordinance failed as untimely under R.S. 33:175, for annexation, even though the ordinance also rezoned, so
+don't cite it as a rezoning deadline. The majority's no-right-of-action ruling on competitive harm, relying on *Lauer v. City of Kenner*, 536 So.2d
+767, disposed of the inverse condemnation claim. McDonald, J., agreeing with reasons, is the one who applies it to contesting a zoning ordinance. *Lauer* is the closer authority for that.
+
+### *Shaw v. Jefferson Parish*, 186 So.3d 1181 (La. App. 5 Cir. 2016)
+A zoning challenge "is not an appeal from a decision of a lower tribunal wherein the reviewing court scrutinizes the record below". **The trap:**
+it predates *Alexander*; don't state it as current law without saying so.
 
 ---
 
@@ -240,31 +332,13 @@ require today?" Never assert that the deficiency is current.
 ## Case law — other
 
 ### *In re Browning-Ferris Industries Petit Bois Landfill*, 93-2050 (La. App. 1 Cir. 6/23/95), 657 So.2d 633
-⚠️ **Status: CITATION CORRECTED, PROPOSITION UNVERIFIED — do not cite for the alternative-site
-point until someone reads p. 637 (flagged 2026-08-29, HPLS campaign; cite corrected 2026-10-16).**
-`bayou:la-court-opinions verify-cite` confirmed the case on CourtListener: La. App. 1 Cir.,
-docket 93 CA 2050, decided **June 23, 1995** (the 1992 date below was the error), 657 So.2d 633.
-LASC writ actions: Nos. 95-C-2127 and 95-C-2155 (La. 11/27/95), 663 So.2d 742. A web index
-summarizes 95-C-2155 as "Denied"; read the LASC action before writing "writ denied". The opinion
-text is not retrievable anonymously (CourtListener's page is bot-gated and the API text endpoint
-needs a token), so the p. 637 proposition below is still unchecked. A scoped CourtListener
-search shows the opinion's text does contain "alternative sites" and "Save Ourselves" and does not
-contain "already owns": the topic is there, but whether it holds what the proposition says needs a
-reading.
+**Status: read in CourtListener's text, 2026-11-03, including p. 637.** Writs denied in Nos. 95-C-2127 and 95-C-2155 (La. 11/27/95), 663 So.2d 742; both actions read. `verify-cite` lists later Louisiana citing opinions as 0, and CourtListener lacks 1st, 3rd and 5th Cir. opinions after 2018, so later treatment isn't established.
 
-Original flag:
-The proposition attributed to it — that an alternative-site analysis performed to justify the site
-the applicant already owns does not satisfy the IT factor — is the right argument and is directly on
-point whenever an EAS screens alternatives by criteria only the chosen site can meet. **But the
-citation itself does not check out.** The reporter volume and year are internally inconsistent
-(657 So.2d is a 1995 volume; the entry gives a 1992 opinion date), and a web search on the case
-name, the reporter cite, and "Petit Bois" together returned nothing matching. It was dropped from
-the HPLS comment letter rather than filed on an unconfirmed cite.
+**Holds:** the Secretary acted arbitrarily and capriciously in granting a landfill permit where the alternative-sites study couldn't support an informed determination; reversed and remanded (pp. 639–40). The court "pretermit[ted]" every other issue. It is "inherently unreasonable ... to limit consideration of alternative sites to arbitrary geographical boundaries where the potential benefits and risks of the proposed facility will impact a multi-parish, if not a multi-state region" (p. 639). Where "only one of the evaluated sites within the optimum radius merits favorable consideration, the search radius should be expanded" (p. 639).
 
-**In the meantime, the argument does not need it:** *Save Ourselves* IT factor 3 supports it
-directly, on the face of a record with no comparative alternatives data. Whoever next needs this
-should pull the opinion from Westlaw, Lexis, or the La. 1st Circuit's own archive, fix the
-citation, and restore the status line — or delete the entry.
+**Useful facts:** sixteen of the seventeen sites were carried over from a study for another facility, and "[t]he only new site to be considered was the location proposed" (p. 638). Eight fell out on a minimum-size cut, and the rest were scored pass/fail, which a DEQ witness called "very crude" and the applicant's consultant conceded was worse than a numerical ranking (pp. 638–39). P. 637 places the burden of proof on the applicant and lists the five IT questions, quoting *Blackett*.
+
+**The trap:** it does **not** hold that an analysis performed to justify a site the applicant already owns fails the IT test. "Already owns" isn't in the opinion, and ownership isn't discussed as a ground. Argue that point from the facts above, or from *Save Ourselves* IT factor 3, and label it as argument. The court also said it knew of "no precise means for determining the sufficiency of an alternate sites analysis", and that acceptable sites within a parish may not require a wider search (p. 639). It dates from 1995, so check the current DEQ rules.
 
 ---
 

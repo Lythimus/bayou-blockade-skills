@@ -17,11 +17,13 @@ statutes by regulation (rulemaking).
 | `permit.md` | issue, modify, or renew a specific permit or license | a hard gate where an aggrieved-person appeal exists | a draftable permit condition |
 | `rulemaking.md` | adopt a rule of general applicability | an interest, not a gate | a rule-text, scope, or record edit |
 | `financing.md` | approve public financing for a private project | an interest, not a gate; never an appeal statute | a record disclosure, a Bond Counsel statement, deferral, or transmittal |
+| `land-use.md` | a parish or municipal rezoning, plat, variance, or land-use ordinance | an interest at the hearing, not a gate; the test for a later suit differs by instrument | a corrected step, a record item, a stated finding, a plat outcome, deferral, or denial |
 
 ## Adding a posture
 
-Add a file only after a real campaign has produced a filed document in that posture, and name
-that document at the top as the worked example. Every posture file carries the same sections,
+Add a file only after a real filing in that posture exists, or, if none does, say at the top that the
+file comes from primary sources and mark what isn't established. Don't name a private filing or its
+location in the file. Every posture file carries the same sections,
 so `SKILL.md` can point at them generically:
 
 1. **Audience.** Who decides, what vocabulary they evaluate in, and how things actually fail
@@ -41,15 +43,7 @@ so `SKILL.md` can point at them generically:
 
 ## Candidates not yet built
 
-The petro campaigns have produced these, but no comment-shaped filing has come out of them yet:
-- **Local land use / ordinance:** parish council rezoning or a future land-use map amendment
-  (IMTT, UBE C1), or an ordinance (scp-prr-fees). The oral side of this is covered by
-  `bayou:hearing-prep`. The current zoning district of every affected parcel, its owner, and the
-  homes already standing on the land being rezoned come from `bayou:parish-assessor-gis`.
-  The case's path from P&Z to the council ordinance, the hearing date and any deferrals come from
-  `bayou:parish-council-agendas track <parish> "<case or applicant>"`.
-- **Enforcement petition:** an EPA/DOJ consent-decree complaint or a CAA § 304 60-day notice
-  (shell-norco-26-flare). Standing here is Article III injury, and the request is enforcement,
-  not a condition.
-- **Corporate grievance:** an OECD National Contact Point submission (lotte-oecp-report).
-- **Utility rate case:** an LPSC docket (Waterford ratepayer material).
+- **Enforcement petition:** an EPA/DOJ consent-decree complaint or a CAA § 304 60-day notice.
+  Standing here is Article III injury, and the request is enforcement, not a condition.
+- **Corporate grievance:** an OECD National Contact Point submission.
+- **Utility rate case:** an LPSC docket.

@@ -19,13 +19,11 @@ Every mode here serves the written record. Questions surface facts for the comme
 statement points to the filing. The debrief feeds the comment's candor section and its
 follow-ups.
 
-Worked examples in `~/Documents/personal/petro/`:
-
-| Mode | Model artifact |
+| Mode | What it produces |
 |---|---|
-| `--questions` | `high-west/OPEN-HOUSE-QUESTIONS.md` (prep), grouped by staffer, keyed to `verification/` question IDs |
-| `--oral` | `hyundai-posco/loans/LPFA-TEFRA-TALKING-POINTS-2026-09-14.md` |
-| `--debrief` | `high-west/meetings/2026-08-27-open-house-notes.md` (full record) and `high-west/OPEN-HOUSE-QUESTIONS-CURATED.md` (campaign view keyed to the prep file) |
+| `--questions` | Prep questions grouped by staffer, keyed to verification question IDs |
+| `--oral` | Talking points |
+| `--debrief` | A full record of the meeting, plus a campaign view keyed to the prep file |
 
 Run exactly one mode per invocation. If none is given, ask which one.
 
@@ -185,8 +183,8 @@ reliability** block covering:
 Under each question: who answered (role, then first name if known), the paraphrase-grade
 quotes with source tags, and a line on what the answer changes for the comment.
 
-**Flag "answered a different question" explicitly.** The High West pattern: every question about
-the pressure front was answered with a claim about the plume, three times. A pattern like that is
+**Flag "answered a different question" explicitly.** For example, every question about
+one risk gets answered with a claim about a different one, several times. A pattern like that is
 often the most useful output of the evening.
 
 **Step 3 — Capture everything else that bears on the record.**

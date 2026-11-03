@@ -1,7 +1,7 @@
 ---
 name: la-class-vi
 description: Track Louisiana's Class VI carbon-sequestration/CO2-injection permit program — application status, issued permits, and the associated Class V stratigraphic test wells, cross-checked against EPA UIC data and Federal Register notices, no CAPTCHA session required
-argument-hint: [operator or project name] [parish]
+argument-hint: "[operator or project name] [parish]"
 allowed-tools: Bash, AskUserQuestion
 ---
 
