@@ -257,6 +257,23 @@ MEMEGEN_API_KEY: <key>
 
 ---
 
+## eClerks LA (www.eclerksla.com)
+
+Used by `bayou:eclerks-land-index` (and `bayou:la-power-map` through it) for parish Clerk of Court land records: conveyances, options,
+leases, servitudes and mortgages that name a buyer, tenant or utility. eClerks LA is run by
+the Louisiana Clerks' Remote Access Authority, and most parishes are on it. The statewide
+index is free but needs an account; viewing and printing document images needs a paid
+per-parish subscription. Register at https://www.eclerksla.com (Log in → Register as a new
+user).
+
+The user signs in themselves in the browser. Claude reads pages from that signed-in session
+and never types this password into the site.
+
+ECLERKS_USERNAME: <email>
+ECLERKS_PASSWORD: <password>
+
+---
+
 ## Notes
 
 - Keep the real file private and outside version control.

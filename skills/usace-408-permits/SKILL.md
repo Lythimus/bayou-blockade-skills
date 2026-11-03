@@ -129,7 +129,49 @@ to open any MVN page, then run `mcp__claude-in-chrome__javascript_tool` in that 
 permits**. Work under nationwide or general permits, which covers most small utility,
 pipeline and road jobs, gets no public notice. When nothing turns up, check the state coastal
 use permit (`bayou:sonris-doc-search`, CUP recipe) before concluding there's no federal
-authorization.
+authorization. Jurisdictional determinations also get no notice, but they are listed in the
+ORM-Public AJD tab (next section), so check it before sending a FOIA for a JD.
+
+---
+
+## Approved jurisdictional determinations (ORM-Public AJD tab)
+
+An AJD says which features on a tract the Corps treats as waters of the U.S. The ORM-Public
+**AJD** tab lists them from 2017 on, with a link to the Corps' basis form (the memorandum for
+record). A tract's JD is often in the AJD list even when its permit has no public notice.
+
+1. Open `https://permits.ops.usace.army.mil/orm-public`, click **AJD**, set District to the
+   district code (MVN for New Orleans) and Year to a year or "All Years", then **Table View**.
+   Page loads and `read_page` work in the Chrome tools. The district dropdown values are the
+   three-letter codes.
+2. Search the box with the **parish**, not the owner. Entries are titled by the consultant and
+   a place, such as "JD Brown, The 130 ac Tract East and Fronting LA 3127 - St Charles", so a
+   search for the developer's or landowner's name returns nothing. Every entry ends in the
+   parish name, written without periods: search "St Charles", because "St. Charles" returns
+   no data. Then match on date, acreage, road names and the Longitude/Latitude columns.
+3. Each row's `Document Link` points to
+   `https://www.mvn.usace.army.mil/Portals/56/docs/regulatory/BasisForms/{DA number minus MVN-}-BASIS.pdf`.
+   `curl` gets 403 there. Open it in the browser tab (it renders in Chrome's PDF viewer,
+   `get_page_text` finds no text, so read it with screenshots) or have the user save it
+   with the viewer's download button. A script download of the PDF did not work, and the
+   viewer's download button did not save anything when driven from the Chrome tools, so
+   ask the user for the file.
+4. The other tabs search the same way. **Final IP** and **Pending IP** have an Applicant column,
+   so search them by owner or project name ("Esperanza"), then by parish. A DA number needs its
+   zero-padded form (`01106`, not `1106`), and search the number without the district prefix.
+   Letters of permission appear under Final IP. **214/Other** lists Section 214 and funded
+   reviews only. The **AJD** and **Section 408** tabs are separate lists: a search typed after
+   a mis-clicked tab runs against the wrong list and reports "no data", so confirm the heading
+   above the search box before trusting a miss. Tab positions shift with window width; click
+   by `find` or `read_page` ref, not by saved coordinates.
+5. In a post-*Sackett* basis form, item 1 lists each feature as jurisdictional or not,
+   item 3 gives the review-area acreage and center point, item 8.f gives the acreage and the
+   reason for each non-jurisdictional wetland, and item 9 names the consultant and the dates
+   of its delineation report. A form with only "N/A" under item 7 means no feature was found
+   to be a water of the U.S. The review area is the surveyed tract, not the whole project.
+6. Not published on ORM-Public or the district site: nationwide permit verifications,
+   pre-construction notices, pre-application records, JDs before 2017, and public notices before
+   2021. Those need a FOIA.
 
 ---
 

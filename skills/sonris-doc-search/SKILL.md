@@ -141,6 +141,28 @@ CUP number. To find where a permit is, read its AUTHORIZATIONS document. Confirm
    `LOCATION:` gives lat/long, parish and section/township, and `DESCRIPTION:` gives the
    work.
 
+**Older permits (confirmed 2026-11-01 on P20070461, a 2007 application).**
+- **Image-only scans.** Documents scanned in the 2009 back-file load (indexed 2009, often
+  with 6-digit Content Ids) have no text layer, so step 4's `pdftotext` returns nothing.
+  Check with `pdftotext f.pdf - | wc -c`. OCR them with `bayou:document-ocr`. Chronologies
+  and code sheets are partly handwritten, and Azure Document Intelligence read them far
+  better than tesseract. Label handwritten readings as machine readings.
+- **"AUTHORIZATIONS" doesn't mean approved.** On an old permit the newest AUTHORIZATIONS row
+  can be a "WITHDRAWAL LETTER" or a "no permit required" determination. Read the row's
+  description column before calling a permit issued.
+- **A withdrawal can carry a federal objection.** A withdrawal letter can double as the
+  State's objection under the federal Coastal Zone Management Act, which bars the Corps from
+  issuing its permit. Quote the stated basis. P20070461's objection was "based on the lack of
+  information", not on the merits.
+- **Follow the enforcement trail.** An "OUTGOING LETTER FROM ENFORCEMENT" or a CHRONOLOGY row
+  points to a violation number (`E<yyyy><nnn>`). The violation is usually closed by a separate
+  after-the-fact CUP with its own `P` number, which is named in the enforcement letter or
+  chronology. Search that number by `xRefNum` too. Its AUTHORIZATIONS document lists the
+  unpermitted work, the mitigation and the penalty. For P20070461 that permit was P20090014.
+- **Results come newest first.** About 20 rows show per search page, so an old permit's
+  original APPLICATION may not be on page 1. The newest AUTHORIZATIONS and enforcement rows
+  are what matter.
+
 If a step stops with exit 4 (the browser window died), resume from the
 `sonris_resume_<ts>.txt` it writes once the cause is known. Don't relaunch in a loop.
 

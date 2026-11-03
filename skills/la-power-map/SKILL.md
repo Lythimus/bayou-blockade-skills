@@ -31,7 +31,19 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-power-map/ethics_search.py" lobbyists "
 
 Returns CSV: `company, paid, branch, lobbyist, dates_represented`. The match is a substring of the company name as the lobbyist typed it on the registration. `--past` adds representations that have ended. `branch` says where the lobbyist is registered to work: Legislative, Executive (state agencies, which includes LDEQ and the Department of Conservation and Energy), or Local.
 
-Then, for each lobbyist found, search the lobbyist's other clients in the browser at `https://ethics.la.gov/LobbyistData/SearchByLobbyist.aspx`. A lobbyist shared with a trade association or with another applicant in the same parish is often the more useful finding.
+**Always run with `--past` before saying a company has no lobbyists.** Without it, only current registrations come back. A local developer that lobbied for one session and then let the registration end shows nothing. Esperanza Land, LLC, a St. Charles landowner, is an example: four lobbyists, 9/2024–6/23/2025, invisible without `--past`.
+
+Then list every client of each lobbyist found:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/la-power-map/ethics_search.py" lobbyists --lobbyist Walts --past
+```
+
+`--lobbyist` takes a last name and filters the same company-representation search by lobbyist. Given alone, it returns the lobbyist's whole client list. The `LobbyistDetail.aspx` page is rendered by script and comes back empty to curl. The results grid's Next button posts back into a reset search, so when a list runs past 100 rows the script runs one search per first letter of the company name and merges them. That is about 28 requests, roughly a minute, and the portal sometimes times out partway; rerun if it does.
+- The match is on last name, so drop rows for other lobbyists who share it (a Picard search also returns Jeffery J. Picard).
+- Filter the CSV for the applicant's industry, the utility, the likely end user, and economic-development bodies.
+
+A lobbyist shared with the utility, a likely end user, a trade association or another applicant in the same parish is often the more useful finding. Esperanza Land's lobbyists (The Picard Group) also represent Entergy Louisiana, and represented Microsoft until two months before Esperanza hired them. Large firms carry a hundred or more clients, so report the count with any overlap. Shared representation is not evidence of coordination.
 
 What the registration does not show: how much the company pays the lobbyist, or which bill or permit was discussed. Lobbyist expenditure reports (`SearchByFinancialDisclosure.aspx`) list spending *on officials* such as meals and events, not fees received.
 
@@ -115,6 +127,16 @@ The Secretary of State's business search at `https://coraweb.sos.la.gov/commerci
 1. Open the URL, search by entity name or by the company number from the first pass, and solve the CAPTCHA.
 2. Open the entity's detail page and record: charter number, entity type, status (Active / Not in good standing), domicile or home state, registered agent, and every officer or manager with an address.
 3. For a foreign (out-of-state) LLC the Louisiana filing names only managers and an agent. The owners are on file, if anywhere, in the home state (often Delaware, which does not publish them). The first pass's `Branch` field names that home-state entity.
+
+**With the claude-in-chrome browser tools**, the search can be run directly. The reCAPTCHA is the invisible kind: it showed no challenge across about 15 searches on 2026-11-01. If a challenge appears, hand it to the user; do not solve it. What works:
+
+- Set fields with `find` + `form_input`, then click Search. Wait 2–3 seconds after loading the form before acting. A click sent too early posts an empty form ("You must enter a Name to search for").
+- A search with one match goes straight to `CommercialSearchDetails.aspx?CharterID=...`; read it with `get_page_text`. With several matches, click that row's Details button. Browser Back from a detail page fails because of the postback, so reload the search form for each lookup. Cite the CharterID URL, but it may not reopen outside the session.
+- **Officer Name or Agent Name** (third radio button; First and Last name fields) is the most useful search. It lists every entity on which a person is an officer, manager, member or agent, with active entities in bold. Use it on the applicant's managers to find sibling LLCs and new project companies. Then run it on the managers of any **other company on the same permit, NOI or traffic study**: a co-developer whose filing gives a different address is a separate owner, not an affiliate.
+- The **Amendments on File** list gives each amendment's type and date (for example "Appointing, Change, or Resign of Officer 9/9/2026") but not its content. That needs the filing image (Buy Certificates / Print Detailed Record), which may cost a fee. Report the date only, and do not guess who changed.
+- Officer pages name people at their filed addresses. List them in `ENTITIES.md` only as filed, per the `manager/officer` rule below.
+
+**Land records** (options, leases, servitudes, mortgages naming a counterparty) are recorded with the parish Clerk of Court. Use `bayou:eclerks-land-index`: it calls the eClerks LA statewide index's JSON endpoint from the user's signed-in browser tab, filtered by parish and document type. Search the applicant, every co-developer, and every party that turns up (option holders, intervenors). An intervenor on an amendment or an assignee of an option is often the hidden counterparty. Rights of way to the utility, servitudes to pipeline companies, and option terminations on the lots being rezoned are the rows to flag. The index is not the act: report index rows as index rows.
 
 Other routes to the parent, all scriptable or already in this plugin:
 

@@ -1,6 +1,6 @@
 ---
 name: satellite-imagery
-description: Fetch a free satellite image of a place on a given date, auto-selecting the best free source (NASA GIBS, EOX Sentinel-2 cloudless, AWS Earth Search Sentinel-2/Landsat, or Copernicus Data Space) by date specificity, resolution, and true-color vs. thermal/fire need
+description: Fetch a free satellite image of a place on a given date, auto-selecting the best free source (NASA GIBS, EOX Sentinel-2 cloudless, AWS Earth Search Sentinel-2/Landsat, Copernicus Data Space, or 0.3–1 m NAIP aerial photos via Planetary Computer) by date specificity, resolution, and true-color vs. thermal/fire need
 allowed-tools: Bash, AskUserQuestion, Read
 ---
 
@@ -8,7 +8,7 @@ allowed-tools: Bash, AskUserQuestion, Read
 
 Given a **location** and a **datetime** (plus optional intent), fetch the best available *free* satellite image, save it as a PNG, and view it. Useful for seeing a facility on the day of an incident (flare, plume, flood, fire), documenting a smoke event, or grabbing a clean recent basemap for a comment letter or map.
 
-No source here costs money. Three are fully keyless (NASA GIBS, EOX Sentinel-2 cloudless, AWS Earth Search); one (Copernicus Data Space) uses a **free** account for true 10 m date-specific crops.
+No source here costs money. Four are fully keyless (NASA GIBS, EOX Sentinel-2 cloudless, AWS Earth Search, and NAIP through Microsoft Planetary Computer); one (Copernicus Data Space) uses a **free** account for true 10 m date-specific crops.
 
 ## Tools available in this environment
 
@@ -66,6 +66,7 @@ Keep both axis orders straight — different APIs disagree:
 | Clean backdrop, date irrelevant | **EOX** s2cloudless mosaic | 10 m | No (annual composite) | No |
 | True color, wide area / any date to ~2000, 250 m OK | **GIBS** MODIS/VIIRS true color | 250 m | Yes (daily) | No |
 | True color, need 10 m on/near a date | **AWS Earth Search** (find scene) → **Copernicus** (render crop) | 10–30 m | Yes | STAC no / Copernicus free key |
+| Sub-meter detail: field rows, pads, roads, ditches, clearing | **NAIP** aerial photo via **Planetary Computer** (Step 3F) | 0.3–1 m | One frame every 2–3 years per state | No |
 
 Tell the user which source you picked and the tradeoff (e.g. "GIBS is date-exact but 250 m; Sentinel-2 is 10 m but the nearest low-cloud pass is 3 days off"). Let them override.
 
@@ -209,6 +210,39 @@ curl -s -X POST "https://sh.dataspace.copernicus.eu/api/v1/process" \
 ```
 
 Widen `timeRange` (e.g. a ±5-day window) if a single day returns an empty/black image — Sentinel-2 revisits every ~5 days.
+
+## Step 3F: NAIP aerial photography (keyless, 0.3–1 m, not date-specific)
+
+USDA's National Agriculture Imagery Program flies each state in leaf-on season roughly every two to three years. Louisiana frames run 2010–2023, at 1 m through 2017, 0.6 m in 2019 and 0.3 m from 2021. Use it to see what 10 m Sentinel-2 can only hint at: crop rows versus graded ground, a new pad or road, a cleared tree line, a ditch. It cannot date an event between flights.
+
+List the frames over a point, newest first. Microsoft Planetary Computer serves the same NAIP catalog keyless, and also renders crops:
+
+```bash
+curl -s -X POST "https://planetarycomputer.microsoft.com/api/stac/v1/search" \
+  -H "Content-Type: application/json" \
+  -d '{"collections":["naip"],
+       "intersects":{"type":"Point","coordinates":[-90.3999,29.9290]},
+       "sortby":[{"field":"properties.datetime","direction":"desc"}],"limit":10}' \
+  | python3 -c "
+import sys, json
+for f in json.load(sys.stdin)['features']:
+    p = f['properties']; print(p['datetime'][:10], p.get('gsd'), f['id'])
+"
+```
+
+Render a true-color crop of one frame (bbox is lon,lat order; the item must cover the box):
+
+```bash
+ITEM="la_m_2909005_se_15_030_20230503_20240209"
+curl -s -o sat_naip_2023-05-03.png \
+  "https://planetarycomputer.microsoft.com/api/data/v1/item/bbox/-90.405,29.925,-90.395,29.933/800x800.png?collection=naip&item=${ITEM}&assets=image&asset_bidx=image%7C1,2,3"
+```
+
+For a change check, render the same bbox from two or three frames and compare them side by side.
+
+- **Not AWS Earth Search for the pixels.** Earth Search's `naip` collection lists the same frames, but its assets are `s3://naip-analytic/...` in a requester-pays bucket, which needs AWS credentials and bills the caller. Use it only to list dates if Planetary Computer is down.
+- **USDA's own image service** (`gis.apfo.usda.gov/arcgis/rest/services/NAIP/...`) did not respond on 2026-11-01 (tested from behind a corporate VPN, so it may work elsewhere).
+- **Caveats to state:** NAIP shows one day every two to three years, so "bare in 2023" says nothing about 2026. A frame near a tile edge may not cover the whole box; if the crop shows a blank wedge, take the adjacent quarter-quad's item from the search. Frames are orthorectified but not survey-grade; don't measure acreage from them to better than a few percent.
 
 ## Step 4: View and report
 

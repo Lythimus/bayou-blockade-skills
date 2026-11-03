@@ -29,7 +29,7 @@
       "owner_fallback": {
         "url": "https://services7.arcgis.com/Nj65ZtNghtksKPeG/arcgis/rest/services/Parcel/FeatureServer/0",
         "authority": "consultant-copy",
-        "note": "AGOL copy, about 2021. Owner differs from the parish layer on roughly 20% of matched parcels. Not queried automatically; check it by hand only if maps.scpgis.com is down, and label any owner from it as 2021."
+        "note": "AGOL copy, vintage uncertain: it carries Esperanza Plantation lot E-1A-1, created by a 12/27/2022 resubdivision, so it postdates 12/2022 (checked 2026-11-01). Owner differs from the parish layer on roughly 20% of matched parcels. Not queried automatically; check it by hand only if maps.scpgis.com is down, and label any owner from it as consultant copy, vintage uncertain (post-12/2022)."
       },
       "zoning": [
         {

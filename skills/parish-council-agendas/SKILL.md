@@ -78,4 +78,4 @@ A CivicPlus parish needs only a registry entry. Run `items` on two or three agen
 - `public-comment`: a written comment on a rezoning or land-use ordinance this skill tracks.
 - `permit-analysis`: local-approval questions (land use, letter of no objection) for a state or federal permit.
 - `la-class-vi`: the state Class VI record for a carbon storage project a parish is acting on.
-- `scp-master-drainage-plan` (user-level, St. Charles): whether a rezoned site touches a planned drainage improvement.
+- `scp-civics:scp-master-drainage-plan` (companion plugin, St. Charles): whether a rezoned site touches a planned drainage improvement.

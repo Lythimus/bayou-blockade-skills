@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Search the Louisiana Ethics Administration's lobbyist and campaign-finance portals.
 
-    ethics_search.py lobbyists <company> [--past]
+    ethics_search.py lobbyists [<company>] [--lobbyist <last name>] [--past]
     ethics_search.py contributions <contributor-name> [--from MM/DD/YYYY] [--to MM/DD/YYYY]
 
 Output is CSV on stdout. Standard library only.
@@ -58,12 +58,14 @@ def table_rows(page, min_cells):
     return rows
 
 
-def lobbyists(company, include_past):
+def lobbyist_page(company_op, company, include_past, lobbyist):
+    """One search; returns (rows, number of result pages)."""
     opener = session()
     form = fetch(opener, LOBBY)
     data = hidden_fields(form)
     data.update({
-        P + "RepNameDropDownList": "Contains",
+        P + "LastNameTextBox": lobbyist,
+        P + "RepNameDropDownList": company_op,
         P + "RepNameTextBox": company,
         P + "PaidDropDownList": "Select...",
         P + "SubjMatterDropDownList": "All Subject Matters",
@@ -71,26 +73,51 @@ def lobbyists(company, include_past):
         P + "BrDropDownList": "Contains",
         P + "BranchDropDownList": "Select...",
         P + "AndOrRadioButtonList": "AND",
-        # 100 is the largest page the form offers; a company with more rows than that
-        # needs a narrower name.
+        # 100 is the largest page the form offers.
         P + "PageSizeDropDownList": "100",
         P + "OrderByDropDownList": "[Rep_Name]",
         P + "SearchButton": "Find Records",
     })
     page = fetch(opener, LOBBY, data, referer=LOBBY)
-    out = [["company", "paid", "branch", "lobbyist", "dates_represented"]]
+    pages = re.search(r'CurrentPageLabel"[^>]*>\s*of\s*(\d+)', page)
+    total = int(pages.group(1)) if pages else 1
+    # An unfiltered result set means the search parameters were dropped (the results
+    # page falls back to every registration on file when it has no session state).
+    if total >= 100:
+        sys.exit("lobbyist search returned the unfiltered list; the form fields may have changed")
+    rows = []
     for cells in table_rows(page, 5):
         if len(cells) != 5 or cells[1] == "Paid?":
             continue
         # The header row is merged into the first cell of the grid's caption row.
         if cells[0].startswith("Results by Company Representation"):
             continue
-        out.append(cells)
-    # An unfiltered result set means the search parameters were dropped (the results
-    # page falls back to every registration on file when it has no session state).
-    if re.search(r"Page:\s*of\s*\d{3,}", " ".join(c for r in table_rows(page, 1) for c in r)):
-        sys.exit("lobbyist search returned the unfiltered list; the form fields may have changed")
-    return out
+        rows.append(cells)
+    return rows, total
+
+
+def lobbyists(company, include_past, lobbyist=""):
+    """With only `lobbyist` (a last name), lists every client that lobbyist registered for;
+    the script-rendered LobbyistDetail page cannot be read without a browser."""
+    header = [["company", "paid", "branch", "lobbyist", "dates_represented"]]
+    rows, pages = lobbyist_page("Contains", company, include_past, lobbyist)
+    if pages == 1:
+        return header + rows
+    if company:
+        sys.exit("more than 100 registrations; use a longer company name or add --lobbyist")
+    # The grid's Next button posts back into a reset search, so a long client list is
+    # fetched as one search per first character of the company name instead.
+    buckets = [("Less Than", "A")] + [("Begins With", c) for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] + [("Greater Than", "ZZZZZZZZ")]
+    seen, out = set(), []
+    for op, value in buckets:
+        part, pages = lobbyist_page(op, value, include_past, lobbyist)
+        if pages > 1:
+            sys.exit("more than 100 registrations starting with %r; narrow by lobbyist name" % value)
+        for r in part:
+            if tuple(r) not in seen:
+                seen.add(tuple(r))
+                out.append(r)
+    return header + sorted(out, key=lambda r: r[0].lower())
 
 
 def contributions(name, date_from, date_to):
@@ -137,7 +164,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     lob = sub.add_parser("lobbyists")
-    lob.add_argument("company")
+    lob.add_argument("company", nargs="?", default="")
+    lob.add_argument("--lobbyist", default="", help="lobbyist last name; alone, lists all of that lobbyist's clients")
     lob.add_argument("--past", action="store_true", help="include ended representations")
     cf = sub.add_parser("contributions")
     cf.add_argument("name")
@@ -145,7 +173,9 @@ def main():
     cf.add_argument("--to", dest="date_to")
     args = ap.parse_args()
     if args.cmd == "lobbyists":
-        rows = lobbyists(args.company, args.past)
+        if not (args.company or args.lobbyist):
+            ap.error("give a company name, --lobbyist, or both")
+        rows = lobbyists(args.company, args.past, args.lobbyist)
     else:
         rows = contributions(args.name, args.date_from, args.date_to)
     csv.writer(sys.stdout).writerows(rows)

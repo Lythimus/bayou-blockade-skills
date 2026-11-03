@@ -1,6 +1,6 @@
 ---
 name: lpsc-dockets
-description: Search LPSC dockets and orders from the Louisiana Public Service Commission
+description: Louisiana Public Service Commission dockets. Gets docket metadata, lists every filing with its files, downloads public filings (testimony, briefs, orders) and greps their text, by docketId with no browser. Use for Entergy, Cleco or SWEPCO certification, rate, large-load and IRP dockets.
 allowed-tools: WebFetch, Bash, AskUserQuestion
 ---
 
@@ -92,13 +92,13 @@ curl -s -b "$COOKIE_JAR" \
 
 ## Viewing a document
 
-Documents can be retrieved directly using their secure file ID:
+Each file is served directly, with no session cookie (verified 2026-11-01):
 
 ```
-https://lpscpubvalence.lpsc.louisiana.gov/portal/PSC/ViewFile?fileId=FILE_ID_SECURED
+https://lpscpubvalence.lpsc.louisiana.gov/portal/PSC/ViewFile?fileId=<FileId, URL-encoded>
 ```
 
-The `fileId` appears in document search results as `docIDSecured` or similar. Use WebFetch to retrieve and read the document.
+`FileId` comes from the docket's document list (next section). It is base64-like, for example `hsljNiQroZw=`, so URL-encode the `=` and `/`. Download with curl or `lpsc_docket.py download`; WebFetch handles large exhibit PDFs poorly.
 
 ---
 
@@ -114,7 +114,30 @@ https://lpscpubvalence.lpsc.louisiana.gov/portal/PSC/DocketDetails?docketId=DOCK
 
 > **Use `docketId=N`, NOT `id=MATTER_ID`** (the older `?id=` form does not resolve). `DocketDetails?docketId=N` reliably returns **docket-level metadata** — docket number (e.g. U-XXXXX), description/title, date opened, and applicant.
 >
-> **Limitation:** the Documents grid, Service List, and Orders on this page are rendered **client-side (Kendo Grid via JavaScript)**, so they show "No items to display" to curl/WebFetch. **Filing-level text is NOT retrievable** this way — only docket-level metadata. For the contents of individual filings/orders, the human must use the portal UI in a browser.
+> **Filings are retrievable without a browser (verified 2026-11-01).** The Documents grid on this page renders client-side, so WebFetch sees "No items to display". The grid's data endpoint, though, answers a plain POST with no cookie:
+>
+> ```bash
+> curl -s -X POST "https://lpscpubvalence.lpsc.louisiana.gov/portal/PSC/Docket_Documents" \
+>   -H "X-Requested-With: XMLHttpRequest" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" \
+>   --data "docketId=32689&sort=&page=1&pageSize=2000&group=&filter="
+> ```
+>
+> It returns `{"Data":[{DocumentId, DocumentType, DateFiled:"/Date(ms)/", FiledBy, Description, Files:[{FileId, FileName, FileSize}]}], "Total": n}`. The parameter is `docketId`; `id` returns the "Value cannot be null" error page. The script wraps this:
+>
+> ```bash
+> S="/Users/josephcoco/.claude/plugins/bayou/skills/lpsc-dockets/lpsc_docket.py"
+> python3 -I "$S" info 32689                                   # docket number, dates, synopsis, parties
+> python3 -I "$S" docs 32689 --grep "brief|testimony" --public  # filings and their files, sealed files dropped
+> python3 -I "$S" download 32689 --out DIR --match "Pre-Hearing Brief" --public
+> python3 -I "$S" grep DIR "St\.? Charles|large load|data cent"  # pdftotext once, hits by page
+> ```
+>
+> - **Download guard.** `download` stops above 25 files or 100 MB unless given `--yes`. Testimony with exhibits runs 10–35 MB a file; all of U-37853's public files total 266 MB. Narrow with `--match` first.
+> - **What `--public` drops.** It drops files whose names say Confidential, Under Seal, Highly Sensitive or HSPM. Sealed testimony often has a "Public Version" filed separately, sometimes weeks later.
+> - **What `grep` can't search.** It flags scanned PDFs with no text layer, which need `bayou:document-ocr` before a miss means anything.
+> - **Briefs map the docket.** Intervenor and Staff pre-hearing briefs are the quickest way to see the issues, and they cite related dockets by number (U-37853's briefs cite U-37425 and U-37882).
+>
+> The Service List grid uses `Docket_ServiceList` the same way (untested).
 >
 > **Finding a docketId without the broken search:** docketIds often appear in third-party citations, news, or prior research notes (e.g. an LPSC link of the form `…DocketDetails?docketId=32689`). **Confirmed docketIds:** U-37425 = `32146` (Meta single-customer generation/transmission settlement); U-37853 = `32689` ("construct Waterford 6 + Westlake Power Station, cost recovery," Entergy LA, opened 02/24/2026).
 
